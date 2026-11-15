@@ -524,9 +524,10 @@ export class PlayState implements Scene, PsychHost {
 
   private rebuildWorld() {
     const game: Sprite[] = [...this.props.values()];
-    for (const slot of ['gf', 'dad', 'bf'] as CharSlot[]) { const c = this.chars[slot]; if (c) game.push(c); }
     const hud: Sprite[] = [], other: Sprite[] = [];
     const place = (s: Sprite) => (s.cam === 'other' ? other : s.cam === 'hud' || s.hud ? hud : game).push(s);
+    // Los grupos de personajes pueden cambiar de cámara mediante setObjectCamera en Psych.
+    for (const slot of ['gf', 'dad', 'bf'] as CharSlot[]) { const c = this.chars[slot]; if (c) place(c); }
     for (const s of this.scriptSprites.values()) place(s);
     for (const s of this.luaSprites.values()) if (s.added) place(s);
     for (const t of this.luaTexts.values()) if (t.added) place(t.s);
