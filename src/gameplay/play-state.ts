@@ -153,6 +153,8 @@ export class PlayState implements Scene, PsychHost {
   };
   private flags: Record<string, boolean> = { showRating: true, showComboNum: true, showCombo: true };
   private timeText: LText | null = null;
+  private videoEl: HTMLVideoElement | null = null;
+  private videoUrl: string | null = null;
   private timeShown = '';
 
   constructor(private audio: AudioEngine, private renderer: Renderer, public mod: ModRuntime, public songId: string, public diff: string, private shared: SharedAssets, private hooks: PlayHooks) {
@@ -649,6 +651,9 @@ export class PlayState implements Scene, PsychHost {
 
   dispose() {
     this.lua?.call('onDestroy');
+    this.videoEl?.pause(); this.videoEl?.remove(); this.videoEl = null;
+    if (this.videoUrl) URL.revokeObjectURL(this.videoUrl);
+    this.videoUrl = null;
     this.song?.stop();
     this.input.destroy();
     this.sandbox?.destroy();
@@ -1065,6 +1070,7 @@ export class PlayState implements Scene, PsychHost {
 
   // ================================================================ PsychHost: objetos y propiedades
   getObject(n: string): any {
+    if (n === 'myCutscene_video' || n === 'video') return this.videoEl;
     switch (n) {
       case '__vars': return this.luaVars;
       case '__state': return this.stateProxy;
@@ -1377,6 +1383,40 @@ export class PlayState implements Scene, PsychHost {
   private camByName(cam: string) { const c = cam.toLowerCase().replace(/^cam/, ''); return c === 'hud' ? this.camHud : c === 'other' ? this.camOther : this.camGame; }
   cameraFlash(cam: string, color: string, durSec: number) { this.camByName(cam).flash(hexColor(color), durSec * 1000); }
   cameraShake(cam: string, intensity: number, durSec: number) { this.camByName(cam).shake(intensity, durSec * 1000); }
+
+  /** Reproduce vídeos del mod como startVideo() de Psych Engine. */
+  startVideo(name: string) {
+    this.videoEl?.pause(); this.videoEl?.remove();
+    if (this.videoUrl) URL.revokeObjectURL(this.videoUrl);
+    this.videoEl = document.createElement('video');
+    const video = this.videoEl;
+    video.className = 'fnf-mod-video';
+    video.playsInline = true; video.preload = 'auto'; video.controls = false;
+    Object.defineProperty(video, 'alpha', { configurable: true, get: () => Number(video.style.opacity || 1), set: (v: number) => { video.style.opacity = String(Math.max(0, Math.min(1, Number(v) || 0))); } });
+    const host = document.getElementById('game-frame') ?? document.getElementById('game')?.parentElement;
+    if (host) {
+      video.style.cssText += ';position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none;z-index:3;background:#000;';
+      host.appendChild(video);
+    }
+    const clean = () => {
+      if (this.videoEl !== video) return;
+      video.pause(); video.remove(); this.videoEl = null;
+      if (this.videoUrl) URL.revokeObjectURL(this.videoUrl);
+      this.videoUrl = null;
+      this.lua?.call('onVideoFinished');
+    };
+    video.addEventListener('ended', clean, { once: true });
+    video.addEventListener('error', clean, { once: true });
+    const file = name.toLowerCase().endsWith('.mp4') ? name : name + '.mp4';
+    const path = this.realPath('videos/' + file);
+    if (!this.hasFile(path)) { clean(); return; }
+    void this.mod.source.blob(path).then((blob) => {
+      if (this.videoEl !== video) return;
+      this.videoUrl = URL.createObjectURL(blob);
+      video.src = this.videoUrl;
+      return video.play();
+    }).catch(() => clean());
+  }
 
   playSound(name: string, volume: number) {
     const play = (buf: AudioBuffer) => {
