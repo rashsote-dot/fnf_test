@@ -1,35 +1,7 @@
 {
   "version": 1,
-  "generated": "2026-11-15T17:12:59.455Z",
+  "generated": "2026-11-15T17:54:05.464Z",
   "mods": [
-    {
-      "id": "vs-garcello",
-      "name": "VS Garcello",
-      "author": "atsuover (arte y personaje) · Rageminer (música) · port web: Funkade",
-      "description": "Smoke 'Em Out Struggle: enfréntate a Garcello en un callejón lleno de humo. 4 canciones: Headache, Nerves, Release y Fading.",
-      "category": "Mods de la comunidad",
-      "cover": "cover.webp",
-      "popularity": 120,
-      "sizeBytes": 59914764,
-      "songCount": 4,
-      "format": "psych",
-      "compatibility": "partial",
-      "path": "mods/vs-garcello/"
-    },
-    {
-      "id": "fnf-rivals-demo",
-      "name": "FNF Rivals (Demo)",
-      "author": "Autores originales del mod · importado con Funkade",
-      "description": "Nene contra Cass en una pelea de gatas sobre los tejados de Philly. Demo con la canción Catfight.",
-      "category": "Mods de la comunidad",
-      "cover": "cover.webp",
-      "popularity": 60,
-      "sizeBytes": 40134983,
-      "songCount": 1,
-      "format": "psych",
-      "compatibility": "full",
-      "path": "mods/fnf-rivals-demo/"
-    },
     {
       "id": "vs-agoti",
       "name": "VS AGOTI",
@@ -45,18 +17,32 @@
       "path": "mods/vs-agoti/"
     },
     {
-      "id": "aura-funkin",
-      "name": "Aura Funkin' at South America",
-      "author": "Equipo de Aura Funkin' (scripts: Hot Mustafa, BCTIX, YB, kludge_) · port web: Funkade",
-      "description": "«CLOCK IT!»: Ike contra Chase en la escuela, con Randy cantando desde las gradas. Letras en pantalla, contador de AURA, cambios de personaje y cámara coreografiada.",
+      "id": "nocturnal-protocol-fan-recreation",
+      "name": "Nocturnal Protocol (Fan Recreation)",
+      "author": "Autores originales del mod · importado con Funkade",
+      "description": "A mod based on the song “Nocturnal Protocol” made by Sanco The Fox",
       "category": "Mods de la comunidad",
       "cover": "cover.webp",
-      "popularity": 110,
-      "sizeBytes": 34616226,
+      "popularity": 60,
+      "sizeBytes": 70081113,
       "songCount": 1,
       "format": "psych",
       "compatibility": "partial",
-      "path": "mods/aura-funkin/"
+      "path": "mods/nocturnal-protocol-fan-recreation/"
+    },
+    {
+      "id": "vs-garcello",
+      "name": "VS Garcello",
+      "author": "atsuover (arte y personaje) · Rageminer (música) · port web: Funkade",
+      "description": "Smoke 'Em Out Struggle: enfréntate a Garcello en un callejón lleno de humo. 4 canciones: Headache, Nerves, Release y Fading.",
+      "category": "Mods de la comunidad",
+      "cover": "cover.webp",
+      "popularity": 120,
+      "sizeBytes": 59914764,
+      "songCount": 4,
+      "format": "psych",
+      "compatibility": "partial",
+      "path": "mods/vs-garcello/"
     },
     {
       "id": "bite-fernan-mix",
@@ -73,18 +59,32 @@
       "path": "mods/bite-fernan-mix/"
     },
     {
-      "id": "nocturnal-protocol-fan-recreation",
-      "name": "Nocturnal Protocol (Fan Recreation)",
+      "id": "fnf-rivals-demo",
+      "name": "FNF Rivals (Demo)",
       "author": "Autores originales del mod · importado con Funkade",
-      "description": "A mod based on the song “Nocturnal Protocol” made by Sanco The Fox",
+      "description": "Nene contra Cass en una pelea de gatas sobre los tejados de Philly. Demo con la canción Catfight.",
       "category": "Mods de la comunidad",
       "cover": "cover.webp",
       "popularity": 60,
-      "sizeBytes": 70081113,
+      "sizeBytes": 40134983,
+      "songCount": 1,
+      "format": "psych",
+      "compatibility": "full",
+      "path": "mods/fnf-rivals-demo/"
+    },
+    {
+      "id": "aura-funkin",
+      "name": "Aura Funkin' at South America",
+      "author": "Equipo de Aura Funkin' (scripts: Hot Mustafa, BCTIX, YB, kludge_) · port web: Funkade",
+      "description": "«CLOCK IT!»: Ike contra Chase en la escuela, con Randy cantando desde las gradas. Letras en pantalla, contador de AURA, cambios de personaje y cámara coreografiada.",
+      "category": "Mods de la comunidad",
+      "cover": "cover.webp",
+      "popularity": 110,
+      "sizeBytes": 34616226,
       "songCount": 1,
       "format": "psych",
       "compatibility": "partial",
-      "path": "mods/nocturnal-protocol-fan-recreation/"
+      "path": "mods/aura-funkin/"
     }
   ]
 }
