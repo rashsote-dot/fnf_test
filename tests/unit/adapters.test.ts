@@ -47,8 +47,9 @@ describe('Psych / legacy', () => {
     expect(ch.anims[0]).toMatchObject({ name: 'idle', prefix: 'BF idle dance', offset: [-5, 0] });
   });
   test('escenario con objetos', () => {
-    const st = parsePsychStage({ defaultZoom: 0.7, boyfriend: [1, 2], objects: [{ type: 'sprite', name: 'bg', image: 'stageback', x: -600, y: -200, scroll: [0.9, 0.9] }, { type: 'gf' }] }, 's');
+    const st = parsePsychStage({ defaultZoom: 0.7, camera_speed: 1.7, boyfriend: [1, 2], objects: [{ type: 'sprite', name: 'bg', image: 'stageback', x: -600, y: -200, scroll: [0.9, 0.9] }, { type: 'gf' }] }, 's');
     expect(st.zoom).toBe(0.7);
+    expect(st.cameraSpeed).toBe(1.7);
     expect(st.props).toHaveLength(1);
     expect(st.props[0].image).toBe('images/stageback');
     expect(st.chars.bf.x).toBe(1);
