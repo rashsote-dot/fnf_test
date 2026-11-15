@@ -37,14 +37,19 @@ export class Character extends Sprite {
     this.update(0);
   }
 
+  /** Recalcula las dimensiones usadas para el punto central tras cambiar la escala. */
+  refreshBaseSize() {
+    const f = this.anim?.current ?? this.frame;
+    this.baseW = (f?.fw ?? 100) * this.scaleX;
+    this.baseH = (f?.fh ?? 100) * this.scaleY;
+  }
+
   /** Aplica el zoom global de escenarios pixelados de Psych sin alterar el zoom propio del personaje. */
   setStageScale(multiplier: number) {
     const m = Number.isFinite(multiplier) && multiplier > 0 ? multiplier : 1;
     this.scaleX = this.def.scale * this.texMul * m;
     this.scaleY = this.def.scale * this.texMul * m;
-    const f = this.anim?.current ?? this.frame;
-    this.baseW = (f?.fw ?? 100) * this.scaleX;
-    this.baseH = (f?.fh ?? 100) * this.scaleY;
+    this.refreshBaseSize();
   }
 
   /** coloca al personaje según el punto del escenario */
