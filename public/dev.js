@@ -36,3 +36,46 @@ const rows = await Promise.all(mods.map(async (e) => {
     </div></td></tr>`;
 }));
 $('rows').innerHTML = rows.join('') || '<tr><td colspan="6" class="muted">No hay mods.</td></tr>';
+
+
+// Historial automático de commits que modificaron archivos de mods.
+// La API pública de GitHub permite mostrar fecha, autor y descripción del cambio.
+async function loadPatchHistory() {
+  const host = $('patch-history');
+  const count = $('patch-count');
+  try {
+    const response = await fetch(
+      `https://api.github.com/repos/${owner}/${repo}/commits?path=public/mods&per_page=12`,
+      { cache: 'no-store', headers: { Accept: 'application/vnd.github+json' } }
+    );
+    if (!response.ok) throw new Error(`GitHub respondió ${response.status}`);
+    const commits = await response.json();
+    count.textContent = `${commits.length} cambios recientes`;
+    if (!commits.length) {
+      host.textContent = 'Todavía no hay parches registrados.';
+      return;
+    }
+    host.innerHTML = commits.map((item) => {
+      const message = (item.commit?.message || 'Actualización de mod').split('\\n')[0];
+      const author = item.commit?.author?.name || item.author?.login || 'Desconocido';
+      const date = item.commit?.author?.date;
+      const when = date
+        ? new Intl.DateTimeFormat('es-PE', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(date))
+        : 'Fecha no disponible';
+      const isPatch = /patch|parche|fix|correcci[oó]n|ajuste|sprite|offset|position|scale|lua|stage/i.test(message);
+      return `<article style="padding:12px 0;border-bottom:1px solid var(--line)">
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:5px">
+          <span class="badge ${isPatch ? 'partial' : 'full'}">${isPatch ? 'Parche / corrección' : 'Actualización de mod'}</span>
+          <span class="muted small">${esc(when)}</span>
+        </div>
+        <b>${esc(message)}</b>
+        <div class="muted small">Publicado por ${esc(author)} · <a href="${esc(item.html_url)}" target="_blank" rel="noopener">Ver cambio en GitHub</a></div>
+      </article>`;
+    }).join('');
+  } catch (error) {
+    count.textContent = 'No disponible';
+    host.textContent = 'No se pudo consultar el historial de GitHub. Recarga la página en unos minutos.';
+    console.error('No se pudo cargar el historial de parches:', error);
+  }
+}
+loadPatchHistory();
