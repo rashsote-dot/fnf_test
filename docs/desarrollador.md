@@ -23,7 +23,7 @@ genera la portada y publica el sitio en unos 2–4 minutos.
 5. Arrastra el archivo **.zip, .rar o .7z** del mod a la zona «Attach binaries».
 6. Pulsa **Publish release**.
 7. Ve a **Actions**: verás «Agregar mod» en marcha. Al terminar (✅), abre el job y lee el **informe**
-   (qué canciones se importaron y qué no es compatible). El sitio ya está actualizado.
+   (qué canciones se importaron y qué no es compatible). El sitio ya está actualizado. Antes de guardar el mod, Funkade valida los manifiestos, los JSON y las rutas declaradas. Si encuentra errores estructurales, cancela la importación y deja un informe en el resumen del workflow y como artefacto descargable.
 
 ## Opción 2 — Enlace de descarga
 
@@ -63,6 +63,19 @@ y la cuenta atrás del propio mod, y genera la portada. Los mods que no traen sk
 Los scripts Lua se ejecutan en la web con un intérprete aislado (ver `docs/scripts.md`). Lo que **no** se
 reproduce: HScript (`.hx`), vídeos y shaders. El informe los enumera. Si un mod depende mucho de ellos, se puede
 añadir un script JavaScript a mano (ejemplo real: `public/mods/aura-funkin/scripts/aura.js`).
+
+## Validar los mods publicados
+
+En el panel de desarrollador pulsa **Validar mods**. Se ejecuta el workflow de publicación, que primero valida todos los mods y solo continúa si no hay errores estructurales. El resultado aparece en el resumen de GitHub Actions. También se guarda como artefacto `funkade-mod-validation` durante 14 días (Markdown para leer/copiar y JSON para procesarlo).
+
+La validación comprueba:
+- que cada mod tenga un `manifest.json` válido y los campos principales;
+- que los archivos declarados en `manifest.files` existan;
+- que todos los archivos JSON del mod se puedan interpretar;
+- que las canciones Psych tengan sus charts declarados;
+- que los JSON de personajes apunten a atlas PNG existentes.
+
+Los avisos no bloquean la publicación; los errores estructurales sí. Esta comprobación no sustituye una prueba visual y jugable: no puede asegurar que cada animación, posición, evento Lua o sincronización se comporte correctamente dentro del juego.
 
 ## Usarlo en tu PC (opcional)
 
