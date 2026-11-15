@@ -37,6 +37,16 @@ export class Character extends Sprite {
     this.update(0);
   }
 
+  /** Aplica el zoom global de escenarios pixelados de Psych sin alterar el zoom propio del personaje. */
+  setStageScale(multiplier: number) {
+    const m = Number.isFinite(multiplier) && multiplier > 0 ? multiplier : 1;
+    this.scaleX = this.def.scale * this.texMul * m;
+    this.scaleY = this.def.scale * this.texMul * m;
+    const f = this.anim?.current ?? this.frame;
+    this.baseW = (f?.fw ?? 100) * this.scaleX;
+    this.baseH = (f?.fh ?? 100) * this.scaleY;
+  }
+
   /** coloca al personaje según el punto del escenario */
   place(x: number, y: number) {
     this.groupX = x; this.groupY = y;
