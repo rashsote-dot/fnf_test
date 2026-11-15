@@ -1,0 +1,75 @@
+{
+  "id": "demo-base",
+  "name": "Demo Base",
+  "version": "1.0.0",
+  "format": "fnfweb",
+  "author": "Funkade",
+  "license": "CC0-1.0 (contenido original de demostración)",
+  "description": "Canciones y personajes originales de demostración para probar el motor: notas, sostenidos, cámara y sincronización.",
+  "category": "Oficial",
+  "cover": "cover.webp",
+  "popularity": 100,
+  "compatibility": "full",
+  "songs": [
+    {
+      "id": "primer-paso",
+      "name": "Primer Paso",
+      "difficulties": [
+        "easy",
+        "normal",
+        "hard"
+      ],
+      "bpm": 100
+    },
+    {
+      "id": "pulso",
+      "name": "Pulso",
+      "difficulties": [
+        "easy",
+        "normal",
+        "hard"
+      ],
+      "bpm": 128
+    }
+  ],
+  "files": [
+    "characters/beat.json",
+    "characters/bocina.json",
+    "characters/rival.json",
+    "charts/primer-paso/easy.json",
+    "charts/primer-paso/hard.json",
+    "charts/primer-paso/normal.json",
+    "charts/pulso/easy.json",
+    "charts/pulso/hard.json",
+    "charts/pulso/normal.json",
+    "cover.webp",
+    "images/characters/beat.png",
+    "images/characters/beat.xml",
+    "images/characters/bocina.png",
+    "images/characters/bocina.xml",
+    "images/characters/rival.png",
+    "images/characters/rival.xml",
+    "images/icons/icon-beat.png",
+    "images/icons/icon-bocina.png",
+    "images/icons/icon-rival.png",
+    "images/stage/city.png",
+    "images/stage/floor.png",
+    "images/stage/lights.png",
+    "images/stage/sky.png",
+    "images/stage/speaker.png",
+    "songs/primer-paso/Inst.m4a",
+    "songs/primer-paso/Inst.ogg",
+    "songs/primer-paso/Voices-opponent.m4a",
+    "songs/primer-paso/Voices-opponent.ogg",
+    "songs/primer-paso/Voices-player.m4a",
+    "songs/primer-paso/Voices-player.ogg",
+    "songs/pulso/Inst.m4a",
+    "songs/pulso/Inst.ogg",
+    "songs/pulso/Voices-opponent.m4a",
+    "songs/pulso/Voices-opponent.ogg",
+    "songs/pulso/Voices-player.m4a",
+    "songs/pulso/Voices-player.ogg",
+    "stages/stage.json"
+  ],
+  "sizeBytes": 4691603
+}

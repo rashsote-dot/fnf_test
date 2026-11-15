@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="bat.png">
+	<SubTexture name="bat0000" x="0" y="0" width="120" height="80"/>
+	<SubTexture name="bat0001" x="122" y="0" width="120" height="80"/>
+	<SubTexture name="bat0002" x="244" y="0" width="120" height="80"/>
+	<SubTexture name="bat0003" x="366" y="0" width="120" height="80"/>
+</TextureAtlas>

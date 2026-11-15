@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="notes.png">
+	<SubTexture name="staticL0000" x="0" y="0" width="160" height="160"/>
+	<SubTexture name="pressL0000" x="162" y="0" width="160" height="160"/>
+	<SubTexture name="pressL0001" x="324" y="0" width="160" height="160"/>
+	<SubTexture name="confirmL0000" x="486" y="0" width="160" height="160"/>
+	<SubTexture name="confirmL0001" x="648" y="0" width="160" height="160"/>
+	<SubTexture name="confirmL0002" x="810" y="0" width="160" height="160"/>
+	<SubTexture name="noteL0000" x="972" y="0" width="160" height="160"/>
+	<SubTexture name="hurtL0000" x="1134" y="0" width="160" height="160"/>
+	<SubTexture name="holdL0000" x="1296" y="0" width="160" height="160"/>
+	<SubTexture name="holdEndL0000" x="1458" y="0" width="160" height="160"/>
+	<SubTexture name="staticD0000" x="1620" y="0" width="160" height="160"/>
+	<SubTexture name="pressD0000" x="1782" y="0" width="160" height="160"/>
+	<SubTexture name="pressD0001" x="0" y="162" width="160" height="160"/>
+	<SubTexture name="confirmD0000" x="162" y="162" width="160" height="160"/>
+	<SubTexture name="confirmD0001" x="324" y="162" width="160" height="160"/>
+	<SubTexture name="confirmD0002" x="486" y="162" width="160" height="160"/>
+	<SubTexture name="noteD0000" x="648" y="162" width="160" height="160"/>
+	<SubTexture name="hurtD0000" x="810" y="162" width="160" height="160"/>
+	<SubTexture name="holdD0000" x="972" y="162" width="160" height="160"/>
+	<SubTexture name="holdEndD0000" x="1134" y="162" width="160" height="160"/>
+	<SubTexture name="staticU0000" x="1296" y="162" width="160" height="160"/>
+	<SubTexture name="pressU0000" x="1458" y="162" width="160" height="160"/>
+	<SubTexture name="pressU0001" x="1620" y="162" width="160" height="160"/>
+	<SubTexture name="confirmU0000" x="1782" y="162" width="160" height="160"/>
+	<SubTexture name="confirmU0001" x="0" y="324" width="160" height="160"/>
+	<SubTexture name="confirmU0002" x="162" y="324" width="160" height="160"/>
+	<SubTexture name="noteU0000" x="324" y="324" width="160" height="160"/>
+	<SubTexture name="hurtU0000" x="486" y="324" width="160" height="160"/>
+	<SubTexture name="holdU0000" x="648" y="324" width="160" height="160"/>
+	<SubTexture name="holdEndU0000" x="810" y="324" width="160" height="160"/>
+	<SubTexture name="staticR0000" x="972" y="324" width="160" height="160"/>
+	<SubTexture name="pressR0000" x="1134" y="324" width="160" height="160"/>
+	<SubTexture name="pressR0001" x="1296" y="324" width="160" height="160"/>
+	<SubTexture name="confirmR0000" x="1458" y="324" width="160" height="160"/>
+	<SubTexture name="confirmR0001" x="1620" y="324" width="160" height="160"/>
+	<SubTexture name="confirmR0002" x="1782" y="324" width="160" height="160"/>
+	<SubTexture name="noteR0000" x="0" y="486" width="160" height="160"/>
+	<SubTexture name="hurtR0000" x="162" y="486" width="160" height="160"/>
+	<SubTexture name="holdR0000" x="324" y="486" width="160" height="160"/>
+	<SubTexture name="holdEndR0000" x="486" y="486" width="160" height="160"/>
+</TextureAtlas>

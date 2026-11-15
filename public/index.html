@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' blob: data:; media-src 'self' blob:; script-src 'self'; style-src 'self' 'unsafe-inline'; worker-src 'self' blob:; frame-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'">
+  <title>Funkade · FNF y mods en tu navegador</title>
+  <meta name="description" content="Juega Friday Night Funkin' y mods compatibles directamente en el navegador, sin instalar nada.">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/app.css">
+  <link rel="modulepreload" href="js/main.js">
+</head>
+<body>
+  <header class="topbar">
+    <a class="logo" href="#/" aria-label="Funkade, inicio">
+      <img src="favicon.svg" alt="" width="32" height="32"><span>Funk<b>ade</b></span>
+    </a>
+    <nav>
+      <a href="#/" data-nav="catalog">Catálogo</a>
+      <button type="button" id="btn-import">Importar mod</button>
+      <button type="button" id="btn-settings">Ajustes</button>
+      <a href="#/about" data-nav="about">Acerca de</a>
+    </nav>
+  </header>
+
+  <main id="view-catalog" class="view">
+    <section class="hero">
+      <h1>Ritmo sin instalaciones</h1>
+      <p>Elige un mod, elige una canción y juega. Todo se ejecuta en tu navegador.</p>
+    </section>
+    <section class="toolbar">
+      <input id="search" type="search" placeholder="Buscar mods…" aria-label="Buscar mods">
+      <select id="filter-cat" aria-label="Categoría"><option value="">Todas las categorías</option></select>
+      <select id="sort" aria-label="Ordenar">
+        <option value="popularity">Más populares</option>
+        <option value="name">Nombre (A–Z)</option>
+        <option value="size">Tamaño</option>
+      </select>
+    </section>
+    <div id="catalog-status" class="status" role="status">Cargando catálogo…</div>
+    <section id="grid" class="grid" aria-live="polite"></section>
+  </main>
+
+  <main id="view-mod" class="view" hidden>
+    <div class="mod-layout">
+      <aside class="side">
+        <button type="button" class="link" id="btn-back">← Volver al catálogo</button>
+        <h2 id="mod-title"></h2>
+        <p id="mod-desc" class="muted"></p>
+        <div id="mod-compat" class="compat"></div>
+        <h3>Canciones</h3>
+        <ul id="song-list" class="songs"></ul>
+        <label class="field">Dificultad <select id="diff"></select></label>
+        <button type="button" class="primary big" id="btn-play" disabled>▶ Jugar</button>
+        <p class="muted small">Teclas: <span id="keys-hint"></span> · Esc: pausa · R: reiniciar · F3: diagnóstico</p>
+      </aside>
+      <section class="stage-wrap">
+        <div class="game-frame" id="game-frame">
+          <canvas id="game" aria-label="Juego"></canvas>
+          <div id="hud-score" class="hud-score" hidden></div>
+          <div id="fps" class="fps" hidden></div>
+          <div id="diag" class="diag" hidden></div>
+          <div id="overlay" class="overlay">
+            <div class="overlay-card" id="overlay-card">
+              <h2>Elige una canción</h2>
+              <p class="muted">Selecciónala en la lista y pulsa «Jugar».</p>
+            </div>
+          </div>
+        </div>
+        <div class="game-actions">
+          <button type="button" id="btn-pause" disabled>⏸ Pausa</button>
+          <button type="button" id="btn-restart" disabled>↻ Reiniciar</button>
+          <button type="button" id="btn-full">⛶ Pantalla completa</button>
+          <span id="toast" class="toast" role="status"></span>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <main id="view-about" class="view prose" hidden>
+    <h1>Acerca de Funkade</h1>
+    <p>Funkade es un motor de juego de ritmo escrito desde cero en TypeScript (WebGL2 + Web Audio) que lee los formatos de datos de varios motores de mods de Friday Night Funkin': <b>Psych Engine</b> (0.6–1.0), <b>Kade/legacy</b> y <b>V-Slice</b> (FNF 0.3+), además de su propio formato.</p>
+    <p>No ejecuta los ejecutables originales: interpreta charts, sprites (Sparrow XML), personajes, escenarios y eventos. Los scripts de mods compatibles se ejecutan aislados en un sandbox sin acceso a tus datos ni a la red.</p>
+    <p>Los mods de demostración incluidos son contenido original. Friday Night Funkin' es obra de The Funkin' Crew; este proyecto no está afiliado a ellos.</p>
+    <p><b>Importar un mod:</b> usa «Importar mod» con un .zip de un mod que tengas derecho a usar. Se procesa y guarda solo en tu navegador.</p>
+  </main>
+
+  <dialog id="dlg-settings" class="dialog">
+    <form method="dialog" id="settings-form">
+      <h2>Ajustes</h2>
+      <div class="settings-grid">
+        <fieldset><legend>Rendimiento</legend>
+          <label>Límite de FPS <select name="fpsCap"><option value="0">Sin límite (frecuencia de pantalla)</option><option value="30">30</option><option value="60">60</option><option value="120">120</option><option value="144">144</option><option value="240">240</option></select></label>
+          <label>Calidad gráfica <select name="quality"><option value="auto">Automática (adaptativa)</option><option value="high">Alta</option><option value="medium">Media</option><option value="low">Baja</option></select></label>
+          <label>Renderizador <select name="renderer"><option value="auto">Automático (WebGL2)</option><option value="webgl2">WebGL2</option><option value="canvas2d">Canvas2D (compatibilidad)</option></select></label>
+          <label class="check"><input type="checkbox" name="showFps"> Mostrar contador de FPS</label>
+          <label class="check"><input type="checkbox" name="showDiag"> Panel de diagnóstico (F3)</label>
+        </fieldset>
+        <fieldset><legend>Audio</legend>
+          <label>Volumen general <input type="range" name="masterVol" min="0" max="1" step="0.05"></label>
+          <label>Música <input type="range" name="musicVol" min="0" max="1" step="0.05"></label>
+          <label>Efectos <input type="range" name="sfxVol" min="0" max="1" step="0.05"></label>
+          <label class="check"><input type="checkbox" name="missSounds"> Sonido al fallar</label>
+          <label>Desfase de audio (ms) <input type="number" name="offsetMs" min="-500" max="500" step="1"></label>
+          <small class="muted">Si las notas llegan antes que la música, aumenta el desfase.</small>
+        </fieldset>
+        <fieldset><legend>Juego</legend>
+          <label class="check"><input type="checkbox" name="downscroll"> Notas hacia abajo (downscroll)</label>
+          <label class="check"><input type="checkbox" name="ghostTapping"> Ghost tapping (pulsar sin nota no penaliza)</label>
+          <label class="check"><input type="checkbox" name="botplay"> Modo automático (bot)</label>
+          <label>Velocidad de scroll <input type="number" name="scrollSpeed" min="0" max="5" step="0.1"></label>
+          <small class="muted">0 = la del chart.</small>
+        </fieldset>
+        <fieldset><legend>Teclas</legend>
+          <div id="keybinds" class="keybinds"></div>
+          <small class="muted">Haz clic en una tecla y pulsa la nueva.</small>
+        </fieldset>
+        <fieldset><legend>Almacenamiento</legend>
+          <p id="storage-info" class="muted small">—</p>
+          <button type="button" id="btn-clear-cache">Vaciar caché de mods</button>
+        </fieldset>
+      </div>
+      <div class="dialog-actions">
+        <button type="button" id="btn-reset-settings">Restablecer</button>
+        <button value="close" class="primary">Cerrar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <input type="file" id="file-import" accept=".zip,application/zip" hidden>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

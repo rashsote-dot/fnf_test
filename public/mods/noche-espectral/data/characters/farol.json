@@ -1,0 +1,54 @@
+{
+ "version": "1.0.0",
+ "name": "farol",
+ "renderType": "sparrow",
+ "assetPath": "characters/farol",
+ "scale": 1,
+ "offsets": [
+  0,
+  0
+ ],
+ "cameraOffsets": [
+  0,
+  0
+ ],
+ "flipX": false,
+ "singTime": 8,
+ "danceEvery": 1,
+ "healthIcon": {
+  "id": "farol"
+ },
+ "healthBarColor": "#6b7fc0",
+ "animations": [
+  {
+   "name": "danceLeft",
+   "prefix": "danceLeft",
+   "frameRate": 24,
+   "looped": false,
+   "offsets": [
+    0,
+    0
+   ]
+  },
+  {
+   "name": "danceRight",
+   "prefix": "danceRight",
+   "frameRate": 24,
+   "looped": false,
+   "offsets": [
+    0,
+    0
+   ]
+  },
+  {
+   "name": "cheer",
+   "prefix": "cheer",
+   "frameRate": 18,
+   "looped": false,
+   "offsets": [
+    0,
+    0
+   ]
+  }
+ ]
+}

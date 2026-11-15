@@ -1,0 +1,85 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<!--
+  Sandbox de scripts de mods.
+  - Se carga en un <iframe sandbox="allow-scripts"> → origen opaco: sin cookies, sin localStorage,
+    sin IndexedDB de la plataforma y sin acceso al DOM de la página principal.
+  - CSP: sin red (default-src 'none'), solo scripts en línea y workers blob.
+  - El código del mod corre dentro de un Worker creado aquí, de modo que un bucle infinito
+    no bloquea el juego: la plataforma detecta que no responde y destruye el sandbox.
+-->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' 'unsafe-eval' blob:; worker-src blob:">
+</head>
+<body>
+<script>
+(() => {
+  const RUNTIME = `
+    'use strict';
+    const cmds = [];
+    const state = { song: '', diff: '', songTime: 0, beat: 0, step: 0, health: 1, score: 0, misses: 0, combo: 0 };
+    const hooks = [];
+    const game = Object.freeze({
+      get song() { return state.song; },
+      get diff() { return state.diff; },
+      get songTime() { return state.songTime; },
+      get beat() { return state.beat; },
+      get step() { return state.step; },
+      get health() { return state.health; },
+      get score() { return state.score; },
+      get misses() { return state.misses; },
+      get combo() { return state.combo; },
+      log: (...a) => cmds.push(['log', a.map(String).join(' ')]),
+      cameraZoom: (add, hudAdd) => cmds.push(['camZoom', +add || 0.015, +hudAdd || 0.03]),
+      setCameraZoom: (zoom, ms) => cmds.push(['camZoomSet', +zoom, +ms || 0]),
+      shake: (intensity, ms, cam) => cmds.push(['shake', +intensity, +ms, cam === 'hud' ? 'hud' : 'game']),
+      flash: (color, ms, cam) => cmds.push(['flash', String(color), +ms, cam === 'hud' ? 'hud' : 'game']),
+      setProp: (obj, prop, value) => cmds.push(['setProp', String(obj), String(prop), value]),
+      tween: (obj, prop, to, ms, ease) => cmds.push(['tween', String(obj), String(prop), +to, +ms, String(ease || 'linear')]),
+      playAnim: (target, anim, force) => cmds.push(['playAnim', String(target), String(anim), !!force]),
+      addSprite: (name, image, x, y, opts) => cmds.push(['addSprite', String(name), String(image), +x || 0, +y || 0, opts && typeof opts === 'object' ? JSON.parse(JSON.stringify(opts)) : {}]),
+      removeSprite: (name) => cmds.push(['removeSprite', String(name)]),
+      addHealth: (v) => cmds.push(['addHealth', +v || 0]),
+      setScrollSpeed: (mult, ms) => cmds.push(['scrollSpeed', +mult || 1, +ms || 0]),
+    });
+    // ocultamos APIs de red dentro del worker (la CSP ya las bloquea; esto es defensa adicional)
+    for (const k of ['fetch', 'XMLHttpRequest', 'WebSocket', 'EventSource', 'importScripts', 'indexedDB', 'caches']) {
+      try { Object.defineProperty(self, k, { value: undefined, configurable: false }); } catch (e) {}
+    }
+    const HOOKS = ['onCreate', 'onSongStart', 'onBeatHit', 'onStepHit', 'onNoteHit', 'onOpponentNoteHit', 'onNoteMiss', 'onEvent', 'onUpdate', 'onSongEnd'];
+    self.onmessage = (e) => {
+      const m = e.data;
+      try {
+        if (m.type === 'load') {
+          const fn = new Function('game', m.code + '\\n;return {' + HOOKS.map(h => h + ': typeof ' + h + ' === "function" ? ' + h + ' : undefined').join(',') + '};');
+          const exp = fn(game);
+          hooks.push({ name: m.name, exp });
+          self.postMessage({ type: 'loaded', name: m.name, hooks: HOOKS.filter(h => exp[h]) });
+        } else if (m.type === 'calls') {
+          Object.assign(state, m.state);
+          for (const [hook, args] of m.calls) {
+            for (const h of hooks) {
+              const f = h.exp[hook];
+              if (f) { try { f(...args); } catch (err) { cmds.push(['error', h.name + ' ' + hook + ': ' + (err && err.message || err)]); } }
+            }
+          }
+          self.postMessage({ type: 'cmds', seq: m.seq, cmds: cmds.splice(0) });
+        }
+      } catch (err) {
+        self.postMessage({ type: 'cmds', seq: m.seq, cmds: [['error', String(err && err.message || err)]] });
+      }
+    };
+  `;
+  const worker = new Worker(URL.createObjectURL(new Blob([RUNTIME], { type: 'text/javascript' })));
+  worker.onmessage = (e) => parent.postMessage(e.data, '*');
+  worker.onerror = (e) => parent.postMessage({ type: 'cmds', seq: -1, cmds: [['error', 'worker: ' + e.message]] }, '*');
+  window.addEventListener('message', (e) => {
+    if (e.source !== parent) return;
+    worker.postMessage(e.data);
+  });
+  parent.postMessage({ type: 'ready' }, '*');
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+{
+ "image": "images/characters/placeholder",
+ "scale": 1,
+ "flipX": false,
+ "anchor": "feet",
+ "anims": [
+  {
+   "name": "idle",
+   "prefix": "idle",
+   "fps": 12,
+   "loop": false
+  },
+  {
+   "name": "singLEFT",
+   "prefix": "singLEFT",
+   "fps": 18,
+   "loop": false
+  },
+  {
+   "name": "singLEFTmiss",
+   "prefix": "missLEFT",
+   "fps": 18,
+   "loop": false
+  },
+  {
+   "name": "singDOWN",
+   "prefix": "singDOWN",
+   "fps": 18,
+   "loop": false
+  },
+  {
+   "name": "singDOWNmiss",
+   "prefix": "missDOWN",
+   "fps": 18,
+   "loop": false
+  },
+  {
+   "name": "singUP",
+   "prefix": "singUP",
+   "fps": 18,
+   "loop": false
+  },
+  {
+   "name": "singUPmiss",
+   "prefix": "missUP",
+   "fps": 18,
+   "loop": false
+  },
+  {
+   "name": "singRIGHT",
+   "prefix": "singRIGHT",
+   "fps": 18,
+   "loop": false
+  },
+  {
+   "name": "singRIGHTmiss",
+   "prefix": "missRIGHT",
+   "fps": 18,
+   "loop": false
+  },
+  {
+   "name": "hey",
+   "prefix": "hey",
+   "fps": 12,
+   "loop": false
+  }
+ ],
+ "healthColor": "#8a8aa0",
+ "icon": "face",
+ "singDuration": 4,
+ "danceEvery": 2
+}

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="ui.png">
+	<SubTexture name="sick0000" x="0" y="0" width="520" height="200"/>
+	<SubTexture name="good0000" x="522" y="0" width="520" height="200"/>
+	<SubTexture name="bad0000" x="1044" y="0" width="520" height="200"/>
+	<SubTexture name="shit0000" x="1566" y="0" width="520" height="200"/>
+	<SubTexture name="ready0000" x="0" y="202" width="520" height="200"/>
+	<SubTexture name="set0000" x="522" y="202" width="520" height="200"/>
+	<SubTexture name="go0000" x="1044" y="202" width="520" height="200"/>
+</TextureAtlas>

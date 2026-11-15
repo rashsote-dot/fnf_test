@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "generated": "2026-11-13T23:52:24.760Z",
+  "mods": [
+    {
+      "id": "demo-base",
+      "name": "Demo Base",
+      "description": "Canciones y personajes originales de demostración para probar el motor: notas, sostenidos, cámara y sincronización.",
+      "category": "Oficial",
+      "cover": "cover.webp",
+      "popularity": 100,
+      "sizeBytes": 4691603,
+      "songCount": 2,
+      "format": "fnfweb",
+      "compatibility": "full",
+      "path": "mods/demo-base/"
+    },
+    {
+      "id": "noche-espectral",
+      "name": "Noche Espectral",
+      "description": "Mecánicas extra: notas dañinas, zoom y velocidad de scroll por eventos, y un script aislado que añade murciélagos, destellos y partículas. Incluye una canción de estrés.",
+      "category": "Demostración",
+      "cover": "cover.webp",
+      "popularity": 90,
+      "sizeBytes": 4809677,
+      "songCount": 2,
+      "format": "vslice",
+      "compatibility": "full",
+      "path": "mods/noche-espectral/"
+    },
+    {
+      "id": "circuito-neon",
+      "name": "Circuito Neón",
+      "description": "Mod de prueba con estructura de Psych Engine: personajes JSON, escenario con objetos animados, cambio de BPM y eventos (Change Character, Add Camera Zoom, Hey!).",
+      "category": "Demostración",
+      "cover": "cover.webp",
+      "popularity": 80,
+      "sizeBytes": 4815277,
+      "songCount": 2,
+      "format": "psych",
+      "compatibility": "full",
+      "path": "mods/circuito-neon/"
+    }
+  ]
+}
