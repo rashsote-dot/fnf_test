@@ -1,0 +1,91 @@
+{
+ "animations": [
+  {
+   "loop": false,
+   "offsets": [
+    0,
+    0
+   ],
+   "anim": "idle",
+   "fps": 24,
+   "name": "Rene Idle0",
+   "indices": []
+  },
+  {
+   "loop": false,
+   "offsets": [
+    5,
+    0
+   ],
+   "anim": "singLEFT",
+   "fps": 24,
+   "name": "Rene Left0",
+   "indices": []
+  },
+  {
+   "loop": false,
+   "offsets": [
+    -10,
+    -50
+   ],
+   "anim": "singDOWN",
+   "fps": 24,
+   "name": "Rene Down0",
+   "indices": []
+  },
+  {
+   "loop": false,
+   "offsets": [
+    -20,
+    30
+   ],
+   "anim": "singUP",
+   "fps": 24,
+   "name": "Rene Up0",
+   "indices": []
+  },
+  {
+   "loop": false,
+   "offsets": [
+    -50,
+    0
+   ],
+   "anim": "singRIGHT",
+   "fps": 24,
+   "name": "Rene Right0",
+   "indices": []
+  },
+  {
+   "loop": true,
+   "offsets": [
+    -42,
+    0
+   ],
+   "anim": "die",
+   "fps": 24,
+   "name": "Rene Die0",
+   "indices": []
+  }
+ ],
+ "vocals_file": "",
+ "no_antialiasing": true,
+ "image": "characters/shobon no action/Rene",
+ "position": [
+  -80,
+  -50
+ ],
+ "healthicon": "rene",
+ "flip_x": false,
+ "healthbar_colors": [
+  40,
+  155,
+  40
+ ],
+ "camera_position": [
+  0,
+  120
+ ],
+ "sing_duration": 5.99999999999999,
+ "scale": 0.4,
+ "_editor_isPlayer": false
+}

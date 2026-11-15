@@ -75,7 +75,7 @@ async function playSong(modId, song, diff, { bot = true, keyboard = false, sampl
   await page.evaluate(() => window.__funkade.resetFrames());
   if (sample) await sample();
   await page.screenshot({ path: `bench-results/${modId}-${song}.png` });
-  await page.waitForFunction(() => window.__funkadeLastResult, null, { timeout: 180000, polling: 500 });
+  await page.waitForFunction(() => window.__funkadeLastResult, null, { timeout: 420000, polling: 500 });
   const res = await page.evaluate(() => ({ r: window.__funkadeLastResult, d: window.__funkade.diag() }));
   return { loadMs, ...res };
 }
@@ -85,7 +85,7 @@ try {
   await page.goto(URL);
   await page.waitForSelector('.card');
   const cards = await page.$$eval('.card h3', (e) => e.map((x) => x.textContent));
-  check('Catálogo muestra los 5 mods', cards.length === 5, cards.join(', '));
+  check('Catálogo muestra los 8 mods', cards.length === 8, cards.join(', '));
   await page.fill('#search', 'espectral');
   check('Buscador filtra', (await page.$$('.card')).length === 1);
   await page.fill('#search', '');
@@ -100,8 +100,13 @@ try {
       ['noche-espectral', 'espectro', 'hard', { bot: true }],
       ['vs-garcello', 'headache', 'normal', { bot: true }],
       ['aura-funkin', 'aura-battle', 'aura', { bot: true }],
+      ['nocturnal-protocol-fan-recreation', 'nocturnal-protocol', 'hard', { bot: true }],
+      ['bite-fernan-mix', 'bite', 'fernan', { bot: true }],
+      ['fnf-rivals-demo', 'catfight', 'hard', { bot: true }],
     ];
+    const only = process.env.ONLY ? process.env.ONLY.split(',') : null;
     for (const [mod, song, diff, opts] of cases) {
+      if (only && !only.includes(mod)) continue;
       const { r, d, loadMs } = await playSong(mod, song, diff, opts);
       const t = r.tally;
       const how = opts.keyboard ? 'teclado simulado' : 'bot';
@@ -112,7 +117,7 @@ try {
       if (d.warnings.length) console.log('   avisos:', d.warnings.join(' | '));
     }
     // perfil: la partida con teclado (sin bot) debe haberse guardado con su logro
-    {
+    if (!process.env.ONLY || process.env.ONLY.includes('demo-base')) {
       const prof = await page.evaluate(async () => { const d = await window.__funkade.profile.current(); return { clears: d.stats.clears, ach: Object.keys(d.stats.achievements), recent: d.recent.length }; });
       check('La partida se guarda en el perfil', prof.clears >= 1 && prof.recent >= 1, `completadas ${prof.clears} · logros: ${prof.ach.join(', ')}`);
       check('Logro «Primer escenario» desbloqueado', prof.ach.includes('first-clear'));
@@ -132,20 +137,6 @@ try {
       const names = await page.$$eval('.table.rank tbody tr', (r) => r.length);
       check('El podio muestra los dos perfiles', names === 2);
       await page.screenshot({ path: 'bench-results/podio.png', fullPage: true });
-    }
-
-    // importar un mod Psych en ZIP sin manifest.json (como lo haría un usuario)
-    const { execSync } = await import('node:child_process');
-    mkdirSync('tools/.cache', { recursive: true });
-    execSync(`python3 -c "import zipfile,os\nz=zipfile.ZipFile('tools/.cache/MiModPsych.zip','w',zipfile.ZIP_DEFLATED)\nb='public/mods/circuito-neon'\nfor r,_,fs in os.walk(b):\n  for f in fs:\n    p=os.path.join(r,f)\n    if f!='manifest.json': z.write(p,'MiModPsych/'+os.path.relpath(p,b))\nz.close()"`);
-    await page.goto(URL);
-    await page.waitForSelector('.card');
-    await page.setInputFiles('#file-import', 'tools/.cache/MiModPsych.zip');
-    await page.waitForFunction(() => /importado/.test(document.getElementById('catalog-status').textContent), null, { timeout: 30000 });
-    check('Importar ZIP de Psych sin manifiesto', true, await page.textContent('#catalog-status'));
-    {
-      const { r } = await playSong('mimodpsych-local', 'circuito', 'normal', { bot: true });
-      check('El mod importado se juega desde IndexedDB', !!r && r.tally.miss === 0, `sick ${r.tally.sick} · miss ${r.tally.miss}`);
     }
 
     // pausa / reanudar

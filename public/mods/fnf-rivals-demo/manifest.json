@@ -1,0 +1,55 @@
+{
+  "id": "fnf-rivals-demo",
+  "name": "FNF Rivals (Demo)",
+  "version": "1.0.0",
+  "format": "psych",
+  "author": "Autores originales del mod · importado con Funkade",
+  "license": "Mod de fans; recursos de sus autores originales.",
+  "description": "Nene contra Cass en una pelea de gatas sobre los tejados de Philly. Demo con la canción Catfight.",
+  "category": "Mods de la comunidad",
+  "cover": "cover.webp",
+  "popularity": 60,
+  "compatibility": "partial",
+  "compatNotes": [
+    "Escenario «philly_wide»: creado a partir de su script Lua (solo la parte estática; animaciones y efectos programados no).",
+    "4 scripts Lua no se ejecutan en la web (efectos, mecánicas o HUD personalizados).",
+    "Skins de notas y shaders propios no se aplican."
+  ],
+  "songs": [
+    {
+      "id": "catfight",
+      "name": "Catfight",
+      "difficulties": [
+        "hard"
+      ],
+      "bpm": 175
+    }
+  ],
+  "files": [
+    "characters/cass-rival.json",
+    "characters/gf.json",
+    "characters/nene-rival.json",
+    "cover.webp",
+    "data/catfight/catfight-hard.json",
+    "data/catfight/events.json",
+    "images/bg/bf bop.png",
+    "images/bg/bf bop.xml",
+    "images/bg/bg.png",
+    "images/bg/fore.png",
+    "images/bg/gf bop.png",
+    "images/bg/gf bop.xml",
+    "images/bg/pico bop.png",
+    "images/bg/pico bop.xml",
+    "images/characters/CASS.png",
+    "images/characters/CASS.xml",
+    "images/characters/GF_assets.png",
+    "images/characters/GF_assets.xml",
+    "images/characters/NENE.png",
+    "images/characters/NENE.xml",
+    "images/icons/icon-gf.png",
+    "songs/catfight/Inst.m4a",
+    "songs/catfight/Inst.ogg",
+    "stages/philly_wide.json"
+  ],
+  "sizeBytes": 26976704
+}

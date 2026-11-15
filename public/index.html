@@ -40,7 +40,6 @@
         <a href="#/about" data-nav="about">Acerca de</a>
       </nav>
       <div class="nav-actions">
-        <button type="button" class="ghost" id="btn-import"><svg class="ic"><use href="#i-upload"/></svg><span>Importar mod</span></button>
         <button type="button" class="ghost icon-only" id="btn-settings" aria-label="Ajustes" title="Ajustes"><svg class="ic"><use href="#i-gear"/></svg></button>
         <a class="profile-chip" id="profile-chip" href="#/profile" aria-label="Tu perfil"></a>
       </div>
@@ -98,7 +97,7 @@
     <section class="features" aria-label="Características">
       <article><div class="f-ic"><svg class="ic"><use href="#i-globe"/></svg></div><h3>Directo en el navegador</h3><p>Sin ejecutables ni instaladores. Funciona en Chrome, Edge, Firefox y Safari, también sin conexión tras la primera visita.</p></article>
       <article><div class="f-ic"><svg class="ic"><use href="#i-bolt"/></svg></div><h3>Precisión de ritmo</h3><p>Motor propio con WebGL2 y Web Audio. Cada pulsación se mide con su marca de tiempo real, sin depender de los FPS.</p></article>
-      <article><div class="f-ic"><svg class="ic"><use href="#i-shield"/></svg></div><h3>Mods aislados y seguros</h3><p>Los scripts de los mods corren en un sandbox sin acceso a la red ni a tus datos. Importa tus propios mods en .zip.</p></article>
+      <article><div class="f-ic"><svg class="ic"><use href="#i-shield"/></svg></div><h3>Mods aislados y seguros</h3><p>Los scripts de los mods corren en un sandbox sin acceso a la red ni a tus datos. Cada mod se revisa y adapta antes de publicarse.</p></article>
     </section>
   </main>
 
@@ -167,7 +166,7 @@
     <div class="about-grid">
       <div class="panel"><h3>Formatos compatibles</h3><p><b>Psych Engine</b> (0.6–1.0), <b>Kade / legacy</b>, <b>V-Slice</b> (FNF 0.3+) y el formato nativo de Funkade. Charts, sprites Sparrow, personajes, escenarios y eventos.</p></div>
       <div class="panel"><h3>Lo que no hace</h3><p>No ejecuta los .exe originales. Los scripts Lua/HScript y las mecánicas programadas en el código del mod no están soportados; la tarjeta de cada mod indica su nivel de compatibilidad.</p></div>
-      <div class="panel"><h3>Importa tus mods</h3><p>Usa «Importar mod» con un .zip que tengas derecho a usar. Se procesa y se guarda solo en tu navegador, sin subir nada a ningún servidor.</p></div>
+      <div class="panel"><h3>Catálogo curado</h3><p>Los mods los añade el administrador del sitio: se convierten automáticamente al formato web, se optimizan sus texturas y se indica su nivel de compatibilidad.</p></div>
       <div class="panel"><h3>Créditos</h3><p>Friday Night Funkin' es obra de The Funkin' Crew. Cada mod pertenece a sus autores, indicados en su página. Funkade no está afiliado a ellos.</p></div>
     </div>
   </main>
@@ -222,7 +221,6 @@
     </form>
   </dialog>
 
-  <input type="file" id="file-import" accept=".zip,application/zip" hidden>
   <script type="module" src="js/main.js"></script>
 </body>
 </html>

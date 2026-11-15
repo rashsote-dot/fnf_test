@@ -1,0 +1,166 @@
+{
+ "directory": "",
+ "defaultZoom": 0.7,
+ "isPixelStage": false,
+ "boyfriend": [
+  1570,
+  920
+ ],
+ "girlfriend": [
+  400,
+  130
+ ],
+ "opponent": [
+  950,
+  940
+ ],
+ "hide_girlfriend": true,
+ "camera_boyfriend": [
+  0,
+  0
+ ],
+ "camera_opponent": [
+  0,
+  0
+ ],
+ "camera_girlfriend": [
+  1500,
+  1120
+ ],
+ "camera_speed": 1,
+ "objects": [
+  {
+   "type": "sprite",
+   "name": "bgback",
+   "image": "bg/bg",
+   "x": 400.0,
+   "y": 500.0,
+   "scale": [
+    0.55,
+    0.55
+   ],
+   "scroll": [
+    1.0,
+    1.0
+   ],
+   "alpha": 1,
+   "animations": []
+  },
+  {
+   "type": "sprite",
+   "name": "fore",
+   "image": "bg/fore",
+   "x": 400.0,
+   "y": 500.0,
+   "scale": [
+    0.55,
+    0.55
+   ],
+   "scroll": [
+    1.0,
+    1.0
+   ],
+   "alpha": 1,
+   "animations": []
+  },
+  {
+   "type": "animatedSprite",
+   "name": "back_bf",
+   "image": "bg/bf bop",
+   "x": 1410.0,
+   "y": 1400.0,
+   "scale": [
+    1,
+    1
+   ],
+   "scroll": [
+    1.0,
+    1.0
+   ],
+   "alpha": 1,
+   "animations": [
+    {
+     "anim": "idle",
+     "name": "BF BOP",
+     "fps": 24.0,
+     "loop": false,
+     "indices": [],
+     "offsets": [
+      0,
+      0
+     ]
+    }
+   ],
+   "firstAnimation": "idle"
+  },
+  {
+   "type": "animatedSprite",
+   "name": "back_pico",
+   "image": "bg/pico bop",
+   "x": 1480.0,
+   "y": 1410.0,
+   "scale": [
+    1,
+    1
+   ],
+   "scroll": [
+    1.0,
+    1.0
+   ],
+   "alpha": 1,
+   "animations": [
+    {
+     "anim": "idle",
+     "name": "pico bop",
+     "fps": 24.0,
+     "loop": false,
+     "indices": [],
+     "offsets": [
+      0,
+      0
+     ]
+    }
+   ],
+   "firstAnimation": "idle"
+  },
+  {
+   "type": "animatedSprite",
+   "name": "back_gf",
+   "image": "bg/gf bop",
+   "x": 1320.0,
+   "y": 1375.0,
+   "scale": [
+    1,
+    1
+   ],
+   "scroll": [
+    1.0,
+    1.0
+   ],
+   "alpha": 1,
+   "animations": [
+    {
+     "anim": "idle",
+     "name": "gf bop",
+     "fps": 24.0,
+     "loop": false,
+     "indices": [],
+     "offsets": [
+      0,
+      0
+     ]
+    }
+   ],
+   "firstAnimation": "idle"
+  },
+  {
+   "type": "gf"
+  },
+  {
+   "type": "dad"
+  },
+  {
+   "type": "boyfriend"
+  }
+ ]
+}

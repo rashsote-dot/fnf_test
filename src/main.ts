@@ -6,10 +6,10 @@ import { DEFAULT_SETTINGS, keyLabel, saveSettings, settings, type Settings } fro
 import type { CatalogEntry } from './core/types';
 import { PlayState, type PlayResult } from './gameplay/play-state';
 import { loadShared } from './gameplay/shared';
-import { BASE_URL, coverUrl, deleteLocalMod, importZip, loadCatalog, openMod, type ModRuntime } from './mod-loader/mod-manager';
+import { BASE_URL, coverUrl, deleteLocalMod, loadCatalog, openMod, type ModRuntime } from './mod-loader/mod-manager';
 import { idbGet, idbSet } from './storage/idb';
 import { cacheModOffline, clearModCache, registerSW, storageInfo } from './storage/offline';
-import { modInfos, resetModInfos } from './mod-loader/mod-manager';
+import { modInfos } from './mod-loader/mod-manager';
 import { createProfile, current, onProfileChange, recordPlay, switchProfile, updateProfile } from './profile/store';
 import { levelOf, xpOf } from './profile/achievements';
 import { avatarEl, renderPodium, renderProfile } from './ui/profile-view';
@@ -521,23 +521,6 @@ async function main() {
     const el = $('game-frame');
     if (document.fullscreenElement) void document.exitFullscreen();
     else void el.requestFullscreen?.({ navigationUI: 'hide' }).catch(() => toast('Pantalla completa no disponible.'));
-  });
-  $('btn-import').addEventListener('click', () => $<HTMLInputElement>('file-import').click());
-  $<HTMLInputElement>('file-import').addEventListener('change', async (e) => {
-    const file = (e.target as HTMLInputElement).files?.[0];
-    if (!file) return;
-    (e.target as HTMLInputElement).value = '';
-    const st = $('catalog-status');
-    try {
-      location.hash = '#/';
-      st.textContent = 'Importando mod…';
-      const m = await importZip(file, (p) => (st.textContent = `Importando mod… ${Math.round(p * 100)}%`));
-      resetModInfos();
-      await initCatalog();
-      st.textContent = `Mod «${m.name}» importado (${m.songs.length} canciones, formato ${FORMAT_LABEL[m.format]}).`;
-    } catch (err) {
-      st.textContent = 'No se pudo importar: ' + (err as Error).message;
-    }
   });
   window.addEventListener('keydown', (e) => {
     if (e.code === 'F3') { e.preventDefault(); saveSettings({ showDiag: !settings.showDiag }); }

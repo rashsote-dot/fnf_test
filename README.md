@@ -9,7 +9,7 @@ Funkade es un motor de juego de ritmo escrito desde cero en **TypeScript + WebGL
 - **Aura Funkin' at South America**: mod de Psych Engine 1.0 con sus eventos Lua (letras, cámara, fundidos, contador de AURA) reescritos en JavaScript.
 - **Perfiles de jugador** estilo Steam: foto, nombre, descripción, color, nivel y XP, actividad reciente, mejores puntuaciones, progreso por mod, 18 logros (incluido completar cada mod y «Leyenda» por completarlo todo) y **podio** con medallas.
 - Catálogo con buscador, filtros, portadas, tamaño e información de compatibilidad.
-- Importación de mods en `.zip` que tengas derecho a usar (se procesan y guardan solo en tu navegador).
+- **Conversor automático de mods** en GitHub Actions (Psych 0.6–1.0, compilaciones con .exe, V-Slice; .zip/.rar/.7z) y **panel de desarrollador**.
 - Scripts de mods aislados en un sandbox sin acceso a la red ni a tus datos.
 - Panel de diagnóstico (F3): FPS, tiempos de frame, draw calls, memoria de texturas, latencia de audio y tiempos de carga.
 
@@ -75,6 +75,12 @@ Alternativas igual de gratuitas: **Cloudflare Pages** o **Netlify**. Usa el coma
 
 ## 3. Añadir un mod nuevo
 
+> **La forma rápida (sin instalar nada):** crea una **Release** en GitHub, ponle de título el nombre del mod y adjunta el `.zip`, `.rar` o `.7z`. GitHub lo convierte y publica solo en 2–4 minutos. También puedes pegar un enlace de descarga en **Actions → Agregar mod**. Guía paso a paso: [docs/desarrollador.md](docs/desarrollador.md). Panel con todos los mods y el espacio usado: `/dev.html`.
+>
+> Los visitantes **no** pueden subir mods: solo la cuenta dueña del repositorio.
+
+### Manualmente
+
 Resumen (detalles en [docs/agregar-mod.md](docs/agregar-mod.md)):
 
 1. Copia la carpeta del mod en `public/mods/<id-del-mod>/`.
@@ -139,7 +145,6 @@ Más detalle técnico: [docs/formatos-y-adaptadores.md](docs/formatos-y-adaptado
 
 ## 5. Limitaciones conocidas
 
-- **Archivos .rar**: el importador de la web solo acepta `.zip`.
 
 Funkade **no promete compatibilidad universal**:
 

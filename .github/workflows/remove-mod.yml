@@ -1,0 +1,45 @@
+# Quita un mod del sitio: Actions → "Quitar mod" → Run workflow → escribe el id (nombre de su carpeta en public/mods).
+name: Quitar mod
+
+on:
+  workflow_dispatch:
+    inputs:
+      id:
+        description: 'Id del mod (carpeta en public/mods, p. ej. vs-garcello)'
+        required: true
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: mods
+  cancel-in-progress: false
+
+jobs:
+  remove:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: oven-sh/setup-bun@v2
+      - name: Quitar
+        env:
+          ID: ${{ inputs.id }}
+        run: |
+          case "$ID" in *[!a-z0-9-]*|"") echo "Id no válido: $ID"; exit 1;; esac
+          [ -d "public/mods/$ID" ] || { echo "No existe public/mods/$ID"; ls public/mods; exit 1; }
+          git rm -rq "public/mods/$ID"
+          bun tools/build-catalog.ts
+          git config user.name "funkade-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A public/mods
+          git commit -m "Quitar mod $ID"
+          git push
+          echo "Mod **$ID** eliminado del sitio." >> "$GITHUB_STEP_SUMMARY"
+
+  deploy:
+    needs: remove
+    uses: ./.github/workflows/deploy.yml

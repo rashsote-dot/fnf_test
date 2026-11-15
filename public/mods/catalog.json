@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated": "2026-11-15T02:39:45.758Z",
+  "generated": "2026-11-15T03:27:51.784Z",
   "mods": [
     {
       "id": "demo-base",
@@ -31,6 +31,20 @@
       "path": "mods/noche-espectral/"
     },
     {
+      "id": "fnf-rivals-demo",
+      "name": "FNF Rivals (Demo)",
+      "author": "Autores originales del mod · importado con Funkade",
+      "description": "Nene contra Cass en una pelea de gatas sobre los tejados de Philly. Demo con la canción Catfight.",
+      "category": "Mods de la comunidad",
+      "cover": "cover.webp",
+      "popularity": 60,
+      "sizeBytes": 26976704,
+      "songCount": 1,
+      "format": "psych",
+      "compatibility": "partial",
+      "path": "mods/fnf-rivals-demo/"
+    },
+    {
       "id": "aura-funkin",
       "name": "Aura Funkin' at South America",
       "author": "Equipo de Aura Funkin' (scripts: Hot Mustafa, BCTIX, YB, kludge_) · port web: Funkade",
@@ -38,7 +52,7 @@
       "category": "Mods de la comunidad",
       "cover": "cover.webp",
       "popularity": 110,
-      "sizeBytes": 34615204,
+      "sizeBytes": 34616226,
       "songCount": 1,
       "format": "psych",
       "compatibility": "partial",
@@ -71,6 +85,34 @@
       "format": "psych",
       "compatibility": "partial",
       "path": "mods/vs-garcello/"
+    },
+    {
+      "id": "nocturnal-protocol-fan-recreation",
+      "name": "Nocturnal Protocol (Fan Recreation)",
+      "author": "Autores originales del mod · importado con Funkade",
+      "description": "A mod based on the song “Nocturnal Protocol” made by Sanco The Fox",
+      "category": "Mods de la comunidad",
+      "cover": "cover.webp",
+      "popularity": 60,
+      "sizeBytes": 58316887,
+      "songCount": 1,
+      "format": "psych",
+      "compatibility": "partial",
+      "path": "mods/nocturnal-protocol-fan-recreation/"
+    },
+    {
+      "id": "bite-fernan-mix",
+      "name": "Bite [Fernan Mix]",
+      "author": "Autores originales del mod · importado con Funkade",
+      "description": "Esto es una version jugable hecha por mi (Josno) para Psych Engine v0.7.3. (Es compatible con la v0.7.1h+), Espero que te guste y No, NO es oficial. Gracias Camboi por el Chart! (Puedes Configurarlo a tu gusto)",
+      "category": "Mods de la comunidad",
+      "cover": "cover.webp",
+      "popularity": 60,
+      "sizeBytes": 50068987,
+      "songCount": 1,
+      "format": "psych",
+      "compatibility": "partial",
+      "path": "mods/bite-fernan-mix/"
     }
   ]
 }

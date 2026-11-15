@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="tinkyturn.png">
+	<SubTexture name="turn0000" x="1058" y="3427" width="523" height="572" frameX="-371" frameY="-201" frameWidth="1375" frameHeight="774"/>
+	<SubTexture name="turn0001" x="1583" y="3427" width="523" height="572" frameX="-371" frameY="-201" frameWidth="1375" frameHeight="774"/>
+	<SubTexture name="turn0002" x="531" y="3427" width="525" height="573" frameX="-370" frameY="-201" frameWidth="1375" frameHeight="774"/>
+	<SubTexture name="turn0003" x="0" y="3427" width="529" height="574" frameX="-368" frameY="-200" frameWidth="1375" frameHeight="774"/>
+	<SubTexture name="turn0004" x="2805" y="2833" width="533" height="576" frameX="-365" frameY="-198" frameWidth="1375" frameHeight="774"/>
+	<SubTexture name="turn0005" x="2264" y="2833" width="539" height="577" frameX="-362" frameY="-196" frameWidth="1375" frameHeight="774"/>
+	<SubTexture name="turn0006" x="1714" y="2833" width="548" height="580" frameX="-357" frameY="-193" frameWidth="1375" frameHeight="774"/>
+	<SubTexture name="turn0007" x="1155" y="2833" width="557" height="583" frameX="-352" frameY="-191" frameWidth="1375" frameHeight="774"/>
+	<SubTexture name="turn0008" x="584" y="2833" width="569" height="587" frameX="-345" frameY="-186" frameWidth="1375" frameHeight="774"/>
+	<SubTexture name="turn0009" x="0" y="2833" width="582" height="592" frameX="-337" frameY="-182" frameWidth="1375" frameHeight="774"/>
+	<SubTexture name="turn0010" x="2536" y="2202" width="598" height="597" frameX="-329" frameY="-177" frameWidth="1375" frameHeight="774"/>
+	<SubTexture name="turn0011" x="1919" y="2202" width="615" height="603" frameX="-319" frameY="-171" frameWidth="1375" frameHeight="774"/>
+	<SubTexture name="turn0012" x="1286" y="2202" width="631" height="610" frameX="-311" frameY="-163" frameWidth="1375" frameHeight="774"/>
+	<SubTexture name="turn0013" x="643" y="2202" width="641" height="619" frameX="-304" frameY="-155" frameWidth="1375" frameHeight="774"/>
+	<SubTexture name="turn0014" x="0" y="2202" width="641" height="629" frameX="-304" frameY="-145" frameWidth="1375" frameHeight="774"/>
+	<SubTexture name="turn0015" x="542" y="1552" width="617" height="645" frameX="-312" frameY="-128" frameWidth="1375" frameHeight="774"/>
+	<SubTexture name="turn0016" x="2168" y="1552" width="451" height="640" frameX="-369" frameY="-134" frameWidth="1375" frameHeight="774"/>
+	<SubTexture name="turn0017" x="2621" y="1552" width="410" height="633" frameX="-426" frameY="-140" frameWidth="1375" frameHeight="774"/>
+	<SubTexture name="turn0018" x="1161" y="1552" width="408" height="641" frameX="-431" frameY="-133" frameWidth="1375" frameHeight="774"/>
+	<SubTexture name="turn0019" x="1571" y="1552" width="595" height="641" frameX="-320" frameY="-133" frameWidth="1375" frameHeight="774"/>
+	<SubTexture name="turn0020" x="0" y="1552" width="540" height="648" frameX="-350" frameY="-125" frameWidth="1375" frameHeight="774"/>
+	<SubTexture name="turn0021" x="2554" y="776" width="545" height="654" frameX="-349" frameY="-120" frameWidth="1375" frameHeight="774"/>
+	<SubTexture name="turn0022" x="1991" y="776" width="561" height="663" frameX="-337" frameY="-110" frameWidth="1375" frameHeight="774"/>
+	<SubTexture name="turn0023" x="1377" y="776" width="612" height="698" frameX="-299" frameY="-76" frameWidth="1375" frameHeight="774"/>
+	<SubTexture name="turn0024" x="0" y="0" width="721" height="774" frameX="-250" frameY="0" frameWidth="1375" frameHeight="774"/>
+	<SubTexture name="turn0025" x="723" y="0" width="853" height="774" frameX="-284" frameY="0" frameWidth="1375" frameHeight="774"/>
+	<SubTexture name="turn0026" x="1578" y="0" width="1375" height="774" frameX="0" frameY="0" frameWidth="1375" frameHeight="774"/>
+	<SubTexture name="idle0000" x="0" y="776" width="1375" height="774" frameX="0" frameY="0" frameWidth="1375" frameHeight="774"/>
+</TextureAtlas>

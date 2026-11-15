@@ -1,0 +1,137 @@
+# Convierte y publica mods automáticamente. Tres formas de usarlo:
+#  1) Release: crea una Release, ponle de título el nombre del mod y adjunta el .zip/.rar/.7z (hasta 2 GB).
+#  2) Manual:  Actions → "Agregar mod" → Run workflow → pega un enlace de descarga directa.
+#  3) Carpeta: sube el archivo a la carpeta incoming/ (máx. 25 MB desde la web).
+name: Agregar mod
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      url:
+        description: 'Enlace de descarga directa del mod (.zip/.rar/.7z)'
+        required: true
+      name:
+        description: 'Nombre visible (opcional)'
+        required: false
+      category:
+        description: 'Categoría'
+        required: false
+        default: 'Mods de la comunidad'
+      description:
+        description: 'Descripción corta (opcional)'
+        required: false
+      popularity:
+        description: 'Popularidad (150 o más = mod destacado en portada)'
+        required: false
+        default: '60'
+  push:
+    branches: [main]
+    paths:
+      - 'incoming/**.zip'
+      - 'incoming/**.rar'
+      - 'incoming/**.7z'
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: mods
+  cancel-in-progress: false
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Instalar herramientas (ffmpeg, 7-Zip, Pillow, Bun)
+        run: |
+          sudo apt-get update -qq
+          # el paquete 7zip (7-Zip 23+, comando 7zz) abre RAR5; p7zip queda como respaldo
+          sudo apt-get install -y -qq ffmpeg 7zip fonts-dejavu-core > /dev/null || sudo apt-get install -y -qq ffmpeg p7zip-full fonts-dejavu-core > /dev/null
+          python3 -m pip install --quiet --break-system-packages pillow || python3 -m pip install --quiet pillow
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Reunir archivos a importar
+        id: gather
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT: ${{ github.event_name }}
+          TAG: ${{ github.event.release.tag_name }}
+          URL: ${{ inputs.url }}
+        run: |
+          mkdir -p /tmp/mods
+          if [ "$EVENT" = "release" ]; then
+            gh release download "$TAG" -R "$GITHUB_REPOSITORY" -D /tmp/mods --pattern '*.zip' --pattern '*.rar' --pattern '*.7z' --pattern '*.ZIP' --pattern '*.RAR'
+          elif [ "$EVENT" = "workflow_dispatch" ]; then
+            echo "$URL" > /tmp/mods/url.txt
+          else
+            for f in incoming/*.zip incoming/*.rar incoming/*.7z; do [ -f "$f" ] && cp "$f" /tmp/mods/; done
+          fi
+          ls -la /tmp/mods
+
+      - name: Convertir mods
+        env:
+          EVENT: ${{ github.event_name }}
+          REL_NAME: ${{ github.event.release.name }}
+          REL_BODY: ${{ github.event.release.body }}
+          IN_NAME: ${{ inputs.name }}
+          IN_CAT: ${{ inputs.category }}
+          IN_DESC: ${{ inputs.description }}
+          IN_POP: ${{ inputs.popularity }}
+        run: |
+          set -e
+          : > /tmp/report.md
+          # opciones desde el cuerpo de la Release: líneas "categoria: …", "descripcion: …", "popularidad: …", "autor: …"
+          field() { printf '%s\n' "$REL_BODY" | grep -i -m1 "^$1[[:space:]]*:" | cut -d: -f2- | sed 's/^ *//;s/\r$//'; }
+          CAT="${IN_CAT:-$(field categor[ií]a)}"; CAT="${CAT:-Mods de la comunidad}"
+          DESC="${IN_DESC:-$(field descripci[oó]n)}"
+          POP="${IN_POP:-$(field popularidad)}"; POP="${POP:-60}"
+          AUTHOR="$(field autor)"
+          count=$(ls /tmp/mods | grep -vc '^url.txt$' || true)
+          run_import() {
+            local src="$1" name="$2"
+            args=(--category "$CAT" --popularity "$POP" --report /tmp/one.md)
+            [ -n "$name" ] && args+=(--name "$name")
+            [ -n "$DESC" ] && args+=(--description "$DESC")
+            [ -n "$AUTHOR" ] && args+=(--author "$AUTHOR")
+            python3 tools/mod-importer/import_mod.py "$src" "${args[@]}"
+            cat /tmp/one.md >> /tmp/report.md; echo >> /tmp/report.md
+          }
+          if [ -f /tmp/mods/url.txt ]; then
+            run_import "$(cat /tmp/mods/url.txt)" "$IN_NAME"
+          else
+            for f in /tmp/mods/*; do
+              name=""
+              # en una Release con un solo archivo, el título de la Release es el nombre del mod
+              if [ "$EVENT" = "release" ] && [ "$count" = "1" ]; then name="$REL_NAME"; fi
+              run_import "$f" "$name"
+            done
+          fi
+          cat /tmp/report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Actualizar catálogo y comprobar que compila
+        run: |
+          bun tools/build-catalog.ts
+          bun install --silent
+          bunx tsc --noEmit
+          bun run build
+
+      - name: Guardar en el repositorio
+        run: |
+          git rm -q --cached incoming/*.zip incoming/*.rar incoming/*.7z 2>/dev/null || true
+          rm -f incoming/*.zip incoming/*.rar incoming/*.7z
+          git config user.name "funkade-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A public/mods incoming
+          git commit -m "Agregar mod(s) automáticamente" -m "$(head -c 3000 /tmp/report.md)" || echo "Sin cambios"
+          git push
+
+  deploy:
+    needs: import
+    uses: ./.github/workflows/deploy.yml

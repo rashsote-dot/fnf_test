@@ -1,0 +1,66 @@
+{
+  "id": "bite-fernan-mix",
+  "name": "Bite [Fernan Mix]",
+  "version": "1.0.0",
+  "format": "psych",
+  "author": "Autores originales del mod · importado con Funkade",
+  "license": "Mod de fans; recursos de sus autores originales.",
+  "description": "Esto es una version jugable hecha por mi (Josno) para Psych Engine v0.7.3. (Es compatible con la v0.7.1h+), Espero que te guste y No, NO es oficial. Gracias Camboi por el Chart! (Puedes Configurarlo a tu gusto)",
+  "category": "Mods de la comunidad",
+  "cover": "cover.webp",
+  "popularity": 60,
+  "compatibility": "partial",
+  "compatNotes": [
+    "Escenario «ShobonNoAction»: creado a partir de su script Lua (solo la parte estática; animaciones y efectos programados no).",
+    "30 scripts Lua no se ejecutan en la web (efectos, mecánicas o HUD personalizados).",
+    "1 scripts HScript no se ejecutan en la web.",
+    "Eventos personalizados sin soporte (requieren portar su Lua a JavaScript): BoyfriendGroupTweenX, CreditsEnd, DadGroupAngle, DadGroupScaleX, DadGroupScaleY, DadGroupTweenAngle, DadGroupTweenX, DadGroupTweenY, DadGroupX, DadGroupY, Lvl Things, Subtitles, Whitecamera, adiosrene, blackcamera, blackcameraEnd, levels, maltillo, muelto, oalsaul, screens",
+    "Incluye vídeos/cinemáticas, que no se reproducen.",
+    "Skins de notas y shaders propios no se aplican."
+  ],
+  "songs": [
+    {
+      "id": "bite",
+      "name": "Bite",
+      "difficulties": [
+        "fernan"
+      ],
+      "bpm": 210
+    }
+  ],
+  "files": [
+    "characters/CebollaConPelo.json",
+    "characters/Fernan.json",
+    "characters/FernanJumpeado.json",
+    "characters/FernanRene.json",
+    "characters/Rene.json",
+    "characters/Syobon.json",
+    "characters/Whoishe.json",
+    "characters/fernanBebe.json",
+    "cover.webp",
+    "data/bite/bite-fernan.json",
+    "data/bite/events.json",
+    "images/characters/shobon no action/CebollaConPelo.png",
+    "images/characters/shobon no action/CebollaConPelo.xml",
+    "images/characters/shobon no action/Fernan.png",
+    "images/characters/shobon no action/Fernan.xml",
+    "images/characters/shobon no action/FernanBebe.png",
+    "images/characters/shobon no action/FernanBebe.xml",
+    "images/characters/shobon no action/FernanJumpeado.png",
+    "images/characters/shobon no action/FernanJumpeado.xml",
+    "images/characters/shobon no action/FernanRene.png",
+    "images/characters/shobon no action/FernanRene.xml",
+    "images/characters/shobon no action/Rene.png",
+    "images/characters/shobon no action/Rene.xml",
+    "images/characters/shobon no action/Syobon.png",
+    "images/characters/shobon no action/Syobon.xml",
+    "images/characters/shobon no action/Whoishe.png",
+    "images/characters/shobon no action/Whoishe.xml",
+    "songs/bite/Inst.m4a",
+    "songs/bite/Inst.ogg",
+    "songs/bite/Voices.m4a",
+    "songs/bite/Voices.ogg",
+    "stages/ShobonNoAction.json"
+  ],
+  "sizeBytes": 50068987
+}

@@ -4,7 +4,10 @@ name: Publicar en GitHub Pages
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - 'incoming/**'
   workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read
@@ -20,12 +23,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
       - uses: oven-sh/setup-bun@v2
       - run: bun install
       - name: Comprobar tipos
         run: bunx tsc --noEmit
       - name: Tests unitarios
         run: bun test tests/unit
+      - name: Regenerar catálogo (por si se editó algún manifest.json)
+        run: bun tools/build-catalog.ts
       - name: Compilar
         run: bun run build
       - uses: actions/configure-pages@v5

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'; base-uri 'self'">
+  <title>Funkade · Panel de desarrollador</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/app.css">
+  <style>
+    .dev-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 18px 0 26px; }
+    .dev-actions a { display: flex; flex-direction: column; gap: 6px; padding: 18px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line2); text-decoration: none; transition: border-color .15s, transform .15s; }
+    .dev-actions a:hover { border-color: var(--pink); transform: translateY(-2px); }
+    .dev-actions b { font-size: 17px; } .dev-actions span { color: var(--muted); font-size: 14px; }
+    .dev-actions .tag { align-self: flex-start; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px; background: rgba(255,63,164,.15); color: var(--pink); }
+    .quota { margin: 8px 0 22px; }
+    .quota .bar { height: 12px; }
+    .devtable td:first-child img { width: 96px; aspect-ratio: 16/9; object-fit: cover; border-radius: 8px; display: block; }
+    .devtable ul { margin: 6px 0 0; padding-left: 18px; color: var(--muted); font-size: 12px; }
+    .devtable .acts { display: flex; gap: 6px; flex-wrap: wrap; }
+    .devtable .acts a { font-size: 13px; padding: 6px 10px; }
+    code { background: var(--bg2); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; font-size: 13px; }
+    @media (max-width: 900px) { .dev-actions { grid-template-columns: 1fr; } .devtable td:nth-child(4), .devtable th:nth-child(4) { display: none; } }
+  </style>
+</head>
+<body>
+  <header class="topbar"><div class="topbar-inner">
+    <a class="logo" href="./"><img src="favicon.svg" alt="" width="34" height="34"><span>Funk<b>ade</b></span></a>
+    <nav class="nav"><a class="active">Panel de desarrollador</a></nav>
+    <div class="nav-actions"><a class="btn ghost" href="./">Ver el sitio</a></div>
+  </div></header>
+  <main class="view">
+    <h1 style="margin:8px 0 4px">Panel de desarrollador</h1>
+    <p class="muted">Solo tú puedes publicar: los botones abren GitHub, que pide iniciar sesión con la cuenta dueña del repositorio. Guía: <a id="doc-link" href="#">docs/desarrollador.md</a></p>
+
+    <div class="dev-actions">
+      <a id="act-release" target="_blank" rel="noopener"><span class="tag">Recomendado · hasta 2 GB</span><b>⬆ Subir mod (Release)</b><span>Título = nombre del mod. Arrastra el .zip / .rar / .7z y pulsa «Publish release».</span></a>
+      <a id="act-url" target="_blank" rel="noopener"><span class="tag">Desde un enlace</span><b>🔗 Agregar por enlace</b><span>«Run workflow» y pega un enlace de descarga directa (GameBanana, Dropbox…).</span></a>
+      <a id="act-runs" target="_blank" rel="noopener"><span class="tag">Estado</span><b>📋 Ver conversiones</b><span>Progreso e informe de cada mod importado (avisos de compatibilidad).</span></a>
+    </div>
+
+    <section class="panel quota">
+      <div class="panel-head"><h2>Espacio usado</h2><span class="muted" id="quota-text">—</span></div>
+      <div class="bar"><div id="quota-bar" style="width:0"></div></div>
+      <p class="muted small" style="margin:8px 0 0">GitHub Pages admite ~1 GB por sitio. Si te acercas al límite, quita mods que ya no uses.</p>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><h2>Mods publicados</h2><span class="muted" id="count">—</span></div>
+      <table class="table devtable">
+        <thead><tr><th></th><th>Mod</th><th>Canciones</th><th>Compatibilidad</th><th class="num">Tamaño</th><th>Acciones</th></tr></thead>
+        <tbody id="rows"><tr><td colspan="6" class="muted">Cargando…</td></tr></tbody>
+      </table>
+    </section>
+  </main>
+  <script type="module" src="dev.js"></script>
+</body>
+</html>
