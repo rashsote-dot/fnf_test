@@ -112,6 +112,7 @@ export class PlayState implements Scene, PsychHost {
   private curBeatI = -9999;
   private strums: Sprite[] = [];
   private strumBase: { x: number; y: number; w: number; h: number }[] = [];
+  private scrollLayoutDown: boolean | null = null;
   private strumTimers = new Float32Array(8);
   private icons: IconSprite[] = [];
   private iconFrames: Frame[][] = [];
@@ -362,7 +363,7 @@ export class PlayState implements Scene, PsychHost {
     add((f) => f.startsWith('custom_events/') && evNames.has(f.slice(14, -4)));
     const types = new Set(this.chart.notes.map((n) => (n.type ?? '').toLowerCase()).filter(Boolean));
     add((f) => f.startsWith('custom_notetypes/') && types.has(f.slice(17, -4)));
-    const chars = new Set([this.chart.player, this.chart.opponent, this.chart.gf].filter(Boolean).map((c) => c!.toLowerCase()));
+    const chars = new Set([this.chart.player, this.chart.opponent, this.chart.gf, ...this.chart.events.filter((e) => e.name === 'changeChar').map((e) => String(e.v.char ?? ''))].filter(Boolean).map((c) => c!.toLowerCase()));
     add((f) => f.startsWith('characters/') && chars.has(f.slice(11, -4)));
     add((f) => f.startsWith(`data/${this.songId.toLowerCase()}/`));
     return out;
@@ -484,6 +485,7 @@ export class PlayState implements Scene, PsychHost {
       this.strumBase.push({ x: s.x, y: s.y, w, h });
     }
     this.setupIcons();
+    this.syncScrollLayout();
     this.countdown.visible = false;
 
     this.focus = (this.chart.events.find((e) => e.name === 'camFocus')?.v.target as CharSlot) ?? 'dad';
@@ -497,6 +499,20 @@ export class PlayState implements Scene, PsychHost {
       if (e.code === 'KeyR' && !e.repeat && this.started && !this.ended && !this.paused) { this.restart(); return true; }
     };
     this.hudDirty = true;
+  }
+
+  /** Mantiene los receptores alineados cuando downscroll cambia sin recargar la página. */
+  private syncScrollLayout() {
+    const down = !!settings.downscroll;
+    if (this.scrollLayoutDown === down) return;
+    this.scrollLayoutDown = down;
+    const y = down ? VIEW_H - 150 : 50;
+    for (let i = 0; i < this.strums.length; i++) {
+      this.strums[i].y = y;
+      if (this.strumBase[i]) this.strumBase[i].y = y;
+    }
+    const iconY = (down ? 0.11 : 0.89) * VIEW_H - 75;
+    for (const icon of this.icons) icon.y = iconY;
   }
 
   private setupIcons() {
@@ -771,6 +787,7 @@ export class PlayState implements Scene, PsychHost {
 
   // ================================================================ bucle
   update(now: number, dt: number) {
+    this.syncScrollLayout();
     if (!this.started || this.paused || this.ended) return;
     this.conductor.sync();
     const t = this.conductor.songTimeAt(now, this.song.startCtx);
@@ -1556,6 +1573,8 @@ export class PlayState implements Scene, PsychHost {
     const by = settings.downscroll ? 0.11 * VIEW_H : 0.89 * VIEW_H;
     const bx = (VIEW_W - 601) / 2;
     const a = this.camHud.alpha;
+    // La posición vertical de los iconos sigue el modo de scroll incluso si cambia en caliente.
+    for (const icon of this.icons) icon.y = by - 75;
     // Psych 0.7: healthBar es un objeto Bar que incluye el fondo; en 0.6 el fondo es healthBarBG
     if (bg.visible && hb.visible) drawRect(r, bx, by, 601, 19, BLACK, bg.alpha * hb.alpha * a, px);
     const barX = bx + 4, barW = 593;
