@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="buildings.png">
+	<SubTexture name="blink0000" x="0" y="0" width="1600" height="560"/>
+	<SubTexture name="blink0001" x="1602" y="0" width="1600" height="560"/>
+	<SubTexture name="blink0002" x="0" y="562" width="1600" height="560"/>
+	<SubTexture name="blink0003" x="1602" y="562" width="1600" height="560"/>
+</TextureAtlas>
