@@ -7,6 +7,7 @@ const $ = (id) => document.getElementById(id);
 $('act-release').href = `${gh}/releases/new`;
 $('act-url').href = `${gh}/actions/workflows/add-mod.yml`;
 $('act-runs').href = `${gh}/actions`;
+$('act-validate').href = `${gh}/actions/workflows/deploy.yml`;
 $('doc-link').href = `${gh}/blob/main/docs/desarrollador.md`;
 const LABEL = { full: 'Compatible', partial: 'Parcial', 'songs-only': 'Solo canciones' };
 const mb = (b) => (b / 1048576).toFixed(1) + ' MB';
