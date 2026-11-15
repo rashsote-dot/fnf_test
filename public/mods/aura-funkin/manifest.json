@@ -1,0 +1,75 @@
+{
+  "id": "aura-funkin",
+  "name": "Aura Funkin' at South America",
+  "version": "1.0.0",
+  "format": "psych",
+  "author": "Equipo de Aura Funkin' (scripts: Hot Mustafa, BCTIX, YB, kludge_) · port web: Funkade",
+  "license": "Mod de fans no oficial; recursos de sus autores. Sin licencia explícita de redistribución.",
+  "description": "«CLOCK IT!»: Ike contra Chase en la escuela, con Randy cantando desde las gradas. Letras en pantalla, contador de AURA, cambios de personaje y cámara coreografiada.",
+  "category": "Mods de la comunidad",
+  "cover": "cover.webp",
+  "popularity": 110,
+  "compatibility": "partial",
+  "compatNotes": [
+    "Los eventos Lua del mod (letras, fundidos, cámara, bop, contador de AURA) se reescribieron en JavaScript y se ejecutan en el sandbox.",
+    "No incluido: skin de notas propia, notas más pequeñas y el reposicionamiento de iconos del script original (runHaxeCode).",
+    "El atlas de Randy se reempaquetó (5185 px → 3989 px) para que cargue en cualquier GPU."
+  ],
+  "songs": [
+    {
+      "id": "aura-battle",
+      "name": "Aura Battle",
+      "difficulties": [
+        "aura"
+      ],
+      "bpm": 110
+    }
+  ],
+  "scripts": [
+    "scripts/aura.js"
+  ],
+  "permissions": [
+    "camera",
+    "sprites",
+    "characters"
+  ],
+  "scriptImages": [
+    "images/black"
+  ],
+  "fonts": [
+    "fonts/vcr.ttf"
+  ],
+  "files": [
+    "characters/chase.json",
+    "characters/ike.json",
+    "characters/ike2.json",
+    "characters/randy.json",
+    "cover.webp",
+    "data/aura-battle/aura-battle-aura.json",
+    "fonts/vcr.ttf",
+    "images/black.png",
+    "images/characters-crowd.png",
+    "images/characters-crowd.xml",
+    "images/characters/chase.png",
+    "images/characters/chase.xml",
+    "images/characters/ike.png",
+    "images/characters/ike.xml",
+    "images/characters/ike2.png",
+    "images/characters/ike2.xml",
+    "images/characters/randy.png",
+    "images/characters/randy.xml",
+    "images/icons/chase.png",
+    "images/icons/freeplay-icon.png",
+    "images/icons/ike.png",
+    "images/school.png",
+    "scripts/aura.js",
+    "songs/aura-battle/Inst.m4a",
+    "songs/aura-battle/Inst.ogg",
+    "songs/aura-battle/Voices-opponent.m4a",
+    "songs/aura-battle/Voices-opponent.ogg",
+    "songs/aura-battle/Voices-player.m4a",
+    "songs/aura-battle/Voices-player.ogg",
+    "stages/school.json"
+  ],
+  "sizeBytes": 34615204
+}

@@ -6,6 +6,8 @@ Funkade es un motor de juego de ritmo escrito desde cero en **TypeScript + WebGL
 
 - 3 mods de demostración jugables, con contenido 100 % original (personajes, escenarios, música y charts generados por código).
 - **VS Garcello (Smoke 'Em Out Struggle)** adaptado desde su versión de PC: 4 canciones, 4 versiones de Garcello y 3 variantes del callejón.
+- **Aura Funkin' at South America**: mod de Psych Engine 1.0 con sus eventos Lua (letras, cámara, fundidos, contador de AURA) reescritos en JavaScript.
+- **Perfiles de jugador** estilo Steam: foto, nombre, descripción, color, nivel y XP, actividad reciente, mejores puntuaciones, progreso por mod, 18 logros (incluido completar cada mod y «Leyenda» por completarlo todo) y **podio** con medallas.
 - Catálogo con buscador, filtros, portadas, tamaño e información de compatibilidad.
 - Importación de mods en `.zip` que tengas derecho a usar (se procesan y guardan solo en tu navegador).
 - Scripts de mods aislados en un sandbox sin acceso a la red ni a tus datos.
@@ -137,6 +139,8 @@ Más detalle técnico: [docs/formatos-y-adaptadores.md](docs/formatos-y-adaptado
 
 ## 5. Limitaciones conocidas
 
+- **Archivos .rar**: el importador de la web solo acepta `.zip`.
+
 Funkade **no promete compatibilidad universal**:
 
 - **Mods con código fuente modificado** (forks de Psych/Kade compilados como `.exe`): no se pueden ejecutar. Solo se aprovechan sus datos (charts, sprites, personajes, escenarios). Las mecánicas programadas a medida hay que portarlas a mano.
@@ -149,7 +153,16 @@ Funkade **no promete compatibilidad universal**:
 - **Audio OGG en Safari antiguo**: los mods de demo incluyen también `.m4a`. Los mods importados que solo traigan `.ogg` pueden no sonar en algunas versiones de Safari.
 - Las demos son sencillas visualmente: el objetivo es probar el motor, no igualar el arte del juego original.
 
-## 6. Pruebas de rendimiento
+## 6. Perfiles, logros y podio
+
+- Todo se guarda en el navegador (IndexedDB). No hay servidor ni cuentas.
+- Puedes tener **varios perfiles en el mismo equipo** (Perfil → selector → «+ Nuevo perfil…»). El **podio** compara los perfiles de ese navegador.
+- La puntuación del podio suma tu **mejor marca en cada canción y dificultad**, así que repetir una canción no infla el ranking.
+- Las partidas con **bot no cuentan**. Un *game over* cuenta como partida, pero no como canción completada.
+- **Exportar / Importar perfil** guarda tu progreso en un `.json` para llevarlo a otro dispositivo.
+- Un ranking **mundial** (entre jugadores de distintos dispositivos) necesitaría un servidor. Se puede añadir gratis con Supabase o Firebase, pero no está incluido.
+
+## 7. Pruebas de rendimiento
 
 Resultados reales en [docs/rendimiento.md](docs/rendimiento.md). En resumen: CPU por frame ≈ **0,13–0,25 ms**, **≤ 14 draw calls**, memoria JS estable (~5 MB) y texturas que vuelven a la línea base tras cada cambio de canción (sin fugas). Los FPS del entorno de pruebas están limitados por WebGL emulado por software. En un equipo con GPU el motor va holgado a la frecuencia de la pantalla.
 

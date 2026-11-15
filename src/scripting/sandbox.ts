@@ -9,6 +9,7 @@ const PERM_OF: Record<string, string> = {
   camZoom: 'camera', camZoomSet: 'camera', shake: 'camera', flash: 'camera',
   addSprite: 'sprites', removeSprite: 'sprites', tween: 'sprites', setProp: 'sprites',
   playAnim: 'characters', addHealth: 'gameplay', scrollSpeed: 'gameplay', log: '', error: '',
+  focus: 'camera', camPos: 'camera', addText: 'sprites', setText: 'sprites', removeText: 'sprites',
 };
 
 export class ScriptSandbox {

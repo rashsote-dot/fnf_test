@@ -123,6 +123,8 @@ export interface ModManifest {
   permissions?: string[];
   /** imágenes que los scripts pueden usar con addSprite (rutas sin extensión) */
   scriptImages?: string[];
+  /** fuentes .ttf/.otf/.woff que usan los scripts (el nombre de la fuente = nombre del archivo) */
+  fonts?: string[];
   compatibility?: 'full' | 'partial' | 'songs-only';
   compatNotes?: string[];
   files?: string[];

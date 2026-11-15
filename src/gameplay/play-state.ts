@@ -15,7 +15,7 @@ import type { Atlas } from '../renderer/atlas';
 import type { Renderer } from '../renderer/renderer';
 import { parseColor } from '../renderer/renderer';
 import { Animator, Camera, drawRect, drawSprite, Sprite, VIEW_H, VIEW_W, whiteFrame } from '../renderer/sprite';
-import type { Frame } from '../renderer/texture';
+import { fullFrame, type Frame } from '../renderer/texture';
 import { ScriptSandbox, type ScriptCmd } from '../scripting/sandbox';
 import { Character } from './character';
 import { accuracy, applyHit, applyMiss, findHittable, grade, HIT_WINDOW, judge, newTally, type Rating, type Tally } from './judge';
@@ -57,6 +57,7 @@ export class PlayState implements Scene {
   props = new Map<string, Sprite>();
   scriptSprites = new Map<string, Sprite>();
   scriptAtlases = new Map<string, Atlas>();
+  texts = new Map<string, { s: Sprite; text: string; opts: TextOpts; x: number; y: number }>();
   song!: SongPlayer;
   conductor: Conductor;
   camGame = new Camera();
@@ -80,6 +81,7 @@ export class PlayState implements Scene {
   private strumTimers = new Float32Array(8);
   private icons: Sprite[] = [];
   private iconFrames: Frame[][] = [];
+  private iconBase: number[] = [];
   private noteSpr = new Sprite();
   private popups: { s: Sprite; vy: number; life: number }[] = [];
   private countdown = new Sprite();
@@ -134,7 +136,7 @@ export class PlayState implements Scene {
       const a = adapter.audio(this.songId, this.chart);
       const inst = (await this.audio.load(source, a.inst))!;
       let voices: { buf: AudioBuffer; who: 'player' | 'opponent' | 'both' }[] = [];
-      for (const group of [0, 1]) {
+      for (const group of [0, 1, 2, 3]) {
         const res = await Promise.all(a.voices.filter((v) => v.group === group).map(async (v) => ({ buf: await this.audio.load(source, v.url, true), who: v.who })));
         voices = res.filter((v) => v.buf) as typeof voices;
         if (voices.length) break;
@@ -194,6 +196,15 @@ export class PlayState implements Scene {
       step('Escenario');
     })();
 
+    const fontsP = Promise.all((manifest.fonts ?? []).map(async (f) => {
+      try {
+        const buf = await (await source.blob(f)).arrayBuffer();
+        const face = new FontFace(f.split('/').pop()!.replace(/\.\w+$/, ''), buf);
+        await face.load();
+        document.fonts.add(face);
+      } catch { this.warnings.push(`Fuente no cargada: ${f}`); }
+    }));
+
     const scriptsP = (async () => {
       const list = manifest.scripts ?? [];
       if (!list.length) return;
@@ -208,11 +219,12 @@ export class PlayState implements Scene {
       }
     })();
 
-    await Promise.all([audioP, charP, extraP, stageP, scriptsP]);
+    await Promise.all([audioP, charP, extraP, stageP, scriptsP, fontsP]);
     this.setup();
     step('Listo');
     Diag.recordLoad(`TOTAL ${manifest.id}/${this.songId}`, performance.now() - t0);
     this.loaded = true;
+    if (this.sandbox) this.warnings = this.warnings.filter((w) => !w.startsWith('Eventos personalizados'));
     for (const w of this.warnings) Diag.warn(w);
     return this.warnings;
   }
@@ -302,11 +314,15 @@ export class PlayState implements Scene {
   private setupIcons() {
     this.icons = [];
     this.iconFrames = [];
+    this.iconBase = [];
     for (const slot of ['dad', 'bf'] as CharSlot[]) {
       const c = this.chars[slot]!;
       const frames = (c as Character & { iconFrames?: Frame[] }).iconFrames ?? splitIcon(this.shared.iconFallback);
       const s = new Sprite(frames[0]);
-      s.scaleX = s.scaleY = ICON;
+      // iconos de cualquier tamaño (150, 200x275…) se normalizan a 150 px de alto, como Psych
+      const base = ICON * Math.min(1.4, 150 / Math.max(1, frames[0]?.fh ?? 150));
+      this.iconBase.push(base);
+      s.scaleX = s.scaleY = base;
       s.flipX = slot === 'bf';
       s.hud = true;
       this.icons.push(s);
@@ -385,6 +401,7 @@ export class PlayState implements Scene {
     this.world = [];
     this.props.clear();
     this.scriptSprites.clear();
+    this.texts.clear();
     if (this.audio.ctx.state === 'suspended') void this.audio.ctx.resume();
   }
 
@@ -435,8 +452,8 @@ export class PlayState implements Scene {
     this.health += r === 'shit' ? -0.01 : r === 'bad' ? 0.005 : 0.023;
     if (n.len > 0) n.hold = 1;
     strum.anim!.play('confirm', true);
-    const bf = this.chars.bf;
-    if (bf && n.kind !== 'noanim') bf.sing(n.lane, false, n.kind === 'alt' ? '-alt' : '');
+    const singer = n.kind === 'gf' ? this.chars.gf : this.chars.bf;
+    if (singer && n.kind !== 'noanim') singer.sing(n.lane, false, n.kind === 'alt' ? '-alt' : '');
     this.song.setVoice('player', true);
     this.popup(r);
     this.hudDirty = true;
@@ -574,7 +591,7 @@ export class PlayState implements Scene {
 
     // iconos
     const ik = Math.exp(-dt / 100);
-    for (const ic of this.icons) { ic.scaleX = ic.scaleY = ICON + (ic.scaleX - ICON) * ik; }
+    this.icons.forEach((ic, i) => { const b = this.iconBase[i] ?? ICON; ic.scaleX = ic.scaleY = b + (ic.scaleX - b) * ik; });
 
     for (const p of this.popups) if (p.life > 0) { p.life -= dt; p.s.y += p.vy * dt; p.vy += 0.0009 * dt; p.s.alpha = Math.min(1, p.life / 250); }
 
@@ -604,7 +621,7 @@ export class PlayState implements Scene {
     this.curBeat = beat;
     for (const slot of ['gf', 'dad', 'bf'] as CharSlot[]) this.chars[slot]?.dance(beat);
     for (const p of this.props.values()) if (p.anim && !p.anim.cur?.loop) p.anim.play('idle', true);
-    for (const ic of this.icons) ic.scaleX = ic.scaleY = ICON * 1.2;
+    this.icons.forEach((ic, i) => { ic.scaleX = ic.scaleY = (this.iconBase[i] ?? ICON) * 1.2; });
     if (beat >= 0 && this.bopRate > 0 && beat % this.bopRate === 0) {
       this.camGame.zoom += 0.015 * this.bopIntensity;
       this.camHud.zoom += 0.03 * this.bopIntensity;
@@ -691,7 +708,9 @@ export class PlayState implements Scene {
       case 'scrollSpeed': this.tweens.to(this.speedObj, 'v', v.absolute ? +v.mult / this.chart.scrollSpeed : +v.mult, +v.dur || 0, 'linear'); break;
       case 'gfSpeed': if (this.chars.gf) this.chars.gf.danceSpeed = +v.speed || 1; break;
     }
-    this.sandbox?.call('onEvent', e.name, v);
+    // eventos personalizados (p. ej. .lua de Psych): onEvent(nombre, valor1, valor2) como en Psych
+    if (e.name === 'custom') this.sandbox?.call('onEvent', String(v.name), v.v1 ?? v.value ?? '', v.v2 ?? '');
+    else this.sandbox?.call('onEvent', e.name, v);
   }
 
   // ---------------------------------------------------------------- scripts
@@ -753,8 +772,61 @@ export class PlayState implements Scene {
         case 'removeSprite': if (this.scriptSprites.delete(a[1])) this.rebuildWorld(); break;
         case 'addHealth': this.health = Math.max(0, Math.min(2, this.health + a[1])); break;
         case 'scrollSpeed': this.tweens.to(this.speedObj, 'v', a[1], a[2], 'linear'); break;
+        case 'focus': {
+          const tg = String(a[1]).toLowerCase();
+          if (tg === 'middle' || tg === 'm') {
+            const save = this.focus; const pts: number[] = [];
+            for (const f of ['bf', 'dad'] as CharSlot[]) { this.forcedCam = null; this.focus = f; this.computeCamTarget(); pts.push(this.camTarget.x, this.camTarget.y); }
+            this.focus = save;
+            this.forcedCam = { x: (pts[0] + pts[2]) / 2, y: (pts[1] + pts[3]) / 2 };
+          } else if (tg === '') { this.forcedCam = null; }
+          else { this.forcedCam = null; this.focus = tg === 'b' || tg === 'bf' || tg === 'boyfriend' ? 'bf' : tg === 'g' || tg === 'gf' ? 'gf' : 'dad'; }
+          break;
+        }
+        case 'camPos': this.forcedCam = a[1] === null ? null : { x: +a[1], y: +a[2] }; break;
+        case 'addText': this.setTextSprite(a[1], a[2], a[3], a[4], a[5] ?? {}); break;
+        case 'setText': {
+          const t = this.texts.get(a[1]);
+          if (t) { if (a[3]) t.opts.color = String(a[3]); this.setTextSprite(a[1], a[2], t.x, t.y, t.opts); }
+          break;
+        }
+        case 'removeText': {
+          const t = this.texts.get(a[1]);
+          if (t) { if (t.s.frame) this.renderer.deleteTexture(t.s.frame.tex); this.texts.delete(a[1]); this.scriptSprites.delete('text:' + a[1]); this.rebuildWorld(); }
+          break;
+        }
       }
     }
+  }
+
+  /** Texto de script: se rasteriza con Canvas2D a una textura y se dibuja como un sprite más. */
+  private setTextSprite(name: string, text: string, x: number, y: number, opts: TextOpts) {
+    const prev = this.texts.get(name);
+    if (prev && prev.text === text && prev.x === x && prev.y === y) return;
+    const size = Math.max(6, Math.min(200, +(opts.size ?? 32)));
+    const font = `${opts.bold === false ? '' : 'bold '}${size}px ${opts.font ? `"${opts.font}", ` : ''}system-ui, sans-serif`;
+    const c = document.createElement('canvas');
+    const cx = c.getContext('2d')!;
+    cx.font = font;
+    const border = Math.max(0, +(opts.border ?? Math.round(size / 12)));
+    const w = Math.max(2, Math.ceil(cx.measureText(text || ' ').width + border * 2 + 4));
+    const hgt = Math.ceil(size * 1.35 + border * 2);
+    c.width = w; c.height = hgt;
+    cx.font = font; cx.textBaseline = 'middle'; cx.lineJoin = 'round';
+    if (border) { cx.lineWidth = border * 2; cx.strokeStyle = String(opts.borderColor ?? '#000'); cx.strokeText(text, border + 2, hgt / 2); }
+    cx.fillStyle = String(opts.color ?? '#ffffff').replace(/^([0-9a-f]{6})$/i, '#$1');
+    cx.fillText(text, border + 2, hgt / 2);
+    if (prev?.s.frame) this.renderer.deleteTexture(prev.s.frame.tex);
+    const tex = this.renderer.createTexture(c, 'text:' + name);
+    this.scope.track(tex);
+    const s = prev?.s ?? new Sprite();
+    s.frame = fullFrame(tex);
+    const align = opts.align ?? 'left';
+    s.x = align === 'center' ? x - w / 2 : align === 'right' ? x - w : x;
+    s.y = y; s.hud = opts.hud !== false; s.z = +(opts.z ?? 3000); s.scrollX = s.scrollY = s.hud ? 1 : +(opts.scroll ?? 1);
+    s.alpha = +(opts.alpha ?? 1); s.visible = !!text;
+    this.texts.set(name, { s, text, opts, x, y });
+    if (!prev) { this.scriptSprites.set('text:' + name, s); this.rebuildWorld(); }
   }
 
   // ---------------------------------------------------------------- fin
@@ -877,6 +949,8 @@ export class PlayState implements Scene {
     };
   }
 }
+
+interface TextOpts { size?: number; color?: string; align?: 'left' | 'center' | 'right'; hud?: boolean; z?: number; font?: string; bold?: boolean; border?: number; borderColor?: string; alpha?: number; scroll?: number }
 
 const BLACK = new Float32Array([0, 0, 0]);
 const ICON = 0.75;

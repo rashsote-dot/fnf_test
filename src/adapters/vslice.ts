@@ -48,9 +48,9 @@ export function parseVsliceChart(meta: Json, chart: Json, diff: string): Interna
   for (const e of (chart?.events ?? []) as Json[]) {
     const ev = mapVsliceEvent(num(e.t), str(e.e), e.v, tc);
     if (ev) events.push(ev);
-    else unsupported.add(str(e.e));
+    else { events.push({ t: num(e.t), name: 'custom', v: { name: str(e.e), value: e.v } }); unsupported.add(str(e.e)); }
   }
-  if (unsupported.size) warnings.push(`Eventos no soportados (ignorados): ${[...unsupported].join(', ')}`);
+  if (unsupported.size) warnings.push(`Eventos personalizados (solo funcionan si el mod incluye un script compatible): ${[...unsupported].join(', ')}`);
   const pd = meta?.playData ?? {};
   const ss = chart?.scrollSpeed;
   return finalizeChart({

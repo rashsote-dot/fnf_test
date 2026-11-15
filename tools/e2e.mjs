@@ -85,7 +85,7 @@ try {
   await page.goto(URL);
   await page.waitForSelector('.card');
   const cards = await page.$$eval('.card h3', (e) => e.map((x) => x.textContent));
-  check('Catálogo muestra los 4 mods', cards.length === 4, cards.join(', '));
+  check('Catálogo muestra los 5 mods', cards.length === 5, cards.join(', '));
   await page.fill('#search', 'espectral');
   check('Buscador filtra', (await page.$$('.card')).length === 1);
   await page.fill('#search', '');
@@ -99,6 +99,7 @@ try {
       ['circuito-neon', 'engranaje', 'hard', { bot: true }],
       ['noche-espectral', 'espectro', 'hard', { bot: true }],
       ['vs-garcello', 'headache', 'normal', { bot: true }],
+      ['aura-funkin', 'aura-battle', 'aura', { bot: true }],
     ];
     for (const [mod, song, diff, opts] of cases) {
       const { r, d, loadMs } = await playSong(mod, song, diff, opts);
@@ -110,6 +111,29 @@ try {
       check(`${mod}/${song} FPS medio`, d.fps > 25, `${d.fps.toFixed(1)} FPS · p99 ${d.p99.toFixed(1)} ms · ${d.drawCalls} draw calls · ${d.sprites} sprites`);
       if (d.warnings.length) console.log('   avisos:', d.warnings.join(' | '));
     }
+    // perfil: la partida con teclado (sin bot) debe haberse guardado con su logro
+    {
+      const prof = await page.evaluate(async () => { const d = await window.__funkade.profile.current(); return { clears: d.stats.clears, ach: Object.keys(d.stats.achievements), recent: d.recent.length }; });
+      check('La partida se guarda en el perfil', prof.clears >= 1 && prof.recent >= 1, `completadas ${prof.clears} · logros: ${prof.ach.join(', ')}`);
+      check('Logro «Primer escenario» desbloqueado', prof.ach.includes('first-clear'));
+      await page.goto(URL + '#/profile');
+      await page.waitForSelector('.pf-head');
+      await page.screenshot({ path: 'bench-results/perfil.png', fullPage: true });
+      // segundo jugador en el mismo navegador → podio
+      const me = await page.evaluate(async () => (await window.__funkade.profile.current()).profile.id);
+      await page.evaluate(async () => {
+        const f = window.__funkade.profile;
+        await f.createProfile('Rival');
+        await f.record({ modId: 'demo-base', modName: 'Demo Base', songId: 'pulso', songName: 'Pulso', diff: 'normal', score: 18000, accuracy: 93.5, grade: 'A', sick: 60, good: 8, bad: 1, shit: 0, miss: 1, maxCombo: 50, cleared: true, date: Date.now(), durationMs: 60000 });
+      });
+      await page.evaluate(async (id) => window.__funkade.profile.switchProfile(id), me);
+      await page.goto(URL + '#/podium');
+      await page.waitForSelector('.podium .pod');
+      const names = await page.$$eval('.table.rank tbody tr', (r) => r.length);
+      check('El podio muestra los dos perfiles', names === 2);
+      await page.screenshot({ path: 'bench-results/podio.png', fullPage: true });
+    }
+
     // importar un mod Psych en ZIP sin manifest.json (como lo haría un usuario)
     const { execSync } = await import('node:child_process');
     mkdirSync('tools/.cache', { recursive: true });

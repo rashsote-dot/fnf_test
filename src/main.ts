@@ -9,6 +9,10 @@ import { loadShared } from './gameplay/shared';
 import { BASE_URL, coverUrl, deleteLocalMod, importZip, loadCatalog, openMod, type ModRuntime } from './mod-loader/mod-manager';
 import { idbGet, idbSet } from './storage/idb';
 import { cacheModOffline, clearModCache, registerSW, storageInfo } from './storage/offline';
+import { modInfos, resetModInfos } from './mod-loader/mod-manager';
+import { createProfile, current, onProfileChange, recordPlay, switchProfile, updateProfile } from './profile/store';
+import { levelOf, xpOf } from './profile/achievements';
+import { avatarEl, renderPodium, renderProfile } from './ui/profile-view';
 
 const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
 const h = (tag: string, attrs: Record<string, string> = {}, ...kids: (Node | string)[]) => {
@@ -235,7 +239,33 @@ function selectSong(id: string) {
 
 async function bestScore(song: string): Promise<number> {
   if (!mod) return 0;
-  try { return (await idbGet<number>('kv', `best:${mod.manifest.id}:${song}`)) ?? 0; } catch { return 0; }
+  try {
+    const d = await current();
+    const pre = `${mod.manifest.id}/${song}/`;
+    return Math.max(0, ...Object.entries(d.stats.bests).filter(([k]) => k.startsWith(pre)).map(([, b]) => b.score));
+  } catch { return 0; }
+}
+
+let playStarted = 0;
+async function savePlay(r: PlayResult | null, cleared: boolean) {
+  if (!mod || !play) return { fresh: [], record: false };
+  const bot = r ? r.bot : settings.botplay;
+  if (bot) return { fresh: [], record: false }; // las partidas con bot no cuentan
+  const song = mod.manifest.songs.find((x) => x.id === selSong);
+  const t = r?.tally ?? play.tally;
+  const res = await recordPlay({
+    modId: mod.manifest.id, modName: mod.manifest.name, songId: selSong, songName: song?.name ?? selSong, diff: play.diff,
+    score: t.score, accuracy: r?.accuracy ?? 0, grade: r?.grade ?? 'F', sick: t.sick, good: t.good, bad: t.bad, shit: t.shit, miss: t.miss, maxCombo: t.maxCombo,
+    cleared, date: Date.now(), durationMs: Math.max(0, performance.now() - playStarted),
+  }, await modInfos(catalog));
+  void renderProfileChip();
+  return res;
+}
+
+async function renderProfileChip() {
+  const d = await current();
+  const lv = levelOf(xpOf(d.stats)).level;
+  $('profile-chip').replaceChildren(avatarEl(d.profile, 30), h('span', { class: 'pc-name' }, d.profile.name), h('span', { class: 'pc-lv' }, String(lv)));
 }
 
 // ------------------------------------------------------------------ juego
@@ -275,6 +305,7 @@ async function startGame() {
     overlay(null);
     if (warnings.length) toast(`⚠ ${warnings.length} aviso(s) de compatibilidad: ${warnings[0]}`, 8000);
     p.start();
+    playStarted = performance.now();
     engine!.start(p);
     setControls(true);
     startDiag();
@@ -318,13 +349,8 @@ async function togglePause() {
 async function showResults(r: PlayResult) {
   engine?.stop();
   setControls(false);
-  let record = false;
-  if (mod && !r.bot) {
-    const key = `best:${mod.manifest.id}:${selSong}`;
-    const prev = (await idbGet<number>('kv', key).catch(() => 0)) ?? 0;
-    if (r.tally.score > prev) { record = true; await idbSet('kv', key, r.tally.score).catch(() => {}); }
-    void renderSongs();
-  }
+  const { fresh, record } = await savePlay(r, true);
+  if (mod) void renderSongs();
   const t = r.tally;
   overlay(frag(
     h('h2', {}, `${r.songName} · ${r.diff}`),
@@ -333,11 +359,14 @@ async function showResults(r: PlayResult) {
     h('div', { class: 'results' },
       ...([['¡Sick!', t.sick], ['Bien', t.good], ['Mal', t.bad], ['Pésimo', t.shit], ['Fallos', t.miss], ['Combo máx.', t.maxCombo]] as [string, number][]).map(([k, v]) => h('div', {}, h('b', {}, String(v)), k))),
     h('p', { class: 'muted' }, `Precisión: ${r.accuracy.toFixed(2)}%`),
+    ...(fresh.length ? [h('div', { class: 'new-achs' }, ...fresh.map((a) => h('div', { class: 'new-ach ' + a.tier }, h('span', {}, a.icon), h('div', {}, h('small', {}, 'Logro desbloqueado'), h('b', {}, a.name)))))] : []),
+    ...(r.bot ? [h('p', { class: 'muted small' }, 'Las partidas con bot no cuentan para el perfil.')] : []),
     h('div', { class: 'btns' }, btn('↻ Jugar otra vez', startGame, 'primary'), btn('Elegir otra canción', () => { void stopGame(); overlay(frag(h('h2', {}, 'Elige una canción'), btn('▶ Jugar', startGame, 'primary big'))); }))));
   (window as any).__funkadeLastResult = r;
 }
 
 function showGameOver() {
+  void savePlay(null, false);
   engine?.stop();
   setControls(false);
   overlay(frag(h('h2', {}, 'Game Over'), h('p', { class: 'muted' }, 'Te quedaste sin vida.'), h('div', { class: 'btns' },
@@ -459,14 +488,21 @@ function updateKeysHint() {
 // ------------------------------------------------------------------ rutas
 async function route() {
   const hash = location.hash || '#/';
-  const views = { catalog: $('view-catalog'), mod: $('view-mod'), about: $('view-about') };
+  const views = { catalog: $('view-catalog'), mod: $('view-mod'), about: $('view-about'), profile: $('view-profile'), podium: $('view-podium') };
   let which: keyof typeof views = 'catalog';
   if (hash.startsWith('#/mod/')) which = 'mod';
   else if (hash.startsWith('#/about')) which = 'about';
+  else if (hash.startsWith('#/profile')) which = 'profile';
+  else if (hash.startsWith('#/podium')) which = 'podium';
   if (which !== 'mod') await stopGame();
   for (const [k, v] of Object.entries(views)) v.hidden = k !== which;
   document.querySelectorAll('[data-nav]').forEach((a) => a.classList.toggle('active', (a as HTMLElement).dataset.nav === which));
   if (which === 'mod') await showMod(decodeURIComponent(hash.slice(6)));
+  if (which === 'profile') {
+    const id = hash.startsWith('#/profile/') ? decodeURIComponent(hash.slice(10)) : undefined;
+    await renderProfile($('view-profile'), await modInfos(catalog), id, () => void route());
+  }
+  if (which === 'podium') await renderPodium($('view-podium'), await modInfos(catalog));
   window.scrollTo(0, 0);
 }
 
@@ -496,6 +532,7 @@ async function main() {
       location.hash = '#/';
       st.textContent = 'Importando mod…';
       const m = await importZip(file, (p) => (st.textContent = `Importando mod… ${Math.round(p * 100)}%`));
+      resetModInfos();
       await initCatalog();
       st.textContent = `Mod «${m.name}» importado (${m.songs.length} canciones, formato ${FORMAT_LABEL[m.format]}).`;
     } catch (err) {
@@ -510,6 +547,8 @@ async function main() {
   window.addEventListener('pagehide', () => void stopGame());
 
   registerSW();
+  onProfileChange(() => void renderProfileChip());
+  void renderProfileChip();
   await initCatalog();
   await route();
 
@@ -524,6 +563,7 @@ async function main() {
     select: (song: string, diff?: string) => { selectSong(song); if (diff) { $<HTMLSelectElement>('diff').value = diff; $('diff-seg').querySelectorAll('button').forEach((x) => x.setAttribute('aria-checked', String((x as HTMLElement).dataset.d === diff))); } },
     stop: stopGame,
     resetFrames: () => Diag.resetFrames(),
+    profile: { current, createProfile, switchProfile, updateProfile, record: async (p: Parameters<typeof recordPlay>[0]) => recordPlay(p, await modInfos(catalog)) },
   };
 }
 

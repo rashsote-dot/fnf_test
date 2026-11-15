@@ -41,6 +41,12 @@ function onUpdate(songTimeMs) {}             // cada frame: úsalo con moderaci�
 function onSongEnd() {}
 ```
 
+## Eventos personalizados (Lua) → scripts
+
+Los eventos del chart que Funkade no conoce (por ejemplo los `custom_events/*.lua` de Psych) no se descartan: llegan a `onEvent(nombre, valor1, valor2)`, igual que en Psych. Así, portar un evento Lua consiste en reescribir su `onEvent` en JavaScript. Ejemplo real: `public/mods/aura-funkin/scripts/aura.js`, que reimplementa `lyrics`, `bop`, `backgroundfade`, `Image Fade In/Out`, `Camera Set Target` y `CamPosV2`.
+
+Fuentes propias: decláralas en el manifiesto (`"fonts": ["fonts/vcr.ttf"]`) y úsalas con `font: 'vcr'`.
+
 ## API `game`
 
 Lectura: `game.song`, `game.diff`, `game.songTime`, `game.beat`, `game.step`, `game.health` (0–2), `game.score`, `game.misses`, `game.combo`.
@@ -59,6 +65,10 @@ Lectura: `game.song`, `game.diff`, `game.songTime`, `game.beat`, `game.step`, `g
 | `playAnim(personaje, anim, forzar)` | animación especial |
 | `addHealth(v)` | requiere `gameplay` |
 | `setScrollSpeed(mult, ms)` | requiere `gameplay` |
+| `focus('bf'\|'dad'\|'gf'\|'middle'\|'')` | la cámara sigue a un personaje, al punto medio, o vuelve al modo automático (`''`) |
+| `cameraPos(x, y)` / `cameraPos(null)` | cámara fija en un punto del mundo / liberarla |
+| `addText(nombre, texto, x, y, opciones)` | texto en pantalla. Opciones: `size`, `color`, `align` (`left`/`center`/`right`), `font` (de `manifest.fonts`), `bold`, `border`, `borderColor`, `hud`, `z`, `alpha` |
+| `setText(nombre, texto, color?)` / `removeText(nombre)` | cambia o elimina un texto |
 
 Los comandos se aplican al final del frame siguiente (la comunicación es asíncrona). Para efectos visuales no se nota, pero no permite cancelar una nota desde el script, como haría `Function_Stop` en Psych.
 

@@ -22,13 +22,17 @@ export function parsePsychChart(raw: Json, eventsRaw: Json | null): InternalChar
   const timeChanges = [{ t: 0, bpm: num(data.bpm, 100) }];
   let bpm = num(data.bpm, 100);
   let t = 0;
-  let unsupportedEv = new Set<string>();
+  const unsupportedEv = new Set<string>();
   let lastFocus = '';
 
   const pushEvent = (time: number, name: string, v1: unknown, v2: unknown) => {
     const ev = mapPsychEvent(time, str(name), str(v1), str(v2));
     if (ev) events.push(ev);
-    else unsupportedEv.add(str(name));
+    else {
+      // evento personalizado (normalmente un .lua del mod): se entrega a los scripts del mod
+      events.push({ t: time, name: 'custom', v: { name: str(name), v1: str(v1), v2: str(v2) } });
+      unsupportedEv.add(str(name));
+    }
   };
 
   for (const sec of data.notes as Json[]) {
@@ -78,7 +82,7 @@ export function parsePsychChart(raw: Json, eventsRaw: Json | null): InternalChar
     if (Array.isArray(e[1])) for (const sub of e[1]) pushEvent(time, sub[0], sub[1], sub[2]);
     else pushEvent(time, e[1], e[2], e[3]);
   }
-  if (unsupportedEv.size) warnings.push(`Eventos no soportados (ignorados): ${[...unsupportedEv].join(', ')}`);
+  if (unsupportedEv.size) warnings.push(`Eventos personalizados (solo funcionan si el mod incluye un script compatible): ${[...unsupportedEv].join(', ')}`);
 
   return finalizeChart({
     songName: str(data.song, 'Canción'),

@@ -35,11 +35,14 @@
       </a>
       <nav class="nav">
         <a href="#/" data-nav="catalog">Mods</a>
+        <a href="#/podium" data-nav="podium">Podio</a>
+        <a href="#/profile" data-nav="profile">Perfil</a>
         <a href="#/about" data-nav="about">Acerca de</a>
       </nav>
       <div class="nav-actions">
         <button type="button" class="ghost" id="btn-import"><svg class="ic"><use href="#i-upload"/></svg><span>Importar mod</span></button>
         <button type="button" class="ghost icon-only" id="btn-settings" aria-label="Ajustes" title="Ajustes"><svg class="ic"><use href="#i-gear"/></svg></button>
+        <a class="profile-chip" id="profile-chip" href="#/profile" aria-label="Tu perfil"></a>
       </div>
     </div>
   </header>
@@ -155,6 +158,9 @@
     </div>
   </main>
 
+  <main id="view-profile" class="view" hidden></main>
+  <main id="view-podium" class="view" hidden></main>
+
   <main id="view-about" class="view prose" hidden>
     <h1>Acerca de Funkade</h1>
     <p class="lead">Funkade es un motor de juego de ritmo escrito desde cero en TypeScript, con WebGL2 y Web Audio, que lee los formatos de datos de los principales motores de mods de Friday Night Funkin'.</p>
@@ -170,7 +176,7 @@
     <div class="footer-inner">
       <div class="footer-brand"><img src="favicon.svg" alt="" width="26" height="26"><b>Funkade</b><span class="muted">FNF y mods en tu navegador</span></div>
       <p class="muted small">Proyecto de fans sin ánimo de lucro. Friday Night Funkin' pertenece a The Funkin' Crew. Los mods pertenecen a sus respectivos autores.</p>
-      <nav class="footer-links"><a href="#/">Mods</a><a href="#/about">Acerca de</a><a href="https://github.com/rashsote-dot/fnf_test" rel="noopener" target="_blank">Código en GitHub</a></nav>
+      <nav class="footer-links"><a href="#/">Mods</a><a href="#/podium">Podio</a><a href="#/profile">Perfil</a><a href="#/about">Acerca de</a><a href="https://github.com/rashsote-dot/fnf_test" rel="noopener" target="_blank">Código en GitHub</a></nav>
     </div>
   </footer>
 

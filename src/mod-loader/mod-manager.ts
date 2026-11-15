@@ -100,3 +100,17 @@ export async function deleteLocalMod(id: string) {
   await idbDeletePrefix('files', id + '/');
   await idbDelete('mods', id);
 }
+
+/** Lista de mods con sus canciones (para logros y progreso). Se cachea durante la sesión. */
+let infoCache: Promise<{ id: string; name: string; cover: string; songs: { id: string; name: string }[] }[]> | null = null;
+export function modInfos(catalog: CatalogEntry[]) {
+  if (!infoCache) {
+    infoCache = Promise.all(catalog.map(async (e) => {
+      try { const m = (await openMod(e)).manifest; return { id: m.id, name: m.name, cover: coverUrl(e), songs: m.songs.map((s) => ({ id: s.id, name: s.name })) }; }
+      catch { return { id: e.id, name: e.name, cover: coverUrl(e), songs: [] }; }
+    }));
+    infoCache.catch(() => (infoCache = null));
+  }
+  return infoCache;
+}
+export function resetModInfos() { infoCache = null; }

@@ -105,7 +105,7 @@ export function mapPsychEvent(t: number, name: string, v1: string, v2: string): 
     case 'Set GF Speed':
       return { t, name: 'gfSpeed', v: { speed: num(v1, 1) } };
     case 'Set Cam Zoom':
-      return { t, name: 'camZoomSet', v: { zoom: num(v1, 1), dur: num(v2, 0) * 1000 } };
+      return { t, name: 'camZoomSet', v: { zoom: num(v1, 1), dur: num(v2, 0) * 1000, ease: v2.includes(',') ? v2.split(',')[1].trim() : 'sineinout' } };
     default:
       return null;
   }

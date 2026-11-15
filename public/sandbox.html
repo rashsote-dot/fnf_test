@@ -42,6 +42,11 @@
       removeSprite: (name) => cmds.push(['removeSprite', String(name)]),
       addHealth: (v) => cmds.push(['addHealth', +v || 0]),
       setScrollSpeed: (mult, ms) => cmds.push(['scrollSpeed', +mult || 1, +ms || 0]),
+      focus: (target) => cmds.push(['focus', String(target || '')]),
+      cameraPos: (x, y) => cmds.push(['camPos', x === null || x === undefined ? null : +x, y === null || y === undefined ? null : +y]),
+      addText: (name, text, x, y, opts) => cmds.push(['addText', String(name), String(text), +x || 0, +y || 0, opts && typeof opts === 'object' ? JSON.parse(JSON.stringify(opts)) : {}]),
+      setText: (name, text, color) => cmds.push(['setText', String(name), String(text), color === undefined ? null : String(color)]),
+      removeText: (name) => cmds.push(['removeText', String(name)]),
     });
     // ocultamos APIs de red dentro del worker (la CSP ya las bloquea; esto es defensa adicional)
     for (const k of ['fetch', 'XMLHttpRequest', 'WebSocket', 'EventSource', 'importScripts', 'indexedDB', 'caches']) {

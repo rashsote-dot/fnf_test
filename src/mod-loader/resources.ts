@@ -45,6 +45,9 @@ export class ResourceScope {
     return p;
   }
 
+  /** registra una textura creada fuera del alcance (p. ej. textos) para liberarla al salir */
+  track(t: Texture) { this.textures.push(t); }
+
   dispose() {
     this.disposed = true;
     for (const t of this.textures) this.renderer.deleteTexture(t);

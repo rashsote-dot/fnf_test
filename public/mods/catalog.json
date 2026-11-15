@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated": "2026-11-15T00:34:44.929Z",
+  "generated": "2026-11-15T02:39:45.758Z",
   "mods": [
     {
       "id": "demo-base",
@@ -31,6 +31,20 @@
       "path": "mods/noche-espectral/"
     },
     {
+      "id": "aura-funkin",
+      "name": "Aura Funkin' at South America",
+      "author": "Equipo de Aura Funkin' (scripts: Hot Mustafa, BCTIX, YB, kludge_) · port web: Funkade",
+      "description": "«CLOCK IT!»: Ike contra Chase en la escuela, con Randy cantando desde las gradas. Letras en pantalla, contador de AURA, cambios de personaje y cámara coreografiada.",
+      "category": "Mods de la comunidad",
+      "cover": "cover.webp",
+      "popularity": 110,
+      "sizeBytes": 34615204,
+      "songCount": 1,
+      "format": "psych",
+      "compatibility": "partial",
+      "path": "mods/aura-funkin/"
+    },
+    {
       "id": "circuito-neon",
       "name": "Circuito Neón",
       "author": "Funkade",
@@ -52,7 +66,7 @@
       "category": "Mods de la comunidad",
       "cover": "cover.webp",
       "popularity": 120,
-      "sizeBytes": 59193094,
+      "sizeBytes": 59193112,
       "songCount": 4,
       "format": "psych",
       "compatibility": "partial",

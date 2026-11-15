@@ -49,12 +49,16 @@ const psych: FormatAdapter = {
     return [{ key: 'chart', path: p.chart }, { key: 'events', path: p.events, optional: true }];
   },
   parseChart: (f) => parsePsychChart(f.chart, f.events),
-  audio: (s) => ({
+  audio: (s, c) => ({
     inst: `songs/${s}/Inst`,
     voices: [
       { url: `songs/${s}/Voices-Player`, who: 'player', group: 0 },
       { url: `songs/${s}/Voices-Opponent`, who: 'opponent', group: 0 },
-      { url: `songs/${s}/Voices`, who: 'both', group: 1 },
+      { url: `songs/${s}/Voices-player`, who: 'player', group: 1 },
+      { url: `songs/${s}/Voices-opponent`, who: 'opponent', group: 1 },
+      { url: `songs/${s}/Voices-${c.player ?? 'bf'}`, who: 'player', group: 2 },
+      { url: `songs/${s}/Voices-${c.opponent ?? 'dad'}`, who: 'opponent', group: 2 },
+      { url: `songs/${s}/Voices`, who: 'both', group: 3 },
     ],
   }),
   characterFile: (id) => `characters/${id}.json`,
