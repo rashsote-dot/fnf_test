@@ -1,6 +1,7 @@
 import type { InternalCharacter } from '../core/types';
 import type { Atlas } from '../renderer/atlas';
 import { Animator, Sprite } from '../renderer/sprite';
+import type { Frame } from '../renderer/texture';
 
 const SING = ['singLEFT', 'singDOWN', 'singUP', 'singRIGHT'];
 
@@ -11,24 +12,34 @@ export class Character extends Sprite {
   baseW = 0; baseH = 0;
   danceSpeed = 1;
   stunned = false;
+  /** compensación de texturas reempaquetadas (1 = sin cambios) */
+  texMul = 1;
+  /** posición del grupo (dadGroup/boyfriendGroup/gfGroup en Psych) */
+  groupX = 0; groupY = 0;
+  idleSuffix = '';
+  /** frames del icono de vida (normal, perdiendo) y su compensación de textura */
+  iconFrames?: Frame[];
+  iconMul = 1;
 
   constructor(public def: InternalCharacter, atlas: Atlas, public isPlayer: boolean) {
     super();
     const an = new Animator();
     for (const a of def.anims) an.addFromAtlas(atlas, a.name, a.prefix, a.fps, a.loop, a.indices, a.offset);
     this.anim = an;
-    this.scaleX = this.scaleY = def.scale;
+    this.texMul = atlas.texMul;
+    this.scaleX = this.scaleY = def.scale * atlas.texMul;
     this.flipX = def.flipX;
     const idle = an.has('danceLeft') ? 'danceLeft' : 'idle';
     an.play(idle, true);
     const f = an.current ?? atlas.frames[0];
-    this.baseW = (f?.fw ?? 100) * def.scale;
-    this.baseH = (f?.fh ?? 100) * def.scale;
+    this.baseW = (f?.fw ?? 100) * this.scaleX;
+    this.baseH = (f?.fh ?? 100) * this.scaleY;
     this.update(0);
   }
 
   /** coloca al personaje según el punto del escenario */
   place(x: number, y: number) {
+    this.groupX = x; this.groupY = y;
     if (this.def.anchor === 'feet') {
       this.x = x - this.baseW / 2 + this.def.position[0];
       this.y = y - this.baseH + this.def.position[1];
@@ -68,9 +79,13 @@ export class Character extends Sprite {
     if (beat % Math.max(1, Math.round(this.def.danceEvery * this.danceSpeed)) !== 0) return;
     this.specialAnim = false;
     this.setColor('#ffffff');
-    if (an.has('danceLeft')) { this.danced = !this.danced; an.play(this.danced ? 'danceRight' : 'danceLeft', true); }
-    else an.play('idle', true);
+    const sx = this.idleSuffix;
+    if (an.has('danceLeft' + sx)) { this.danced = !this.danced; an.play((this.danced ? 'danceRight' : 'danceLeft') + sx, true); }
+    else an.play(an.has('idle' + sx) ? 'idle' + sx : 'idle', true);
   }
+
+  /** fuerza el baile aunque esté cantando (characterDance de Psych) */
+  forceDance() { this.specialAnim = false; this.holdTimer = 0; const n = this.anim!.name; if (n.startsWith('sing')) this.anim!.cur = null; this.dance(0); }
 
   /** llamado cada frame; stepMs = duración de un paso (1/4 de beat) */
   updateHold(dtMs: number, stepMs: number, holdingKey: boolean) {

@@ -77,6 +77,8 @@
     "data/release/release-easy.json",
     "data/release/release-hard.json",
     "data/release/release.json",
+    "images/NOTE_assets.png",
+    "images/NOTE_assets.xml",
     "images/characters/BOYFRIEND.png",
     "images/characters/BOYFRIEND.xml",
     "images/characters/GF_assets.png",
@@ -123,5 +125,5 @@
     "stages/alley-smoke.json",
     "stages/alley.json"
   ],
-  "sizeBytes": 59193112
+  "sizeBytes": 59914764
 }

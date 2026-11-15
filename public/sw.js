@@ -3,7 +3,8 @@
 // - JSON (catálogo, manifiestos, charts) y archivos de la app: primero red, caché como respaldo sin conexión.
 const VERSION = '__BUILD_VERSION__';
 const APP_CACHE = 'funkade-app-' + VERSION;
-const MOD_CACHE = 'funkade-mods-v1';
+// subir este número cuando se reimporten mods con las mismas rutas de archivo
+const MOD_CACHE = 'funkade-mods-v2';
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(APP_CACHE).then((c) => c.addAll(['./', 'index.html', 'css/app.css', 'js/main.js', 'js/chart-worker.js', 'sandbox.html', 'favicon.svg']).catch(() => {})));
@@ -12,7 +13,7 @@ self.addEventListener('install', (e) => {
 
 self.addEventListener('activate', (e) => {
   e.waitUntil((async () => {
-    for (const k of await caches.keys()) if (k.startsWith('funkade-app-') && k !== APP_CACHE) await caches.delete(k);
+    for (const k of await caches.keys()) if ((k.startsWith('funkade-app-') && k !== APP_CACHE) || (k.startsWith('funkade-mods-') && k !== MOD_CACHE)) await caches.delete(k);
     await self.clients.claim();
   })());
 });

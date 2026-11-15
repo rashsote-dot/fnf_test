@@ -11,6 +11,9 @@ export class ResourceScope {
   private atlases = new Map<string, Promise<Atlas>>();
   disposed = false;
 
+  /** escalas de reempaquetado del manifiesto ('images/ruta' en minúsculas → escala) */
+  texScales: Record<string, number> = {};
+
   constructor(public renderer: Renderer, public source: ModSource, public label: string) {}
 
   async texture(path: string): Promise<Texture> {
@@ -27,6 +30,10 @@ export class ResourceScope {
   }
 
   /** Carga un atlas Sparrow (ruta sin extensión: carga .png y .xml). Si no hay XML, crea un único frame. */
+  /** atlas ya cargado (síncrono) o undefined */
+  loaded = new Map<string, Atlas>();
+  cached(pathNoExt: string): Atlas | undefined { return this.loaded.get(pathNoExt.toLowerCase()); }
+
   atlas(pathNoExt: string): Promise<Atlas> {
     const key = pathNoExt.toLowerCase();
     let p = this.atlases.get(key);
@@ -37,10 +44,13 @@ export class ResourceScope {
           this.source.blob(pathNoExt + '.xml').then((b) => b.text()).catch((e) => { if (e instanceof LoadError) return null; throw e; }),
         ]);
         const raw = xml ? parseSparrowXml(xml) : [{ name: 'full', x: 0, y: 0, w: tex.width, h: tex.height, fx: 0, fy: 0, fw: tex.width, fh: tex.height, rotated: false }];
-        return new Atlas(tex, raw);
+        const atlas = new Atlas(tex, raw);
+        const sc = this.texScales[key];
+        if (sc && sc > 0 && sc !== 1) atlas.texMul = 1 / sc;
+        return atlas;
       })();
       this.atlases.set(key, p);
-      p.catch(() => this.atlases.delete(key));
+      p.then((a) => this.loaded.set(key, a), () => this.atlases.delete(key));
     }
     return p;
   }

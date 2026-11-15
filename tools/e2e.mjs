@@ -26,6 +26,8 @@ const page = await browser.newPage({ viewport: { width: 1600, height: 900 } });
 const logs = [];
 page.on('console', (m) => logs.push(`[${m.type()}] ${m.text()}`));
 page.on('pageerror', (e) => logs.push(`[pageerror] ${e.message}`));
+const missing = new Set();
+page.on('response', (r) => { if (r.status() === 404) missing.add(new globalThis.URL(r.url()).pathname); });
 mkdirSync('bench-results', { recursive: true });
 
 const results = [];
@@ -75,6 +77,14 @@ async function playSong(modId, song, diff, { bot = true, keyboard = false, sampl
   await page.evaluate(() => window.__funkade.resetFrames());
   if (sample) await sample();
   await page.screenshot({ path: `bench-results/${modId}-${song}.png` });
+  // capturas a lo largo de la canción para comparar con el original
+  const dur = await page.evaluate(() => window.__funkade.play?.duration ?? 0);
+  for (const f of [0.25, 0.5, 0.75, 0.92]) {
+    const at = dur * f;
+    const ok = await page.waitForFunction((at) => window.__funkadeLastResult || (window.__funkade.play?.songT ?? 0) >= at, at, { timeout: 420000, polling: 250 }).then(() => true, () => false);
+    if (!ok || (await page.evaluate(() => !!window.__funkadeLastResult))) break;
+    await page.screenshot({ path: `bench-results/${modId}-${song}-${Math.round(f * 100)}.png` });
+  }
   await page.waitForFunction(() => window.__funkadeLastResult, null, { timeout: 420000, polling: 500 });
   const res = await page.evaluate(() => ({ r: window.__funkadeLastResult, d: window.__funkade.diag() }));
   return { loadMs, ...res };
@@ -85,8 +95,9 @@ try {
   await page.goto(URL);
   await page.waitForSelector('.card');
   const cards = await page.$$eval('.card h3', (e) => e.map((x) => x.textContent));
-  check('Catálogo muestra los 8 mods', cards.length === 8, cards.join(', '));
-  await page.fill('#search', 'espectral');
+  check('Catálogo muestra los 5 mods', cards.length === 5, cards.join(', '));
+  check('Los mods de demostración se eliminaron', !cards.some((c) => /Demo Base|Circuito|Noche Espectral/i.test(c)));
+  await page.fill('#search', 'garcello');
   check('Buscador filtra', (await page.$$('.card')).length === 1);
   await page.fill('#search', '');
   await page.screenshot({ path: 'bench-results/catalogo.png' });
@@ -95,10 +106,7 @@ try {
     const cases = [
       // con teclado simulado usamos calidad baja: en Chrome sin GPU (SwiftShader) el renderizado por software
       // bloquea el hilo principal y retrasa los setTimeout que simulan las pulsaciones
-      ['demo-base', 'primer-paso', 'hard', { bot: false, keyboard: true }],
-      ['circuito-neon', 'engranaje', 'hard', { bot: true }],
-      ['noche-espectral', 'espectro', 'hard', { bot: true }],
-      ['vs-garcello', 'headache', 'normal', { bot: true }],
+      ['vs-garcello', 'headache', 'normal', { bot: false, keyboard: true }],
       ['aura-funkin', 'aura-battle', 'aura', { bot: true }],
       ['nocturnal-protocol-fan-recreation', 'nocturnal-protocol', 'hard', { bot: true }],
       ['bite-fernan-mix', 'bite', 'fernan', { bot: true }],
@@ -115,9 +123,19 @@ try {
       if (opts.keyboard) check('Precisión del input por teclado ≥ 95%', r.accuracy >= 95, `${r.accuracy.toFixed(2)}%`);
       check(`${mod}/${song} FPS medio`, d.fps > 25, `${d.fps.toFixed(1)} FPS · p99 ${d.p99.toFixed(1)} ms · ${d.drawCalls} draw calls · ${d.sprites} sprites`);
       if (d.warnings.length) console.log('   avisos:', d.warnings.join(' | '));
+      const info = await page.evaluate(() => window.__funkadeLastPlayInfo ?? null);
+      if (info) {
+        console.log(`   skin: ${info.skin} · lua: ${info.luaScripts.map((x) => x.name + (x.closed ? ' (CERRADO)' : '')).join(', ') || '—'}`);
+        const luaErr = info.warnings.filter((w) => w.startsWith('Error en'));
+        // una función de Psych que falta en la web aparece como «intento de llamar a 'x' (nil)»; otros errores
+        // (p. ej. aritmética con un texto vacío) también ocurren en el juego original y se informan sin fallar
+        const missingApi = luaErr.filter((w) => /intento de llamar a '/.test(w));
+        if (luaErr.length > missingApi.length) console.log('   errores propios del script (también en el original):', luaErr.filter((w) => !missingApi.includes(w)).slice(0, 4).join(' | '));
+        check(`${mod} API de Psych completa para sus scripts`, missingApi.length === 0, missingApi.slice(0, 6).join(' | '));
+      }
     }
     // perfil: la partida con teclado (sin bot) debe haberse guardado con su logro
-    if (!process.env.ONLY || process.env.ONLY.includes('demo-base')) {
+    if (!process.env.ONLY || process.env.ONLY.includes('vs-garcello')) {
       const prof = await page.evaluate(async () => { const d = await window.__funkade.profile.current(); return { clears: d.stats.clears, ach: Object.keys(d.stats.achievements), recent: d.recent.length }; });
       check('La partida se guarda en el perfil', prof.clears >= 1 && prof.recent >= 1, `completadas ${prof.clears} · logros: ${prof.ach.join(', ')}`);
       check('Logro «Primer escenario» desbloqueado', prof.ach.includes('first-clear'));
@@ -129,7 +147,7 @@ try {
       await page.evaluate(async () => {
         const f = window.__funkade.profile;
         await f.createProfile('Rival');
-        await f.record({ modId: 'demo-base', modName: 'Demo Base', songId: 'pulso', songName: 'Pulso', diff: 'normal', score: 18000, accuracy: 93.5, grade: 'A', sick: 60, good: 8, bad: 1, shit: 0, miss: 1, maxCombo: 50, cleared: true, date: Date.now(), durationMs: 60000 });
+        await f.record({ modId: 'vs-garcello', modName: 'VS Garcello', songId: 'nerves', songName: 'Nerves', diff: 'normal', score: 18000, accuracy: 93.5, grade: 'A', sick: 60, good: 8, bad: 1, shit: 0, miss: 1, maxCombo: 50, cleared: true, date: Date.now(), durationMs: 60000 });
       });
       await page.evaluate(async (id) => window.__funkade.profile.switchProfile(id), me);
       await page.goto(URL + '#/podium');
@@ -140,8 +158,8 @@ try {
     }
 
     // pausa / reanudar
-    await openMod('demo-base');
-    await page.evaluate(() => { window.__funkade.saveSettings({ botplay: true }); window.__funkade.select('pulso', 'normal'); });
+    await openMod('vs-garcello');
+    await page.evaluate(() => { window.__funkade.saveSettings({ botplay: true }); window.__funkade.select('nerves', 'normal'); });
     await page.click('#btn-play');
     await page.waitForFunction(() => window.__funkade.play?.songT > 3000, null, { timeout: 30000 });
     await page.keyboard.press('Escape');
@@ -162,7 +180,7 @@ try {
   } else {
     // ---------------- benchmark
     const samples = [];
-    const { r, d, loadMs } = await playSong('noche-espectral', 'tormenta', 'hard', {
+    const { r, d, loadMs } = await playSong('nocturnal-protocol-fan-recreation', 'nocturnal-protocol', 'hard', {
       bot: true, quality: QUALITY,
       sample: async () => {
         for (let i = 0; i < 30; i++) {
@@ -175,14 +193,14 @@ try {
     const max = (k) => Math.max(...samples.map((x) => x[k]));
     const bench = {
       date: new Date().toISOString(), chrome: await browser.version(), renderer: d.renderer, viewport: '1600x900',
-      song: 'noche-espectral/tormenta (hard, bot)', quality: QUALITY, loadMs, misses: r.tally.miss, accuracy: r.accuracy,
+      song: 'nocturnal-protocol (hard, bot)', quality: QUALITY, loadMs, misses: r.tally.miss, accuracy: r.accuracy,
       fpsAvg: avg('fps'), frameAvgMs: avg('avg'), frameP99Ms: max('p99'), cpuPerFrameMs: avg('cpu'), drawCallsMax: max('draw'), spritesMax: max('sprites'), textureMB: max('tex'),
     };
     // memoria al cambiar de canción repetidamente
     const heap = [];
     for (let i = 0; i < 6; i++) {
-      await openMod(i % 2 ? 'circuito-neon' : 'demo-base');
-      await page.evaluate(() => { window.__funkade.saveSettings({ botplay: true }); window.__funkade.select(document.querySelector('#song-list button').dataset.song, 'normal'); });
+      await openMod(i % 2 ? 'fnf-rivals-demo' : 'vs-garcello');
+      await page.evaluate(() => { window.__funkade.saveSettings({ botplay: true }); window.__funkade.select(document.querySelector('#song-list button').dataset.song); });
       await page.click('#btn-play');
       await page.waitForFunction(() => window.__funkade.play?.songT > 2000, null, { timeout: 30000 });
       const info = await page.evaluate(async () => { await window.__funkade.stop(); return { heap: performance.memory?.usedJSHeapSize ?? 0, tex: window.__funkade.diag().textureMB }; });
@@ -199,7 +217,8 @@ try {
   console.error(e);
   failed++;
 } finally {
-  const errors = logs.filter((l) => l.startsWith('[pageerror]') || l.startsWith('[error]'));
+  if (missing.size) console.log('Archivos 404 (opcionales que el motor prueba):\n  ' + [...missing].slice(0, 40).join('\n  '));
+  const errors = logs.filter((l) => l.startsWith('[pageerror]') || (l.startsWith('[error]') && !l.includes('404')));
   if (errors.length) { console.log('Errores de consola:\n' + errors.slice(0, 20).join('\n')); }
   writeFileSync('bench-results/console.log', logs.join('\n'));
   await browser.close();

@@ -19,7 +19,7 @@
   "cover": "cover.webp",
   "popularity": 50,
   "compatibility": "partial",
-  "compatNotes": ["Los scripts Lua de la canción 2 no se ejecutan."],
+  "compatNotes": ["Los vídeos de la canción 2 no se reproducen."],
   "songs": [
     { "id": "cancion-1", "name": "Canción 1", "difficulties": ["easy", "normal", "hard"] }
   ]
@@ -63,7 +63,7 @@ El mod aparece en el catálogo con la categoría «Importados» y un botón para
 - Si el mod usa personajes del juego base (`bf`, `gf`, `dad`), incluye los tuyos propios con el mismo `id` o cambia los nombres en el chart. Si no, verás el personaje de reemplazo.
 - Exporta los audios en `.ogg` **y** `.m4a` para máxima compatibilidad con Safari.
 - Mantén las texturas en 4096 px o menos por lado para GPUs modestas (Funkade avisa a partir de 8192).
-- Las mecánicas que en Psych están en Lua pueden reescribirse como script JavaScript con la API de [scripts.md](scripts.md).
+- Los scripts Lua de Psych se ejecutan tal cual (ver [scripts.md](scripts.md)); lo que esté en HScript puede reescribirse como script JavaScript con la misma página.
 
 ## Ejemplo real: cómo se adaptó VS Garcello
 

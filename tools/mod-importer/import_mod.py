@@ -168,8 +168,24 @@ def encode_audio(src, dst_noext, mono=False):
     subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-i', str(ogg), '-c:a', 'aac', '-b:a', '96k' if mono else '128k', str(dst_noext.with_suffix('.m4a'))], check=True)
 
 
+TEX_SCALE = {}
+COPIED = {}
+
+
 def copy_atlas(vfs, ref, out_root, keep=None, report=None):
-    """Copia images/<ref>.png (+.xml). Reempaqueta si es enorme. Devuelve la escala aplicada (1 = sin cambios) o None si no existe."""
+    """Copia images/<ref>.png (+.xml). Reempaqueta si es enorme. Devuelve la escala aplicada (1 = sin cambios) o None si no existe.
+    La escala se anota en TEX_SCALE (→ manifest.textureScale) para que el motor la compense: los JSON del mod no se tocan."""
+    key = ref.lower()
+    if key in COPIED and keep is None:
+        return COPIED[key]
+    sc = _copy_atlas(vfs, ref, out_root, keep, report)
+    COPIED[key] = sc
+    if sc not in (None, 1.0):
+        TEX_SCALE[f'images/{ref}'.lower()] = sc
+    return sc
+
+
+def _copy_atlas(vfs, ref, out_root, keep=None, report=None):
     png, xml = vfs.get(f'images/{ref}.png'), vfs.get(f'images/{ref}.xml')
     if not png:
         if vfs.get(f'images/{ref}/animation.json') or vfs.get(f'images/{ref}/Animation.json'):
@@ -340,6 +356,101 @@ def lua_stage_objects(code):
     return behind, front
 
 
+# ------------------------------------------------------------------ scripts Lua, skins y UI del mod
+LUA_WANTED = set()
+FONTS = []
+STR_RX = re.compile(r"""(['"])((?:(?!\1)[^\\\n]|\\.){1,120})\1""")
+
+
+def copy_lua(vfs, out, songs, chars_needed, custom_events, report):
+    """Copia los .lua que Psych cargaría y los recursos (imágenes, sonidos, fuentes, personajes) que nombran."""
+    want = set(LUA_WANTED)
+    want |= {k for k in vfs.glob('scripts/*.lua')}
+    for e in custom_events:
+        k = f'custom_events/{e}.lua'.lower()
+        if vfs.get(k):
+            want.add(k)
+    want |= {k for k in vfs.glob('custom_notetypes/*.lua')}
+    for c in list(chars_needed):
+        if vfs.get(f'characters/{c}.lua'):
+            want.add(f'characters/{c}.lua'.lower())
+    for sng in songs:
+        want |= {k for k in vfs.files if k.startswith(f"data/{sng['id']}/") and k.endswith('.lua')}
+    if not want:
+        return
+    lits = set()
+    n = 0
+    for k in sorted(want):
+        f = vfs.get(k)
+        if not f:
+            continue
+        code = f.read_text(encoding='utf-8', errors='replace')
+        write(out / k, f)
+        n += 1
+        lits |= {m.group(2) for m in STR_RX.finditer(code)}
+        # personajes añadidos por script
+        for m in re.finditer(r"addCharacterToList\s*\(\s*['\"]([^'\"]+)['\"]\s*,\s*['\"]?(\w+)", code):
+            chars_needed.setdefault(m.group(1), m.group(2).lower() in ('boyfriend', 'bf', '0'))
+    imgs = snds = 0
+    for lit in lits:
+        lit = lit.replace('\\', '/').strip()
+        if not lit or len(lit) > 100:
+            continue
+        base = lit[:-4] if lit.lower().endswith('.png') else lit
+        if vfs.get(f'images/{base}.png'):
+            if copy_atlas(vfs, base, out, None, report) is not None:
+                imgs += 1
+        elif '/' in base:
+            # rutas construidas con concatenación ('pop-ups/'..nombre, 'dropimages/image'..i): se copian todas las que empiezan así
+            pre = f'images/{base}'.lower()
+            hits = [k for k in vfs.files if k.startswith(pre) and k.endswith('.png')][:80]
+            for k in hits:
+                orig = '/'.join(vfs.get(k).parts[-len(Path(k).parts):])  # misma ruta con mayúsculas originales
+                if copy_atlas(vfs, orig[7:-4], out, None, report) is not None:
+                    imgs += 1
+        for ext in ('ogg', 'mp3', 'wav'):
+            snd = vfs.get(f'sounds/{lit}.{ext}')
+            if snd:
+                encode_audio(snd, out / 'sounds' / lit)
+                snds += 1
+                break
+        fnt = vfs.get(f'fonts/{lit}') or vfs.get(f'fonts/{lit}.ttf') or vfs.get(f'fonts/{lit}.otf')
+        if fnt:
+            dst = f'fonts/{fnt.name}'
+            write(out / dst, fnt)
+            if dst not in FONTS:
+                FONTS.append(dst)
+    log(f'Scripts Lua: {n} (con {imgs} imágenes y {snds} sonidos referenciados)')
+    report.append(f'{n} scripts Lua se ejecutan en el intérprete aislado de la web (API de Psych compatible; las funciones no implementadas se ignoran).')
+
+
+def copy_ui(vfs, out, report):
+    """Skin de notas, notas dañinas, puntuaciones y cuenta atrás del propio mod (sin cambiarlas)."""
+    skins = {'NOTE_assets', 'HURTNOTE_assets'}
+    for k in vfs.glob('data/*/*.json'):
+        try:
+            ch = vfs.json(k) or {}
+            sng = ch['song'] if isinstance(ch.get('song'), dict) else ch
+            if sng.get('arrowSkin'):
+                skins.add(str(sng['arrowSkin']))
+        except Exception:
+            pass
+    for k in vfs.glob('images/noteskins/*.png'):
+        skins.add('noteSkins/' + Path(vfs.get(k).name).stem)
+    got = [sk for sk in sorted(skins) if vfs.get(f'images/{sk}.png') and vfs.get(f'images/{sk}.xml') and copy_atlas(vfs, sk, out, None, report) is not None]
+    if got:
+        log('Skins de notas: ' + ', '.join(got))
+    for n in ('sick', 'good', 'bad', 'shit', 'ready', 'set', 'go', 'healthBar', 'timeBar'):
+        if vfs.get(f'images/{n}.png'):
+            copy_atlas(vfs, n, out, None, report)
+    for f in ('vcr.ttf', 'pixel.otf'):
+        src = vfs.get(f'fonts/{f}')
+        if src:
+            write(out / 'fonts' / f, src)
+            if f'fonts/{f}' not in FONTS:
+                FONTS.append(f'fonts/{f}')
+
+
 # ------------------------------------------------------------------ importación Psych
 BUILTIN_EVENTS = {'Hey!', 'Add Camera Zoom', 'Play Animation', 'Camera Follow Pos', 'Change Character', 'Screen Shake', 'Change Scroll Speed', 'Set GF Speed', 'Set Cam Zoom', ''}
 
@@ -428,8 +539,10 @@ def import_psych(vfs, out, meta, report):
             report.append(f'Canción «{name}»: falta el instrumental (songs/{sid}/Inst.ogg).')
             continue
         encode_audio(inst, out / 'songs' / sid / 'Inst')
-        vp = pick('voices-player', f'voices-{p1}')
-        vo = pick('voices-opponent', f'voices-{p2}')
+        # Psych 0.7.3+: cada personaje puede indicar su archivo de voces (vocals_file → Voices-<x>)
+        vfile = lambda cid: str((vfs.json(f'characters/{cid}.json') or {}).get('vocals_file') or cid)
+        vp = pick('voices-player', f'voices-{vfile(p1)}', f'voices-{p1}')
+        vo = pick('voices-opponent', f'voices-{vfile(p2)}', f'voices-{p2}')
         if vp:
             encode_audio(vp, out / 'songs' / sid / 'Voices-Player', mono=True)
         if vo:
@@ -440,8 +553,12 @@ def import_psych(vfs, out, meta, report):
         result_songs.append({'id': sid, 'name': pretty, 'difficulties': order, **({'bpm': round(bpm)} if bpm else {})})
         log(f'Canción «{pretty}»: dificultades {", ".join(order)}')
 
+    # scripts Lua (se ejecutan en el intérprete aislado de la web) y lo que referencian
+    LUA_WANTED.update(f'stages/{st}.lua'.lower() for st in stages_needed if vfs.get(f'stages/{st}.lua'))
+    copy_lua(vfs, out, result_songs, chars_needed, custom_events, report)
+    copy_ui(vfs, out, report)
     # personajes
-    for cid, is_player in chars_needed.items():
+    for cid, is_player in list(chars_needed.items()):
         cj = vfs.json(f'characters/{cid}.json')
         if not cj or not vfs.get(f"images/{str(cj.get('image', '')).split(',')[0].strip()}.png"):
             if cid.lower() in ('gf', 'gf-christmas', 'gf-car', 'gf-pixel', 'gf-tankmen', 'girlfriend'):
@@ -458,8 +575,6 @@ def import_psych(vfs, out, meta, report):
             report.append(f'Personaje «{cid}»: no se encontró su imagen images/{image}.png.')
             continue
         cj['image'] = image
-        if sc != 1.0:
-            cj['scale'] = round(float(cj.get('scale', 1) or 1) / sc, 5)
         (out / 'characters').mkdir(parents=True, exist_ok=True)
         (out / 'characters' / f'{cid}.json').write_text(json.dumps(cj, indent=1, ensure_ascii=False), encoding='utf-8')
         icon = str(cj.get('healthicon', cid))
@@ -468,6 +583,7 @@ def import_psych(vfs, out, meta, report):
             write(out / 'images' / 'icons' / f'icon-{icon}.png', src_icon)
         log(f'Personaje «{cid}» ({"jugador" if is_player else "oponente/gf"})')
 
+
     # escenarios
     for st in stages_needed:
         sj = vfs.json(f'stages/{st}.json')
@@ -475,12 +591,8 @@ def import_psych(vfs, out, meta, report):
             report.append(f'Escenario «{st}» no incluido: se usará uno por defecto.')
             continue
         objs = sj.get('objects') or []
-        lua = vfs.get(f'stages/{st}.lua')
-        if lua and not any(o.get('type') in ('sprite', 'animatedSprite', 'square') for o in objs):
-            behind, front = lua_stage_objects(lua.read_text(encoding='utf-8', errors='replace'))
-            objs = behind + [{'type': 'gf'}, {'type': 'dad'}, {'type': 'boyfriend'}] + front
-            log(f'Escenario «{st}»: {len(behind) + len(front)} objetos traducidos desde Lua')
-            report.append(f'Escenario «{st}»: creado a partir de su script Lua (solo la parte estática; animaciones y efectos programados no).')
+        if vfs.get(f'stages/{st}.lua'):
+            LUA_WANTED.add(f'stages/{st}.lua')
         kept = []
         for o in objs:
             if o.get('type') in ('sprite', 'animatedSprite') and not o.get('image'):
@@ -490,9 +602,6 @@ def import_psych(vfs, out, meta, report):
                 if sc is None:
                     report.append(f'Escenario «{st}»: falta la imagen images/{o["image"]}.png')
                     continue
-                if sc != 1.0:
-                    s = o.get('scale', [1, 1])
-                    o['scale'] = [round(float(s[0]) / sc, 5), round(float(s[1]) / sc, 5)]
             kept.append(o)
         sj['objects'] = kept
         if gf_missing:
@@ -501,20 +610,16 @@ def import_psych(vfs, out, meta, report):
         (out / 'stages' / f'{st}.json').write_text(json.dumps(sj, indent=1, ensure_ascii=False), encoding='utf-8')
 
     # inventario de lo no soportado
-    lua = [k for k in vfs.files if k.endswith('.lua')]
     hx = [k for k in vfs.files if k.endswith(('.hx', '.hxs', '.hscript'))]
-    if lua:
-        report.append(f'{len(lua)} scripts Lua no se ejecutan en la web (efectos, mecánicas o HUD personalizados).')
     if hx:
         report.append(f'{len(hx)} scripts HScript no se ejecutan en la web.')
-    if custom_events:
-        report.append('Eventos personalizados sin soporte (requieren portar su Lua a JavaScript): ' + ', '.join(sorted(custom_events)))
+    no_lua = sorted(e for e in custom_events if not vfs.get(f'custom_events/{e}.lua'))
+    if no_lua:
+        report.append('Eventos personalizados sin script: ' + ', '.join(no_lua))
     if [k for k in vfs.files if k.endswith(('.mp4', '.webm'))]:
         report.append('Incluye vídeos/cinemáticas, que no se reproducen.')
-    if vfs.glob('custom_notetypes/*.lua'):
-        report.append('Tipos de nota personalizados: se juegan como notas normales (salvo las «Hurt»).')
-    if vfs.glob('images/noteskins/*') or vfs.glob('shaders/*.frag'):
-        report.append('Skins de notas y shaders propios no se aplican.')
+    if vfs.glob('shaders/*.frag'):
+        report.append('Shaders propios (efectos visuales GLSL) no se aplican.')
     return result_songs, pack
 
 
@@ -629,7 +734,7 @@ def main():
             shutil.rmtree(out)
             sys.exit('No se pudo importar ninguna canción. Revisa el informe:\n- ' + '\n- '.join(report))
         desc = a.description or re.sub(r'\s+', ' ', str(pack.get('description', '')).strip())[:220] or f'{len(songs)} canción(es) importada(s) automáticamente.'
-        partial = any(('no se ejecutan' in r) or ('sin soporte' in r) or ('reemplazo' in r) or ('no soportado' in r) for r in report)
+        partial = any(('no se aplican' in r) or ('no se ejecutan en la web' in r) or ('sin soporte' in r) or ('reemplazo' in r) or ('no soportado' in r) for r in report)
         manifest = {
             'id': mid, 'name': name, 'version': '1.0.0', 'format': fmt,
             'author': a.author or 'Autores originales del mod · importado con Funkade',
@@ -637,6 +742,10 @@ def main():
             'description': desc, 'category': a.category, 'cover': 'cover.webp', 'popularity': a.popularity,
             'compatibility': 'partial' if partial else 'full', 'compatNotes': report[:8], 'songs': songs,
         }
+        if TEX_SCALE:
+            manifest['textureScale'] = {k: round(v, 5) for k, v in sorted(TEX_SCALE.items())}
+        if FONTS:
+            manifest['fonts'] = FONTS
         (out / 'manifest.json').write_text(json.dumps(manifest, indent=2, ensure_ascii=False), encoding='utf-8')
         try:
             make_cover(out, name, f'{len(songs)} canción' + ('es' if len(songs) != 1 else ''))

@@ -1,35 +1,7 @@
 {
   "version": 1,
-  "generated": "2026-11-15T04:04:57.447Z",
+  "generated": "2026-11-15T06:00:21.730Z",
   "mods": [
-    {
-      "id": "demo-base",
-      "name": "Demo Base",
-      "author": "Funkade",
-      "description": "Canciones y personajes originales de demostración para probar el motor: notas, sostenidos, cámara y sincronización.",
-      "category": "Oficial",
-      "cover": "cover.webp",
-      "popularity": 100,
-      "sizeBytes": 4692968,
-      "songCount": 2,
-      "format": "fnfweb",
-      "compatibility": "full",
-      "path": "mods/demo-base/"
-    },
-    {
-      "id": "noche-espectral",
-      "name": "Noche Espectral",
-      "author": "Funkade",
-      "description": "Mecánicas extra: notas dañinas, zoom y velocidad de scroll por eventos, y un script aislado que añade murciélagos, destellos y partículas. Incluye una canción de estrés.",
-      "category": "Demostración",
-      "cover": "cover.webp",
-      "popularity": 90,
-      "sizeBytes": 4811176,
-      "songCount": 2,
-      "format": "vslice",
-      "compatibility": "full",
-      "path": "mods/noche-espectral/"
-    },
     {
       "id": "fnf-rivals-demo",
       "name": "FNF Rivals (Demo)",
@@ -38,10 +10,10 @@
       "category": "Mods de la comunidad",
       "cover": "cover.webp",
       "popularity": 60,
-      "sizeBytes": 26977492,
+      "sizeBytes": 40134983,
       "songCount": 1,
       "format": "psych",
-      "compatibility": "partial",
+      "compatibility": "full",
       "path": "mods/fnf-rivals-demo/"
     },
     {
@@ -59,20 +31,6 @@
       "path": "mods/aura-funkin/"
     },
     {
-      "id": "circuito-neon",
-      "name": "Circuito Neón",
-      "author": "Funkade",
-      "description": "Mod de prueba con estructura de Psych Engine: personajes JSON, escenario con objetos animados, cambio de BPM y eventos (Change Character, Add Camera Zoom, Hey!).",
-      "category": "Demostración",
-      "cover": "cover.webp",
-      "popularity": 80,
-      "sizeBytes": 4816711,
-      "songCount": 2,
-      "format": "psych",
-      "compatibility": "full",
-      "path": "mods/circuito-neon/"
-    },
-    {
       "id": "vs-garcello",
       "name": "VS Garcello",
       "author": "atsuover (arte y personaje) · Rageminer (música) · port web: Funkade",
@@ -80,7 +38,7 @@
       "category": "Mods de la comunidad",
       "cover": "cover.webp",
       "popularity": 120,
-      "sizeBytes": 59193112,
+      "sizeBytes": 59914764,
       "songCount": 4,
       "format": "psych",
       "compatibility": "partial",
@@ -94,7 +52,7 @@
       "category": "Mods de la comunidad",
       "cover": "cover.webp",
       "popularity": 60,
-      "sizeBytes": 58318912,
+      "sizeBytes": 70081113,
       "songCount": 1,
       "format": "psych",
       "compatibility": "partial",
@@ -108,7 +66,7 @@
       "category": "Mods de la comunidad",
       "cover": "cover.webp",
       "popularity": 60,
-      "sizeBytes": 50070413,
+      "sizeBytes": 50830094,
       "songCount": 1,
       "format": "psych",
       "compatibility": "partial",

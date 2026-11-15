@@ -27,42 +27,45 @@
 
 ## Resultados medidos
 
-Entorno de pruebas: Chrome 153 headless, **sin GPU** (WebGL2 emulado por software con SwiftShader), 2 vCPU Intel Xeon a 2,1 GHz, ventana de 1600×900 (canvas de 1030×579). Se mide con `bun run bench` (`tools/e2e.mjs --bench`), que juega la canción de estrés `noche-espectral/tormenta` en *hard* con el bot y el script de partículas activo, y muestrea 30 s.
+Entorno de pruebas: Chrome headless, **sin GPU** (WebGL2 emulado por software con SwiftShader), 2 vCPU, ventana de 1600×900. Se mide con `bun run bench` (`tools/e2e.mjs --bench`), que juega *Nocturnal Protocol* en *hard* con el bot y sus 11 scripts Lua activos (escenario, eventos, tipo de nota personalizado, barras de cine), y muestrea 30 s en calidad automática.
 
-| Métrica | Calidad alta (100 %) | Calidad baja (50 %) |
-|---|---|---|
-| FPS medio | 29,5 | **60,0** (límite de vsync) |
-| Tiempo de frame medio | 34,0 ms | 16,7 ms |
-| Tiempo de frame p99 | 50,1 ms | 16,8 ms |
-| **CPU del motor por frame** | **0,25 ms** | **0,13 ms** |
-| Draw calls (máx.) | 14 | 14 |
-| Sprites dibujados (máx.) | 75 | 70 |
-| Texturas en GPU | 57 MB | 57 MB |
-| Carga de la canción (chart + 3 personajes + escenario + audio + script) | 878 ms | 818 ms |
-| Notas falladas por el bot | 0 (100 %) | 0 (100 %) |
+| Métrica | Resultado |
+|---|---|
+| FPS medio | **59,8** |
+| Tiempo de frame medio | 16,7 ms |
+| Tiempo de frame p99 | 33,4 ms |
+| **CPU del motor por frame** (incluye el intérprete Lua) | **0,31 ms** |
+| Draw calls (máx.) | 19 |
+| Sprites dibujados (máx.) | 34 |
+| Texturas en GPU (máx.) | 331 MB (14 personajes precargados para los cambios de personaje del mod) |
+| Carga de la canción | 2,9 s |
+| Notas falladas por el bot | 0 (100 %) |
 
-**Cómo leer estos números**: el motor usa 0,13–0,25 ms de CPU por frame, menos del 2 % del presupuesto de un frame a 60 FPS. En este entorno el límite es la **rasterización por software** de SwiftShader, que escala con los píxeles: al bajar la resolución se alcanzan 60 FPS estables. Con una GPU real (incluso integrada), rasterizar 14 draw calls a 1080p es trivial, así que lo esperable es ir a la frecuencia de la pantalla. Estos resultados son un **límite inferior**.
+En el recorrido completo (`bun run e2e`) los cinco mods van a 43–60 FPS sin GPU; con una GPU real lo esperable es la frecuencia de la pantalla. Estos resultados son un **límite inferior**.
 
-**Memoria tras cambiar de canción 6 veces** (Demo Base ↔ Circuito Neón):
+**Memoria tras cambiar de canción 6 veces** (VS Garcello ↔ FNF Rivals):
 
 | Cambio | 1 | 2 | 3 | 4 | 5 | 6 |
 |---|---|---|---|---|---|---|
-| Heap JS (MB) | 5,0 | 4,8 | 4,0 | 4,8 | 4,0 | 4,8 |
-| Texturas en GPU (MB) | 18,8 | 18,8 | 18,8 | 18,8 | 18,8 | 18,8 |
+| Heap JS (MB) | 5,7 | 6,8 | 5,6 | 6,8 | 5,9 | 7,1 |
+| Texturas en GPU (MB) | 27,4 | 27,4 | 27,4 | 27,4 | 27,4 | 27,4 |
 
-Las texturas vuelven siempre a 18,8 MB, que son los recursos comunes (skin de notas, UI y personaje de reemplazo, cargados una sola vez). El heap no crece: **no hay fugas** al cambiar de canción ni de mod.
+Las texturas vuelven siempre a 27,4 MB, que son los recursos comunes (skin de flechas de Psych, puntuaciones, UI y personaje de reemplazo, cargados una sola vez). El heap no crece: **no hay fugas** al cambiar de canción ni de mod.
 
-**Precisión del input**: con el teclado simulado (eventos `KeyboardEvent` reales del DOM, enviados en el instante de cada nota), *Primer Paso* en *hard* terminó con 63/63 «¡Genial!» (100 %). Un detalle de metodología: a resolución completa y sin GPU, el renderizado por software bloquea el hilo principal unos ~36 ms, y los `setTimeout` que simulan las pulsaciones llegan tarde. El motor las juzga correctamente como tardías (≈ 88 % de precisión). Por eso esa prueba se ejecuta en calidad baja. Con teclas reales el navegador marca el evento con la hora del hardware, y este efecto no se da de la misma forma.
+**Precisión del input**: con el teclado simulado (eventos `KeyboardEvent` reales del DOM, enviados en el instante de cada nota), *Headache* de VS Garcello terminó con 180/180 «Sick» (100 %). Esa prueba se ejecuta en calidad baja porque, sin GPU, el renderizado por software retrasa los `setTimeout` que simulan las pulsaciones; con teclas reales el navegador marca el evento con la hora del hardware.
 
 ## Pruebas automáticas incluidas
 
-`bun run e2e` (17 comprobaciones, todas superadas en la última ejecución):
+`bun run e2e` (30 comprobaciones, todas superadas en las dos últimas ejecuciones completas):
 
-- el catálogo muestra los mods y el buscador filtra;
-- cada formato (nativo con teclado, Psych con bot y V-Slice con bot) se juega de principio a fin sin fallos;
-- un ZIP de Psych **sin manifiesto** se importa, se detecta el formato y se juega desde IndexedDB;
-- pausar congela el reloj de la canción (3029 → 3029 ms), reanudar continúa desde el mismo punto y `R` reinicia.
+- el catálogo muestra los 5 mods (sin los de demostración) y el buscador filtra;
+- cada mod se juega de principio a fin sin fallos (VS Garcello con teclado simulado, el resto con bot), con capturas al 25, 50, 75 y 92 % de cada canción;
+- los scripts Lua de cada mod no llaman a ninguna función de Psych que falte en la web;
+- la partida se guarda en el perfil, se desbloquean logros y el podio muestra los perfiles;
+- pausar congela el reloj de la canción, reanudar continúa desde el mismo punto y `R` reinicia.
 
-`bun run test`: 19 tests unitarios de adaptadores, cambios de BPM, parser Sparrow, detección de mods y juicio de notas.
+`node tools/e2e-social.mjs` (11 comprobaciones): «me gusta» (marca, suma entre jugadores, se conserva al recargar), buscador de jugadores y que la tarjeta de logros quepa en el marco y se pueda desplazar.
+
+`bun run test`: 33 tests unitarios (adaptadores, juicio de notas, logros e intérprete Lua).
 
 Capturas de las pruebas en `bench-results/`.

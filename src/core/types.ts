@@ -14,6 +14,8 @@ export interface ChartNote {
   player: boolean;
   /** tipo de nota: '' normal, 'hurt', 'alt', o cualquier otro (los desconocidos se tratan como normales) */
   kind: string;
+  /** nombre original del tipo de nota en el mod (p. ej. 'Hurt Note', 'CustardNote'), para los scripts */
+  type?: string;
 }
 
 export interface ChartEvent {
@@ -22,6 +24,8 @@ export interface ChartEvent {
   name: string;
   /** parámetros ya normalizados */
   v: Record<string, unknown>;
+  /** nombre y valores originales (Psych: [nombre, valor1, valor2]) para onEvent de los scripts */
+  raw?: [string, string, string];
 }
 
 export interface TimeChange { t: number; bpm: number }
@@ -38,6 +42,8 @@ export interface InternalChart {
   opponent?: string;
   gf?: string;
   stage?: string;
+  /** skin de notas que pide el chart (Psych: arrowSkin) */
+  arrowSkin?: string;
   /** avisos de compatibilidad detectados durante la conversión */
   warnings: string[];
 }
@@ -82,7 +88,7 @@ export interface StageProp {
   color?: string;
   width?: number;
   height?: number;
-  anim?: { prefix: string; fps: number; loop: boolean };
+  anim?: { prefix: string; fps: number; loop: boolean; indices?: number[] };
   lowQuality?: boolean; // se oculta en calidad baja
 }
 
@@ -125,6 +131,8 @@ export interface ModManifest {
   scriptImages?: string[];
   /** fuentes .ttf/.otf/.woff que usan los scripts (el nombre de la fuente = nombre del archivo) */
   fonts?: string[];
+  /** escala aplicada al reempaquetar cada imagen ('images/ruta' → 0.72): el motor la compensa */
+  textureScale?: Record<string, number>;
   compatibility?: 'full' | 'partial' | 'songs-only';
   compatNotes?: string[];
   files?: string[];

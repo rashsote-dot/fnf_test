@@ -11,12 +11,8 @@
   "popularity": 60,
   "compatibility": "partial",
   "compatNotes": [
-    "Personaje «dad» no incluido en el mod (se usará un personaje de reemplazo).",
-    "Escenario «Forest»: creado a partir de su script Lua (solo la parte estática; animaciones y efectos programados no).",
-    "11 scripts Lua no se ejecutan en la web (efectos, mecánicas o HUD personalizados).",
-    "Eventos personalizados sin soporte (requieren portar su Lua a JavaScript): BlackScreen, CamSwing, CharSwing, PopUp, Screamers, Tinky, TinkyScreamer",
-    "Tipos de nota personalizados: se juegan como notas normales (salvo las «Hurt»).",
-    "Skins de notas y shaders propios no se aplican."
+    "11 scripts Lua se ejecutan en el intérprete aislado de la web (API de Psych compatible; las funciones no implementadas se ignoran).",
+    "Personaje «dad» no incluido en el mod (se usará un personaje de reemplazo)."
   ],
   "songs": [
     {
@@ -28,6 +24,10 @@
       "bpm": 95
     }
   ],
+  "textureScale": {
+    "images/characters/tinkydance": 0.7787,
+    "images/characters/tinkyturn": 0.7164
+  },
   "files": [
     "characters/gbt.json",
     "characters/guardian.json",
@@ -43,13 +43,24 @@
     "characters/tinkyturn.json",
     "characters/tinkywinky.json",
     "cover.webp",
+    "custom_events/blackscreen.lua",
+    "custom_events/camswing.lua",
+    "custom_events/charswing.lua",
+    "custom_events/popup.lua",
+    "custom_events/screamers.lua",
+    "custom_events/tinky.lua",
+    "custom_events/tinkyscreamer.lua",
+    "custom_notetypes/custardnote.lua",
     "data/nocturnal-protocol/nocturnal-protocol-hard.json",
+    "images/Tinky.png",
     "images/characters/guardian.png",
     "images/characters/guardian.xml",
     "images/characters/guardianbd.png",
     "images/characters/guardianbd.xml",
     "images/characters/guardianbtinky.png",
     "images/characters/guardianbtinky.xml",
+    "images/characters/guardianfinal.png",
+    "images/characters/guardianfinal.xml",
     "images/characters/guardianrun.png",
     "images/characters/guardianrun.xml",
     "images/characters/guardianrunfinal.png",
@@ -68,18 +79,40 @@
     "images/characters/tinkyturn.xml",
     "images/characters/tinkywinky.png",
     "images/characters/tinkywinky.xml",
+    "images/custard.png",
+    "images/custard.xml",
     "images/dayforest/custard.png",
     "images/dayforest/forest.png",
+    "images/dayforest/forest2.png",
+    "images/dayforest/forest3.png",
+    "images/dayforest/forest4.png",
+    "images/dayforest/forest5.png",
+    "images/dayforest/text.png",
+    "images/dropimages/image1.png",
+    "images/dropimages/image2.png",
+    "images/dropimages/image3.png",
+    "images/dropimages/image4.png",
+    "images/dropimages/image5.png",
+    "images/endings/badEnding.png",
+    "images/endings/goodEnding.png",
     "images/icons/icon-guardian.png",
     "images/icons/icon-guardianglow.png",
     "images/icons/icon-tinky.png",
+    "images/pop-ups/dipsy.png",
+    "images/pop-ups/lala.png",
+    "images/pop-ups/po.png",
+    "images/pop-ups/tinky.png",
+    "images/screeneffect.png",
+    "scripts/icons.lua",
+    "scripts/letterbox.lua",
     "songs/nocturnal-protocol/Inst.m4a",
     "songs/nocturnal-protocol/Inst.ogg",
     "songs/nocturnal-protocol/Voices-Opponent.m4a",
     "songs/nocturnal-protocol/Voices-Opponent.ogg",
     "songs/nocturnal-protocol/Voices-Player.m4a",
     "songs/nocturnal-protocol/Voices-Player.ogg",
-    "stages/Forest.json"
+    "stages/Forest.json",
+    "stages/forest.lua"
   ],
-  "sizeBytes": 58318912
+  "sizeBytes": 70081113
 }

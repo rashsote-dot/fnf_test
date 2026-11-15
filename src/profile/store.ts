@@ -12,7 +12,7 @@ export interface Profile {
   createdAt: number;
 }
 
-export interface ProfileData { profile: Profile; stats: ProfileStats; recent: PlayRecord[] }
+export interface ProfileData { profile: Profile; stats: ProfileStats; recent: PlayRecord[]; likes?: string[] }
 
 export const THEMES = [
   { name: 'Neón', a: '#ff3fa4', b: '#4f8bff' },
@@ -94,6 +94,17 @@ export async function deleteProfile(id: string) {
   await persist(all.get(currentId)!);
 }
 
+/** Me gusta de una canción ('<mod>/<canción>') para el perfil actual. Devuelve el nuevo estado. */
+export async function toggleLike(songKey: string): Promise<boolean> {
+  const d = await current();
+  const set = new Set(d.likes ?? []);
+  const liked = !set.has(songKey);
+  if (liked) set.add(songKey); else set.delete(songKey);
+  d.likes = [...set];
+  await persist(d);
+  return liked;
+}
+
 export async function recordPlay(p: PlayRecord, mods: ModInfo[]): Promise<{ fresh: Achievement[]; record: boolean }> {
   const d = await current();
   const bk = `${p.modId}/${p.songId}/${p.diff}`;
@@ -128,7 +139,7 @@ export async function importProfile(file: File): Promise<ProfileData> {
   const j = JSON.parse(await file.text());
   if (!j || j.funkadeProfile !== 1 || !j.profile || !j.stats) throw new Error('El archivo no es un perfil de Funkade.');
   const all = await loadAll();
-  const d: ProfileData = { profile: { ...newProfileData('').profile, ...j.profile, id: uid() }, stats: { ...emptyStats(), ...j.stats }, recent: Array.isArray(j.recent) ? j.recent.slice(0, 60) : [] };
+  const d: ProfileData = { profile: { ...newProfileData('').profile, ...j.profile, id: uid() }, stats: { ...emptyStats(), ...j.stats }, recent: Array.isArray(j.recent) ? j.recent.slice(0, 60) : [], likes: Array.isArray(j.likes) ? j.likes.filter((x: unknown) => typeof x === 'string').slice(0, 500) : [] };
   if (typeof d.profile.avatar !== 'string' || (d.profile.avatar && !d.profile.avatar.startsWith('data:image/'))) d.profile.avatar = '';
   all.set(d.profile.id, d);
   currentId = d.profile.id;

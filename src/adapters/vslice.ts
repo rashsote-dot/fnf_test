@@ -41,7 +41,7 @@ export function parseVsliceChart(meta: Json, chart: Json, diff: string): Interna
   if (!Array.isArray(rawNotes)) throw new Error(`El chart V-Slice no tiene la dificultad "${diff}".`);
   const notes: ChartNote[] = rawNotes.map((n) => {
     const dd = num(n.d);
-    return { t: num(n.t), lane: dd % 4, len: Math.max(0, num(n.l)), player: dd < 4, kind: normalizeKind(n.k) };
+    return { t: num(n.t), lane: dd % 4, len: Math.max(0, num(n.l)), player: dd < 4, kind: normalizeKind(n.k), type: str(n.k) };
   });
   const events: ChartEvent[] = [];
   const unsupported = new Set<string>();

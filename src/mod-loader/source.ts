@@ -61,3 +61,20 @@ export async function getJson(src: ModSource, path: string): Promise<any> {
 export async function tryJson(src: ModSource, path: string): Promise<any | null> {
   try { return await getJson(src, path); } catch (e) { if (e instanceof LoadError) return null; throw e; }
 }
+
+/** Envoltorio que conoce la lista de archivos del mod (manifest.files): los que no existen fallan al instante,
+ *  sin pedirlos al servidor (evita cientos de 404 al probar archivos opcionales). */
+export class ListedSource implements ModSource {
+  private map: Map<string, string>;
+  constructor(private inner: ModSource, files: string[]) { this.map = new Map(files.map((f) => [f.toLowerCase(), f])); }
+  get id() { return this.inner.id; }
+  async exists(path: string) { return this.has(path); }
+  has(path: string) { return this.map.has(path.replace(/^\.?\//, '').toLowerCase()); }
+  /** el servidor (GitHub Pages) distingue mayúsculas: se pide el archivo con el nombre exacto que tiene */
+  async blob(path: string): Promise<Blob> {
+    if (path === 'manifest.json') return this.inner.blob(path);
+    const real = this.map.get(path.replace(/^\.?\//, '').toLowerCase());
+    if (!real) throw new LoadError(path, 404);
+    return this.inner.blob(real);
+  }
+}

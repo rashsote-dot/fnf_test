@@ -87,7 +87,7 @@ data/stages/<id>.json
 images/...
 ```
 
-**Funkade nativo**: consulta `public/mods/demo-base/`, que es el ejemplo de referencia.
+**Funkade nativo**: el formato `fnfweb` sigue soportado (ver `src/adapters/fnfweb.ts`); `node tools/gen-mods.mjs demo` genera un mod de ejemplo en este formato.
 
 ## Qué ocurre cuando falta algo
 

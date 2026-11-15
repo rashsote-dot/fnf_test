@@ -385,8 +385,11 @@ function onOpponentNoteHit(lane, kind) {
 
 const which = process.argv[2];
 const t0 = Date.now();
+// Por defecto solo se generan los recursos comunes (public/shared). Los antiguos mods de demostración
+// (Demo Base, Circuito Neón, Noche Espectral) se retiraron del catálogo; se pueden generar a mano para pruebas
+// con «node tools/gen-mods.mjs demo|psych|vslice» (no se publican salvo que se copien a public/mods).
 if (!which || which === 'shared') await shared();
-if (!which || which === 'demo') await demoBase();
-if (!which || which === 'psych') await modPsych();
-if (!which || which === 'vslice') await modVslice();
+if (which === 'demo') await demoBase();
+if (which === 'psych') await modPsych();
+if (which === 'vslice') await modVslice();
 console.log(`Generación completa en ${((Date.now() - t0) / 1000).toFixed(1)} s`);

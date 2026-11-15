@@ -50,7 +50,7 @@ Otros comandos:
 | `bun run catalog` | Regenera `public/mods/catalog.json` tras añadir o modificar mods |
 | `bun run e2e` | Pruebas en Chrome real con Playwright (opcional) |
 | `bun run bench` | Benchmark de rendimiento y memoria (opcional) |
-| `bun run gen:mods` | Regenera los mods de demostración (requiere `sharp` y `ffmpeg`) |
+| `bun run gen:shared` | Regenera los recursos comunes generados de `public/shared` (requiere `sharp`) |
 | `python3 tools/repack_atlas.py` | Reempaqueta atlas enormes (8192 px) para la web: quita frames sin usar y duplicados y cabe en 4096 px |
 
 ## 2. Publicarlo gratis en Internet (GitHub Pages)

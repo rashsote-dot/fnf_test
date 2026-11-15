@@ -32,3 +32,7 @@ for (const d of readdirSync(MODS)) {
 }
 writeFileSync(join(MODS, 'catalog.json'), JSON.stringify({ version: 1, generated: new Date().toISOString(), mods }, null, 2));
 console.log(`catalog.json: ${mods.length} mods`);
+
+// lista de archivos comunes (evita pedir al servidor archivos opcionales que no existen)
+const SHARED = 'public/shared';
+writeFileSync(join(SHARED, 'files.json'), JSON.stringify(walk(SHARED).map((f) => relative(SHARED, f).split('\\').join('/')).filter((f) => f !== 'files.json').sort()));

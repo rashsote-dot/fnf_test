@@ -54,12 +54,15 @@ El sitio se vuelve a publicar solo.
 | Juego antiguo **FNF 0.2.x / Kade** con `.exe` (personajes programados en el ejecutable) | ⚠️ Importa canciones y audio; los personajes hay que adaptarlos a mano (ver `docs/agregar-mod.md`, ejemplo VS Garcello) |
 | Codename Engine | ❌ Aún no |
 
-Lo que **siempre** hace el conversor: copia solo lo que usan las canciones, reduce texturas gigantes (≤ 4096 px),
-convierte audio a `.ogg` + `.m4a`, traduce escenarios hechos en Lua a JSON y genera la portada.
+Lo que **siempre** hace el conversor: copia solo lo que usan las canciones, reduce texturas gigantes (≤ 4096 px,
+anotando la escala en `manifest.textureScale` para que el motor la compense sin tocar los JSON del mod),
+convierte audio a `.ogg` + `.m4a` (incluidas las voces por personaje, `vocals_file`), copia los **scripts Lua**
+con las imágenes, sonidos, fuentes y personajes que usan, copia la **skin de notas**, los iconos, las puntuaciones
+y la cuenta atrás del propio mod, y genera la portada. Los mods que no traen skin usan la de Psych por defecto.
 
-Lo que **no** puede hacer automáticamente: ejecutar scripts **Lua/HScript** (letras, efectos, mecánicas especiales),
-vídeos, shaders y skins de notas. El informe los enumera. Si un mod depende mucho de ellos, se pueden portar a mano a
-JavaScript (ver `docs/scripts.md`; ejemplo real: `public/mods/aura-funkin/scripts/aura.js`).
+Los scripts Lua se ejecutan en la web con un intérprete aislado (ver `docs/scripts.md`). Lo que **no** se
+reproduce: HScript (`.hx`), vídeos y shaders. El informe los enumera. Si un mod depende mucho de ellos, se puede
+añadir un script JavaScript a mano (ejemplo real: `public/mods/aura-funkin/scripts/aura.js`).
 
 ## Usarlo en tu PC (opcional)
 

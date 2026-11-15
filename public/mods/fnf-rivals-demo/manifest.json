@@ -9,11 +9,9 @@
   "category": "Mods de la comunidad",
   "cover": "cover.webp",
   "popularity": 60,
-  "compatibility": "partial",
+  "compatibility": "full",
   "compatNotes": [
-    "Escenario «philly_wide»: creado a partir de su script Lua (solo la parte estática; animaciones y efectos programados no).",
-    "4 scripts Lua no se ejecutan en la web (efectos, mecánicas o HUD personalizados).",
-    "Skins de notas y shaders propios no se aplican."
+    "3 scripts Lua se ejecutan en el intérprete aislado de la web (API de Psych compatible; las funciones no implementadas se ignoran)."
   ],
   "songs": [
     {
@@ -25,6 +23,16 @@
       "bpm": 175
     }
   ],
+  "textureScale": {
+    "images/characters/cass": 0.7787,
+    "images/characters/gf_assets": 0.5578,
+    "images/characters/nene": 0.6064
+  },
+  "fonts": [
+    "fonts/Quadrangle.otf",
+    "fonts/vcr.ttf",
+    "fonts/pixel.otf"
+  ],
   "files": [
     "characters/cass-rival.json",
     "characters/gf.json",
@@ -32,6 +40,11 @@
     "cover.webp",
     "data/catfight/catfight-hard.json",
     "data/catfight/events.json",
+    "fonts/Quadrangle.otf",
+    "fonts/pixel.otf",
+    "fonts/vcr.ttf",
+    "images/bad.png",
+    "images/bg/bar.png",
     "images/bg/bf bop.png",
     "images/bg/bf bop.xml",
     "images/bg/bg.png",
@@ -46,10 +59,41 @@
     "images/characters/GF_assets.xml",
     "images/characters/NENE.png",
     "images/characters/NENE.xml",
+    "images/custHPsys/black.png",
+    "images/custHPsys/healthbar.png",
+    "images/custHPsys/healthbar.xml",
+    "images/custHPsys/healthbar_METER_ANIM.png",
+    "images/custHPsys/healthbar_METER_ANIM.xml",
+    "images/custHPsys/pink.png",
+    "images/go.png",
+    "images/good.png",
+    "images/healthBar.png",
     "images/icons/icon-gf.png",
+    "images/noteSkins/NOTE_assets-chip.png",
+    "images/noteSkins/NOTE_assets-chip.xml",
+    "images/noteSkins/NOTE_assets-future.png",
+    "images/noteSkins/NOTE_assets-future.xml",
+    "images/noteSkins/NOTE_assets.png",
+    "images/noteSkins/NOTE_assets.xml",
+    "images/ready.png",
+    "images/scoreHUD/doods.png",
+    "images/scoreHUD/goo.png",
+    "images/scoreHUD/miss.png",
+    "images/scoreHUD/score.png",
+    "images/set.png",
+    "images/shit.png",
+    "images/sick.png",
+    "images/timeBar.png",
+    "scripts/nenejuice.lua",
+    "scripts/nenescorehud.lua",
     "songs/catfight/Inst.m4a",
     "songs/catfight/Inst.ogg",
-    "stages/philly_wide.json"
+    "songs/catfight/Voices-Opponent.m4a",
+    "songs/catfight/Voices-Opponent.ogg",
+    "songs/catfight/Voices-Player.m4a",
+    "songs/catfight/Voices-Player.ogg",
+    "stages/philly_wide.json",
+    "stages/philly_wide.lua"
   ],
-  "sizeBytes": 26977492
+  "sizeBytes": 40134983
 }

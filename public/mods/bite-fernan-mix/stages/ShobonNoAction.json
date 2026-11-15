@@ -28,51 +28,5 @@
   0
  ],
  "camera_speed": 1,
- "objects": [
-  {
-   "type": "square",
-   "name": "bgColor",
-   "image": "empty",
-   "x": -29.0,
-   "y": -29.0,
-   "scale": [
-    552.0,
-    417.0
-   ],
-   "scroll": [
-    1,
-    1
-   ],
-   "alpha": 0,
-   "animations": [],
-   "color": "FFFFFF"
-  },
-  {
-   "type": "gf"
-  },
-  {
-   "type": "dad"
-  },
-  {
-   "type": "boyfriend"
-  },
-  {
-   "type": "square",
-   "name": "box",
-   "image": "empty",
-   "x": 425.0,
-   "y": 146.0,
-   "scale": [
-    40.0,
-    40.0
-   ],
-   "scroll": [
-    1,
-    1
-   ],
-   "alpha": 0.0,
-   "animations": [],
-   "color": "000000"
-  }
- ]
+ "objects": []
 }

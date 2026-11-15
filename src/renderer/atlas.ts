@@ -37,6 +37,8 @@ export function parseSparrowXml(xml: string): RawFrame[] {
 
 export class Atlas {
   frames: Frame[] = [];
+  /** factor para dibujar al tamaño original si la textura se reempaquetó a menor resolución (1 / escala) */
+  texMul = 1;
   private byName = new Map<string, Frame>();
   private prefixCache = new Map<string, Frame[]>();
 

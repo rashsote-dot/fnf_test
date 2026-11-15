@@ -57,6 +57,10 @@ export class Sprite {
   anim: Animator | null = null;
   name = '';
   hud = false;
+  /** cámara: 'game' (mundo), 'hud' o 'other' (por encima del HUD, como camOther de Psych) */
+  cam: 'game' | 'hud' | 'other' = 'game';
+  /** modo de mezcla ('add' = aditivo) */
+  blend = '';
 
   constructor(frame: Frame | null = null) { this.frame = frame; }
 
@@ -84,6 +88,10 @@ export class Camera {
   flashAlpha = 0; flashDecay = 0;
   flashColor = new Float32Array([1, 1, 1]);
   alpha = 1;
+  visible = true;
+  x = 0; y = 0; // desplazamiento de la cámara (camHUD.x/y en Psych)
+  angle = 0;
+  bgColor = '';
 
   update(dtMs: number) {
     if (this.shakeTime > 0) {
@@ -100,7 +108,7 @@ export class Camera {
 /** Dibuja un sprite. px = factor de escala entre la vista virtual (1280x720) y los píxeles del canvas. */
 export function drawSprite(r: Renderer, s: Sprite, cam: Camera, px: number) {
   const f = s.frame;
-  if (!f || !s.visible || s.alpha <= 0.001) return;
+  if (!f || !s.visible || s.alpha <= 0.001 || !cam.visible || cam.alpha <= 0.001) return;
   const lw = f.rotated ? f.h : f.w;
   const lh = f.rotated ? f.w : f.h;
   const sx = s.scaleX, sy = s.scaleY;
@@ -124,8 +132,8 @@ export function drawSprite(r: Renderer, s: Sprite, cam: Camera, px: number) {
   }
   const z = cam.zoom * px;
   const hw = VIEW_W / 2, hh = VIEW_H / 2;
-  const ox = (wx - hw) * z + hw * px + cam.shakeX * px;
-  const oy = (wy - hh) * z + hh * px + cam.shakeY * px;
+  const ox = (wx - hw) * z + hw * px + (cam.shakeX + cam.x) * px;
+  const oy = (wy - hh) * z + hh * px + (cam.shakeY + cam.y) * px;
   x0 = x0 * z + ox; y0 = y0 * z + oy; x1 = x1 * z + ox; y1 = y1 * z + oy;
   x2 = x2 * z + ox; y2 = y2 * z + oy; x3 = x3 * z + ox; y3 = y3 * z + oy;
   // descarte de lo que queda fuera de pantalla

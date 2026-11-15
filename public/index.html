@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' blob: data:; media-src 'self' blob:; script-src 'self'; style-src 'self' 'unsafe-inline'; worker-src 'self' blob:; frame-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' blob: data:; media-src 'self' blob:; script-src 'self'; style-src 'self' 'unsafe-inline'; worker-src 'self' blob:; frame-src 'self'; connect-src 'self' https://*.supabase.co; object-src 'none'; base-uri 'self'">
   <title>Funkade · Juega FNF y mods en tu navegador</title>
   <meta name="description" content="Juega Friday Night Funkin' y mods compatibles directamente en el navegador. Sin descargas, sin instalación.">
   <meta name="theme-color" content="#0b0916">
@@ -36,6 +36,7 @@
       <nav class="nav">
         <a href="#/" data-nav="catalog">Mods</a>
         <a href="#/podium" data-nav="podium">Podio</a>
+        <a href="#/players" data-nav="players">Jugadores</a>
         <a href="#/profile" data-nav="profile">Perfil</a>
         <a href="#/about" data-nav="about">Acerca de</a>
       </nav>
@@ -159,6 +160,7 @@
 
   <main id="view-profile" class="view" hidden></main>
   <main id="view-podium" class="view" hidden></main>
+  <main id="view-players" class="view" hidden></main>
 
   <main id="view-about" class="view prose" hidden>
     <h1>Acerca de Funkade</h1>
@@ -175,7 +177,7 @@
     <div class="footer-inner">
       <div class="footer-brand"><img src="favicon.svg" alt="" width="26" height="26"><b>Funkade</b><span class="muted">FNF y mods en tu navegador</span></div>
       <p class="muted small">Proyecto de fans sin ánimo de lucro. Friday Night Funkin' pertenece a The Funkin' Crew. Los mods pertenecen a sus respectivos autores.</p>
-      <nav class="footer-links"><a href="#/">Mods</a><a href="#/podium">Podio</a><a href="#/profile">Perfil</a><a href="#/about">Acerca de</a><a href="https://github.com/rashsote-dot/fnf_test" rel="noopener" target="_blank">Código en GitHub</a></nav>
+      <nav class="footer-links"><a href="#/">Mods</a><a href="#/podium">Podio</a><a href="#/players">Jugadores</a><a href="#/profile">Perfil</a><a href="#/about">Acerca de</a><a href="https://github.com/rashsote-dot/fnf_test" rel="noopener" target="_blank">Código en GitHub</a></nav>
     </div>
   </footer>
 

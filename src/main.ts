@@ -1,5 +1,8 @@
 // Controlador de la aplicación: catálogo, pantalla de mod, ajustes y ciclo de vida del juego.
 import { AudioEngine } from './audio/audio';
+import { likeButton, likeCounts, renderOnlinePlayer, renderPlayers } from './ui/players-view';
+import { isLiked, publishProfile, toggleLike } from './social/social';
+import { current as currentProfile } from './profile/store';
 import { Diag } from './core/diagnostics';
 import { Engine } from './core/engine';
 import { DEFAULT_SETTINGS, keyLabel, saveSettings, settings, type Settings } from './core/settings';
@@ -203,6 +206,10 @@ async function showMod(id: string) {
 async function renderSongs() {
   if (!mod) return;
   const ul = $('song-list');
+  const mid = mod.manifest.id;
+  const keys = mod.manifest.songs.map((s) => `${mid}/${s.id}`);
+  const [counts, me] = await Promise.all([likeCounts(keys), currentProfile()]);
+  const mine = new Set(me.likes ?? []);
   const items = await Promise.all(mod.manifest.songs.map(async (s, i) => {
     const best = await bestScore(s.id);
     const b = btn('', () => selectSong(s.id));
@@ -211,7 +218,8 @@ async function renderSongs() {
       h('span', { class: 's-name' }, h('span', { class: 'num' }, String(i + 1)), h('span', {}, s.name)),
       h('span', { class: 's-meta' }, s.bpm ? `${s.bpm} BPM` : '', best ? h('span', { class: 'best' }, `★ ${best.toLocaleString('es')}`) : ''));
     if (s.id === selSong) b.classList.add('sel');
-    return h('li', {}, b);
+    const key = `${mid}/${s.id}`;
+    return h('li', {}, b, likeButton(key, mine.has(key), counts.get(key) ?? 0, () => toggleLike(key)));
   }));
   ul.replaceChildren(...items);
 }
@@ -259,6 +267,7 @@ async function savePlay(r: PlayResult | null, cleared: boolean) {
     cleared, date: Date.now(), durationMs: Math.max(0, performance.now() - playStarted),
   }, await modInfos(catalog));
   void renderProfileChip();
+  void publishProfile();
   return res;
 }
 
@@ -292,6 +301,8 @@ async function startGame() {
     const shared = await loadShared(engine!.renderer);
     const p = new PlayState(audio!, engine!.renderer, mod, selSong, diff, shared, {
       onHud: (t) => ($('hud-score').textContent = t),
+      // los scripts del mod pueden ocultar el marcador (scoreTxt) o todo el HUD (camHUD)
+      onHudVisible: (v, a) => { const el = $('hud-score'); el.style.visibility = v && a > 0.01 ? '' : 'hidden'; el.style.opacity = String(Math.max(0, Math.min(1, a))); },
       onEnd: (r) => showResults(r),
       onGameOver: () => showGameOver(),
       onPauseRequest: () => togglePause(),
@@ -301,6 +312,8 @@ async function startGame() {
     if (play !== p) return;
     const hud = $('hud-score');
     hud.hidden = false;
+    hud.style.visibility = ''; hud.style.opacity = '';
+    p.markHud();
     hud.classList.toggle('down', settings.downscroll);
     overlay(null);
     if (warnings.length) toast(`⚠ ${warnings.length} aviso(s) de compatibilidad: ${warnings[0]}`, 8000);
@@ -346,6 +359,12 @@ async function togglePause() {
     btn('⌂ Volver al catálogo', () => (location.hash = '#/')))));
 }
 
+async function resultLike(): Promise<HTMLElement> {
+  const key = `${mod?.manifest.id}/${selSong}`;
+  const counts = await likeCounts([key]);
+  return likeButton(key, await isLiked(key), counts.get(key) ?? 0, async () => { const v = await toggleLike(key); void renderSongs(); return v; });
+}
+
 async function showResults(r: PlayResult) {
   engine?.stop();
   setControls(false);
@@ -359,9 +378,11 @@ async function showResults(r: PlayResult) {
     h('div', { class: 'results' },
       ...([['¡Sick!', t.sick], ['Bien', t.good], ['Mal', t.bad], ['Pésimo', t.shit], ['Fallos', t.miss], ['Combo máx.', t.maxCombo]] as [string, number][]).map(([k, v]) => h('div', {}, h('b', {}, String(v)), k))),
     h('p', { class: 'muted' }, `Precisión: ${r.accuracy.toFixed(2)}%`),
-    ...(fresh.length ? [h('div', { class: 'new-achs' }, ...fresh.map((a) => h('div', { class: 'new-ach ' + a.tier }, h('span', {}, a.icon), h('div', {}, h('small', {}, 'Logro desbloqueado'), h('b', {}, a.name)))))] : []),
+    await resultLike(),
+    ...(fresh.length ? [h('p', { class: 'new-achs-title' }, `${fresh.length} logro${fresh.length > 1 ? 's' : ''} desbloqueado${fresh.length > 1 ? 's' : ''}`), h('div', { class: 'new-achs', tabindex: '0' }, ...fresh.map((a) => h('div', { class: 'new-ach ' + a.tier }, h('span', {}, a.icon), h('div', {}, h('small', {}, 'Logro desbloqueado'), h('b', {}, a.name)))))] : []),
     ...(r.bot ? [h('p', { class: 'muted small' }, 'Las partidas con bot no cuentan para el perfil.')] : []),
     h('div', { class: 'btns' }, btn('↻ Jugar otra vez', startGame, 'primary'), btn('Elegir otra canción', () => { void stopGame(); overlay(frag(h('h2', {}, 'Elige una canción'), btn('▶ Jugar', startGame, 'primary big'))); }))));
+  (window as any).__funkadeLastPlayInfo = play?.debugInfo() ?? null;
   (window as any).__funkadeLastResult = r;
 }
 
@@ -488,12 +509,13 @@ function updateKeysHint() {
 // ------------------------------------------------------------------ rutas
 async function route() {
   const hash = location.hash || '#/';
-  const views = { catalog: $('view-catalog'), mod: $('view-mod'), about: $('view-about'), profile: $('view-profile'), podium: $('view-podium') };
+  const views = { catalog: $('view-catalog'), mod: $('view-mod'), about: $('view-about'), profile: $('view-profile'), podium: $('view-podium'), players: $('view-players') };
   let which: keyof typeof views = 'catalog';
   if (hash.startsWith('#/mod/')) which = 'mod';
   else if (hash.startsWith('#/about')) which = 'about';
   else if (hash.startsWith('#/profile')) which = 'profile';
   else if (hash.startsWith('#/podium')) which = 'podium';
+  else if (hash.startsWith('#/players') || hash.startsWith('#/player/')) which = 'players';
   if (which !== 'mod') await stopGame();
   for (const [k, v] of Object.entries(views)) v.hidden = k !== which;
   document.querySelectorAll('[data-nav]').forEach((a) => a.classList.toggle('active', (a as HTMLElement).dataset.nav === which));
@@ -503,6 +525,10 @@ async function route() {
     await renderProfile($('view-profile'), await modInfos(catalog), id, () => void route());
   }
   if (which === 'podium') await renderPodium($('view-podium'), await modInfos(catalog));
+  if (which === 'players') {
+    if (hash.startsWith('#/player/')) await renderOnlinePlayer($('view-players'), decodeURIComponent(hash.slice(9)));
+    else await renderPlayers($('view-players'));
+  }
   window.scrollTo(0, 0);
 }
 
@@ -531,6 +557,7 @@ async function main() {
 
   registerSW();
   onProfileChange(() => void renderProfileChip());
+  void publishProfile();
   void renderProfileChip();
   await initCatalog();
   await route();

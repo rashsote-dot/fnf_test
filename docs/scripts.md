@@ -72,4 +72,32 @@ Lectura: `game.song`, `game.diff`, `game.songTime`, `game.beat`, `game.step`, `g
 
 Los comandos se aplican al final del frame siguiente (la comunicación es asíncrona). Para efectos visuales no se nota, pero no permite cancelar una nota desde el script, como haría `Function_Stop` en Psych.
 
-Ejemplo completo: `public/mods/noche-espectral/scripts/efectos.js`.
+Ejemplo completo: `public/mods/aura-funkin/scripts/aura.js`.
+
+## Scripts Lua de Psych Engine
+
+Los mods de Psych traen sus efectos, HUD y mecánicas en scripts `.lua`. Funkade los ejecuta **tal cual**, sin
+traducirlos, con un intérprete de Lua 5.1 propio (`src/lua/`), así el mod se ve y se comporta como el original.
+
+**Aislamiento.** El intérprete es un programa que *lee* el código Lua; el código del mod nunca se convierte en
+JavaScript ni se evalúa con `eval`/`Function`. Un script solo puede llamar a las funciones que le damos
+(la API de Psych de `src/lua/psych.ts`): no hay `os.execute`, `io`, `require`, `load` de archivos, red, DOM,
+cookies ni almacenamiento. Cada llamada tiene un presupuesto de instrucciones (3 millones): un bucle infinito
+se corta con un error en ese script y la partida sigue. Los errores se muestran en el diagnóstico (F3) y se
+cierran solo para el script que falla, igual que en Psych.
+
+**Qué se carga** (mismo orden que Psych): `scripts/*.lua`, `stages/<escenario>.lua`,
+`custom_events/<evento>.lua` de los eventos que usa el chart, `custom_notetypes/<tipo>.lua`,
+`characters/<personaje>.lua` y `data/<canción>/*.lua`. El importador copia esos archivos y las imágenes,
+sonidos, fuentes y personajes que nombran (también rutas construidas como `'pop-ups/'..nombre`).
+
+**API soportada** (resumen): sprites y textos (`makeLuaSprite`, `makeAnimatedLuaSprite`, `makeGraphic`,
+`addAnimationByPrefix/Indices`, `playAnim`, `scaleObject`, `setScrollFactor`, `setObjectCamera`,
+`setObjectOrder`, `makeLuaText`…), propiedades (`getProperty`/`setProperty` con rutas como
+`dadGroup.x`, `camHUD.alpha`, `iconP1.y`, `strumLineNotes.members[2].x`), grupos (`getPropertyFromGroup`
+sobre `notes`, `unspawnNotes`, `playerStrums`…), tweens y temporizadores (`doTweenX/Y/Alpha/Angle/Zoom/Color`,
+`noteTweenX…`, `runTimer`, `cancelTween`), cámara (`cameraFlash`, `cameraShake`, `cameraSetTarget`,
+`triggerEvent`), sonido (`playSound`), y las llamadas de juego (`onCreate`, `onCreatePost`, `onUpdate`,
+`onStepHit`, `onBeatHit`, `onSectionHit`, `onEvent`, `goodNoteHit`, `opponentNoteHit`, `noteMiss`,
+`onSpawnNote`, `onCountdownTick`, `onSongStart`, `onEndSong`, `onGameOver`, `onPause`, `onTweenCompleted`,
+`onTimerCompleted`…). Las funciones sin equivalente en la web (shaders, vídeos, HScript) no hacen nada.
