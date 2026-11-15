@@ -98,6 +98,8 @@ export interface InternalStage {
   props: StageProp[];
   chars: Record<CharSlot, { x: number; y: number; z: number; cam: [number, number] }>;
   hideGf?: boolean;
+  /** Escala global de personajes para escenarios pixelados de Psych (daPixelZoom = 6). */
+  pixelZoom?: number;
   bgColor: string;
 }
 
