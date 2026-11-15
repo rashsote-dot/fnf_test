@@ -96,6 +96,8 @@ export class PlayState implements Scene, PsychHost {
   started = false;
   paused = false;
   ended = false;
+  /** Una búsqueda invalida logros, XP y récords durante toda esta partida. */
+  rankedEligible = true;
   loaded = false;
   songT = -99999;
   skin!: NoteSkin;
@@ -550,6 +552,46 @@ export class PlayState implements Scene, PsychHost {
     this.sandbox?.call('onCreate');
     this.lua?.setVar('startedCountdown', true);
     this.lua?.call('onCountdownStarted');
+  }
+
+  /** Busca una posición y resincroniza audio, reloj, notas y eventos. */
+  async seekTo(targetMs: number) {
+    if (!this.started || this.ended || !this.song) return;
+    const target = Math.max(0, Math.min(this.song.duration - 100, Number.isFinite(targetMs) ? targetMs : 0));
+    this.rankedEligible = false;
+    await this.audio.ctx.resume();
+    this.song.stop();
+    for (const n of this.notes) {
+      n.spawned = false;
+      n.hold = n.t < target ? 2 : 0;
+      n.state = n.t < target ? (n.player ? 2 : 1) : 0;
+    }
+    const nextPlayer = this.notes.findIndex((n) => n.player && n.t >= target);
+    const nextOpponent = this.notes.findIndex((n) => !n.player && n.t >= target);
+    this.pIdx = nextPlayer < 0 ? this.notes.length : nextPlayer;
+    this.oIdx = nextOpponent < 0 ? this.notes.length : nextOpponent;
+    this.evIdx = 0;
+    const step = Math.floor(timeToBeat(target, this.chart.timeChanges) * 4);
+    this.curStepI = step - 1;
+    this.curBeatI = Math.floor((step - 1) / 4);
+    this.songStartedCalled = target >= 0;
+    this.lastTick = -99;
+    this.spawned.length = 0;
+    this.popups.length = 0;
+    this.strumTimers.fill(0);
+    this.botHeld.fill(-1);
+    this.holdingLane.fill(false);
+    for (const s of this.strums) s.anim?.play('static', true);
+    this.tweens.clear();
+    // El audio arranca ahora desde target y el reloj del juego toma ese mismo offset.
+    const startCtx = this.audio.ctx.currentTime - target / 1000;
+    this.song.start(startCtx, target);
+    this.conductor.userOffsetMs = settings.offsetMs;
+    this.conductor.sync(true);
+    this.songT = target;
+    this.paused = false;
+    this.ended = false;
+    this.lua?.call('onResume');
   }
 
   restart() {
