@@ -5,6 +5,7 @@ Plataforma web para jugar **Friday Night Funkin'** y mods compatibles directamen
 Funkade es un motor de juego de ritmo escrito desde cero en **TypeScript + WebGL2 + Web Audio**. No emula los ejecutables originales: **interpreta los formatos de datos** de los motores de mods más usados (Psych Engine, Kade/legacy y V-Slice) mediante un sistema de adaptadores. Así, añadir un mod nuevo consiste en copiar su carpeta y escribir un manifiesto, sin tocar el motor.
 
 - 3 mods de demostración jugables, con contenido 100 % original (personajes, escenarios, música y charts generados por código).
+- **VS Garcello (Smoke 'Em Out Struggle)** adaptado desde su versión de PC: 4 canciones, 4 versiones de Garcello y 3 variantes del callejón.
 - Catálogo con buscador, filtros, portadas, tamaño e información de compatibilidad.
 - Importación de mods en `.zip` que tengas derecho a usar (se procesan y guardan solo en tu navegador).
 - Scripts de mods aislados en un sandbox sin acceso a la red ni a tus datos.
@@ -48,6 +49,7 @@ Otros comandos:
 | `bun run e2e` | Pruebas en Chrome real con Playwright (opcional) |
 | `bun run bench` | Benchmark de rendimiento y memoria (opcional) |
 | `bun run gen:mods` | Regenera los mods de demostración (requiere `sharp` y `ffmpeg`) |
+| `python3 tools/repack_atlas.py` | Reempaqueta atlas enormes (8192 px) para la web: quita frames sin usar y duplicados y cabe en 4096 px |
 
 ## 2. Publicarlo gratis en Internet (GitHub Pages)
 

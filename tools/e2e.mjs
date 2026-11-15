@@ -85,7 +85,7 @@ try {
   await page.goto(URL);
   await page.waitForSelector('.card');
   const cards = await page.$$eval('.card h3', (e) => e.map((x) => x.textContent));
-  check('Catálogo muestra los 3 mods', cards.length === 3, cards.join(', '));
+  check('Catálogo muestra los 4 mods', cards.length === 4, cards.join(', '));
   await page.fill('#search', 'espectral');
   check('Buscador filtra', (await page.$$('.card')).length === 1);
   await page.fill('#search', '');
@@ -98,6 +98,7 @@ try {
       ['demo-base', 'primer-paso', 'hard', { bot: false, keyboard: true }],
       ['circuito-neon', 'engranaje', 'hard', { bot: true }],
       ['noche-espectral', 'espectro', 'hard', { bot: true }],
+      ['vs-garcello', 'headache', 'normal', { bot: true }],
     ];
     for (const [mod, song, diff, opts] of cases) {
       const { r, d, loadMs } = await playSong(mod, song, diff, opts);

@@ -64,3 +64,16 @@ El mod aparece en el catálogo con la categoría «Importados» y un botón para
 - Exporta los audios en `.ogg` **y** `.m4a` para máxima compatibilidad con Safari.
 - Mantén las texturas en 4096 px o menos por lado para GPUs modestas (Funkade avisa a partir de 8192).
 - Las mecánicas que en Psych están en Lua pueden reescribirse como script JavaScript con la API de [scripts.md](scripts.md).
+
+## Ejemplo real: cómo se adaptó VS Garcello
+
+VS Garcello es un mod compilado (`vsgarcello.exe`) sobre FNF 0.2.7, así que sus personajes y escenarios estaban programados dentro del ejecutable. Pasos seguidos:
+
+1. **Solo el contenido del mod**: charts (`data/headache…fading`), audio, atlas de Garcello, Boyfriend y GF, el escenario del callejón e iconos. Las semanas 1–6 del juego base no se copiaron.
+2. **Charts**: el formato legacy se lee tal cual con el adaptador Psych. Solo se añadió el campo `stage` a cada chart para elegir la variante del callejón.
+3. **Personajes**: se escribieron JSON de Psych con los prefijos de animación del XML y los offsets originales de Boyfriend y GF del juego base. Los frames de Garcello comparten tamaño de caja, así que no necesitan offsets.
+4. **Texturas**: `tools/repack_atlas.py` redujo cada atlas de 128–256 MB de GPU a 17–63 MB (frames duplicados eliminados, bordes transparentes recortados, máx. 4096 px). La `scale` de cada personaje compensa la reducción, así que se ven al mismo tamaño.
+5. **Escenarios**: 3 JSON de Psych 1.0 con `objects` (fondo con parallax, callejón, humo animado en Release).
+6. **Audio**: se añadieron copias `.m4a` para Safari.
+
+No incluido: diálogos, cinemática inicial y efectos programados en el `.exe`.

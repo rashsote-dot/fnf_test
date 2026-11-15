@@ -55,7 +55,10 @@ export class Atlas {
     const key = prefix + '|' + (indices ? indices.join(',') : '');
     const c = this.prefixCache.get(key);
     if (c) return c;
-    const list = this.frames.filter((f) => f.name.startsWith(prefix));
+    // Igual que Flixel: addByPrefix acepta cualquier nombre que empiece por el prefijo, pero
+    // addByIndices exige "prefijo + número" (así "GF Dancing Beat" no incluye "GF Dancing Beat Hair…").
+    const strict = /^\d+(\.png)?$/;
+    const list = this.frames.filter((f) => f.name.startsWith(prefix) && (!indices || strict.test(f.name.slice(prefix.length))));
     const numOf = (n: string) => { const mm = /(\d+)(?:\.png)?$/.exec(n); return mm ? parseInt(mm[1], 10) : 0; };
     list.sort((a, b) => numOf(a.name) - numOf(b.name));
     const out = indices ? indices.map((i) => list[i]).filter(Boolean) : list;

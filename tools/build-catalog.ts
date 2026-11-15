@@ -24,7 +24,7 @@ for (const d of readdirSync(MODS)) {
   manifest.sizeBytes = size;
   writeFileSync(join(dir, 'manifest.json'), JSON.stringify(manifest, null, 2));
   mods.push({
-    id: manifest.id, name: manifest.name, description: manifest.description ?? '', category: manifest.category ?? 'Mods',
+    id: manifest.id, name: manifest.name, author: manifest.author ?? '', description: manifest.description ?? '', category: manifest.category ?? 'Mods',
     cover: manifest.cover ?? '', popularity: manifest.popularity ?? 0, sizeBytes: size, songCount: manifest.songs.length,
     format: manifest.format, compatibility: manifest.compatibility ?? 'partial', path: `mods/${d}/`,
   });

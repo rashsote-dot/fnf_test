@@ -131,6 +131,7 @@ export interface ModManifest {
 export interface CatalogEntry {
   id: string;
   name: string;
+  author?: string;
   description: string;
   category: string;
   cover: string;

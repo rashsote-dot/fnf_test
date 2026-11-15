@@ -1,19 +1,22 @@
-✔ Catálogo muestra los 3 mods  — Demo Base, Noche Espectral, Circuito Neón
+✔ Catálogo muestra los 4 mods  — VS Garcello, Demo Base, Noche Espectral, Circuito Neón
 ✔ Buscador filtra
-✔ demo-base/primer-paso (hard, teclado simulado) se juega hasta el final  — carga 708 ms · WebGL2 (batch)
+✔ demo-base/primer-paso (hard, teclado simulado) se juega hasta el final  — carga 699 ms · WebGL2 (batch)
 ✔ demo-base/primer-paso sin fallos  — sick 63 · good 0 · bad 0 · shit 0 · miss 0 · precisión 100.00%
 ✔ Precisión del input por teclado ≥ 95%  — 100.00%
 ✔ demo-base/primer-paso FPS medio  — 60.0 FPS · p99 16.8 ms · 11 draw calls · 20 sprites
-✔ circuito-neon/engranaje (hard, bot) se juega hasta el final  — carga 661 ms · WebGL2 (batch)
+✔ circuito-neon/engranaje (hard, bot) se juega hasta el final  — carga 623 ms · WebGL2 (batch)
 ✔ circuito-neon/engranaje sin fallos  — sick 87 · good 0 · bad 0 · shit 0 · miss 0 · precisión 100.00%
-✔ circuito-neon/engranaje FPS medio  — 60.0 FPS · p99 16.8 ms · 11 draw calls · 20 sprites
-✔ noche-espectral/espectro (hard, bot) se juega hasta el final  — carga 700 ms · WebGL2 (batch)
+✔ circuito-neon/engranaje FPS medio  — 52.4 FPS · p99 33.4 ms · 11 draw calls · 20 sprites
+✔ noche-espectral/espectro (hard, bot) se juega hasta el final  — carga 669 ms · WebGL2 (batch)
 ✔ noche-espectral/espectro sin fallos  — sick 96 · good 0 · bad 0 · shit 0 · miss 0 · precisión 100.00%
-✔ noche-espectral/espectro FPS medio  — 56.5 FPS · p99 33.4 ms · 13 draw calls · 25 sprites
+✔ noche-espectral/espectro FPS medio  — 43.1 FPS · p99 33.4 ms · 13 draw calls · 25 sprites
+✔ vs-garcello/headache (normal, bot) se juega hasta el final  — carga 1190 ms · WebGL2 (batch)
+✔ vs-garcello/headache sin fallos  — sick 180 · good 0 · bad 0 · shit 0 · miss 0 · precisión 100.00%
+✔ vs-garcello/headache FPS medio  — 53.9 FPS · p99 33.4 ms · 9 draw calls · 18 sprites
 ✔ Importar ZIP de Psych sin manifiesto  — Mod «mimodpsych-local» importado (2 canciones, formato Psych Engine).
 ✔ El mod importado se juega desde IndexedDB  — sick 78 · miss 0
-✔ Pausa congela la canción  — 3029 → 3029 ms
-✔ Reanudar continúa desde el mismo punto  — 4587 ms
+✔ Pausa congela la canción  — 3033 → 3033 ms
+✔ Reanudar continúa desde el mismo punto  — 4579 ms
 ✔ Reiniciar (R) vuelve al inicio
 Errores de consola:
 

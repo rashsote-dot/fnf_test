@@ -18,7 +18,18 @@ const h = (tag: string, attrs: Record<string, string> = {}, ...kids: (Node | str
   return el;
 };
 
+const SVGNS = 'http://www.w3.org/2000/svg';
+function icon(name: string) {
+  const svg = document.createElementNS(SVGNS, 'svg');
+  svg.setAttribute('class', 'ic');
+  const use = document.createElementNS(SVGNS, 'use');
+  use.setAttribute('href', '#i-' + name);
+  svg.appendChild(use);
+  return svg;
+}
+
 let catalog: CatalogEntry[] = [];
+let category = '';
 let engine: Engine | null = null;
 let audio: AudioEngine | null = null;
 let play: PlayState | null = null;
@@ -61,52 +72,94 @@ function btn(label: string, onClick: () => void, cls = '') {
 // ------------------------------------------------------------------ catálogo
 async function initCatalog() {
   catalog = await loadCatalog();
-  const cats = [...new Set(catalog.map((c) => c.category))].sort();
-  const sel = $<HTMLSelectElement>('filter-cat');
-  sel.replaceChildren(h('option', { value: '' }, 'Todas las categorías'), ...cats.map((c) => h('option', { value: c }, c)));
+  const cats = [...new Set(catalog.map((c) => c.category))].sort((a, b) => a.localeCompare(b, 'es'));
+  if (category && !cats.includes(category)) category = '';
+  const chips = $('chips');
+  const mk = (label: string, value: string) => {
+    const b = btn(label, () => { category = value; syncChips(); renderCatalog(); }, 'chip');
+    b.setAttribute('role', 'tab');
+    b.dataset.cat = value;
+    return b;
+  };
+  chips.replaceChildren(mk('Todos', ''), ...cats.map((c) => mk(c, c)));
+  syncChips();
+  $('stat-mods').textContent = String(catalog.length);
+  $('stat-songs').textContent = String(catalog.reduce((n, c) => n + c.songCount, 0));
+  renderHero();
   renderCatalog();
+}
+
+function syncChips() {
+  document.querySelectorAll<HTMLButtonElement>('#chips .chip').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.cat === category)));
+}
+
+function renderHero() {
+  const f = [...catalog].sort((a, b) => b.popularity - a.popularity)[0];
+  if (!f) return;
+  const url = coverUrl(f);
+  $('hero-eyebrow').textContent = '★ Mod destacado';
+  $('hero-title').textContent = f.name;
+  $('hero-desc').textContent = f.description;
+  $('hero-meta').replaceChildren(
+    h('span', { class: 'badge ' + f.compatibility }, COMPAT_LABEL[f.compatibility]),
+    h('span', { class: 'badge' }, FORMAT_LABEL[f.format]),
+    h('span', { class: 'badge' }, `${f.songCount} canciones`),
+    h('span', { class: 'badge' }, fmtSize(f.sizeBytes)));
+  ($('hero-play') as HTMLAnchorElement).href = '#/mod/' + encodeURIComponent(f.id);
+  const img = $<HTMLImageElement>('hero-img');
+  if (url) { img.src = url; img.hidden = false; $('hero-bg').style.backgroundImage = `url("${url}")`; }
 }
 
 function renderCatalog() {
   const q = $<HTMLInputElement>('search').value.trim().toLowerCase();
-  const cat = $<HTMLSelectElement>('filter-cat').value;
   const sort = $<HTMLSelectElement>('sort').value;
-  let list = catalog.filter((c) => (!cat || c.category === cat) && (!q || (c.name + ' ' + c.description + ' ' + c.category).toLowerCase().includes(q)));
+  let list = catalog.filter((c) => (!category || c.category === category) && (!q || (c.name + ' ' + c.description + ' ' + c.category + ' ' + (c.author ?? '')).toLowerCase().includes(q)));
   list = list.sort((a, b) => sort === 'name' ? a.name.localeCompare(b.name, 'es') : sort === 'size' ? a.sizeBytes - b.sizeBytes : b.popularity - a.popularity);
   $('catalog-status').textContent = catalog.length ? (list.length ? '' : 'Ningún mod coincide con la búsqueda.') : 'No hay mods en el catálogo.';
-  const grid = $('grid');
-  grid.replaceChildren(...list.map(card));
+  $('grid').replaceChildren(...list.map(card));
 }
 
 function card(c: CatalogEntry) {
+  const go = () => (location.hash = '#/mod/' + encodeURIComponent(c.id));
   const cover = h('div', { class: 'cover' });
   const url = coverUrl(c);
   if (url) cover.append(h('img', { src: url, alt: '', loading: 'lazy', decoding: 'async' }));
   else cover.append(h('div', { class: 'ph' }, c.name.slice(0, 2).toUpperCase()));
-  const actions = h('div', { class: 'actions' }, btn('▶ Jugar', () => (location.hash = '#/mod/' + encodeURIComponent(c.id)), 'primary'));
-  if (c.local) actions.append(btn('🗑', async () => {
-    if (!confirm(`¿Eliminar "${c.name}" de este navegador?`)) return;
-    await deleteLocalMod(c.id); await initCatalog();
-  }));
-  else actions.append(btn('⤓', async (ev?: unknown) => {
-    void ev;
-    try {
-      toast(`Guardando ${c.name} para jugar sin conexión…`, 60000);
-      const m = await openMod(c);
-      const n = await cacheModOffline(new URL(c.path.replace(/\/?$/, '/'), BASE_URL).href, m.manifest.files ?? [], (p) => toast(`Guardando ${c.name}: ${Math.round(p * 100)}%`, 60000));
-      toast(`${c.name} disponible sin conexión (${n} archivos).`);
-    } catch (e) { toast('No se pudo guardar: ' + (e as Error).message); }
-  }));
-  (actions.lastChild as HTMLElement).title = c.local ? 'Eliminar' : 'Guardar para jugar sin conexión';
+  cover.append(h('div', { class: 'play-over' }, h('span', {}, icon('play'))), h('span', { class: 'tag' }, c.category));
+  cover.addEventListener('click', go);
+  const playBtn = btn('Jugar', go, 'primary');
+  playBtn.prepend(icon('play'));
+  const actions = h('div', { class: 'actions' }, playBtn);
+  if (c.local) {
+    const del = btn('Eliminar', async () => {
+      if (!confirm(`¿Eliminar "${c.name}" de este navegador?`)) return;
+      await deleteLocalMod(c.id); await initCatalog();
+    }, 'ghost');
+    actions.append(del);
+  } else {
+    const off = btn('', async () => {
+      try {
+        toast(`Guardando ${c.name} para jugar sin conexión…`, 60000);
+        const m = await openMod(c);
+        const n = await cacheModOffline(new URL(c.path.replace(/\/?$/, '/'), BASE_URL).href, m.manifest.files ?? [], (p) => toast(`Guardando ${c.name}: ${Math.round(p * 100)}%`, 60000));
+        toast(`${c.name} disponible sin conexión (${n} archivos).`);
+      } catch (e) { toast('No se pudo guardar: ' + (e as Error).message); }
+    }, 'ghost icon-only');
+    off.append(icon('disk'));
+    off.title = 'Guardar para jugar sin conexión';
+    off.setAttribute('aria-label', off.title);
+    actions.append(off);
+  }
+  const meta = h('div', { class: 'meta' },
+    h('span', {}, icon('music'), `${c.songCount} canc.`),
+    h('span', {}, icon('disk'), fmtSize(c.sizeBytes)),
+    h('span', {}, FORMAT_LABEL[c.format]));
   return h('article', { class: 'card' }, cover, h('div', { class: 'body' },
     h('h3', {}, c.name),
-    h('p', {}, c.description),
-    h('div', { class: 'badges' },
-      h('span', { class: 'badge ' + c.compatibility, title: 'Compatibilidad' }, COMPAT_LABEL[c.compatibility]),
-      h('span', { class: 'badge' }, FORMAT_LABEL[c.format]),
-      h('span', { class: 'badge' }, `${c.songCount} canc.`),
-      h('span', { class: 'badge' }, fmtSize(c.sizeBytes)),
-      h('span', { class: 'badge' }, c.category)),
+    ...(c.author ? [h('p', { class: 'author', title: c.author }, c.author)] : []),
+    h('p', { class: 'desc' }, c.description),
+    h('div', { class: 'badges' }, h('span', { class: 'badge ' + c.compatibility, title: 'Compatibilidad' }, COMPAT_LABEL[c.compatibility])),
+    meta,
     actions));
 }
 
@@ -121,11 +174,22 @@ async function showMod(id: string) {
   catch (e) { overlay(frag(h('h2', {}, 'Error'), h('p', {}, (e as Error).message))); return; }
   const m = mod.manifest;
   $('mod-title').textContent = m.name;
+  $('mod-author').textContent = m.author ? m.author : '';
   $('mod-desc').textContent = m.description ?? '';
+  const url = coverUrl(entry);
+  const cov = $<HTMLImageElement>('mod-cover');
+  cov.hidden = !url; if (url) cov.src = url;
+  $('mod-hero-bg').style.backgroundImage = url ? `url("${url}")` : '';
   const compat = $('mod-compat');
-  compat.replaceChildren(h('span', { class: 'badge ' + (m.compatibility ?? 'partial') }, COMPAT_LABEL[m.compatibility ?? 'partial']), ' ', h('span', { class: 'badge' }, FORMAT_LABEL[m.format]));
-  if (m.compatNotes?.length) compat.append(h('ul', {}, ...m.compatNotes.map((n) => h('li', {}, n))));
-  if (m.author || m.license) compat.append(h('p', { class: 'muted small' }, [m.author && `Autor: ${m.author}`, m.license && `Licencia: ${m.license}`].filter(Boolean).join(' · ')));
+  compat.replaceChildren(
+    h('span', { class: 'badge ' + (m.compatibility ?? 'partial') }, COMPAT_LABEL[m.compatibility ?? 'partial']),
+    h('span', { class: 'badge' }, FORMAT_LABEL[m.format]),
+    h('span', { class: 'badge' }, `${m.songs.length} canciones`),
+    ...(m.sizeBytes ? [h('span', { class: 'badge' }, fmtSize(m.sizeBytes))] : []));
+  const notes = $('mod-notes');
+  notes.replaceChildren();
+  if (m.compatNotes?.length) notes.append(h('b', {}, 'Notas de compatibilidad'), h('ul', {}, ...m.compatNotes.map((n) => h('li', {}, n))));
+  if (m.license) notes.append(h('p', { class: 'small' }, 'Licencia: ' + m.license));
   selSong = '';
   await renderSongs();
   if (m.songs.length) selectSong(m.songs[0].id);
@@ -135,11 +199,13 @@ async function showMod(id: string) {
 async function renderSongs() {
   if (!mod) return;
   const ul = $('song-list');
-  const items = await Promise.all(mod.manifest.songs.map(async (s) => {
+  const items = await Promise.all(mod.manifest.songs.map(async (s, i) => {
     const best = await bestScore(s.id);
     const b = btn('', () => selectSong(s.id));
     b.dataset.song = s.id;
-    b.append(h('span', {}, s.name), h('span', { class: 'best' }, best ? `★ ${best.toLocaleString('es')}` : ''));
+    b.append(
+      h('span', { class: 's-name' }, h('span', { class: 'num' }, String(i + 1)), h('span', {}, s.name)),
+      h('span', { class: 's-meta' }, s.bpm ? `${s.bpm} BPM` : '', best ? h('span', { class: 'best' }, `★ ${best.toLocaleString('es')}`) : ''));
     if (s.id === selSong) b.classList.add('sel');
     return h('li', {}, b);
   }));
@@ -155,7 +221,15 @@ function selectSong(id: string) {
   const prev = diff.value;
   diff.replaceChildren(...s.difficulties.map((d) => h('option', { value: d }, d[0].toUpperCase() + d.slice(1))));
   diff.value = s.difficulties.includes(prev) ? prev : s.difficulties.includes('normal') ? 'normal' : s.difficulties[0];
-  diff.disabled = s.difficulties.length < 2;
+  const LABEL: Record<string, string> = { easy: 'Fácil', normal: 'Normal', hard: 'Difícil' };
+  const seg = $('diff-seg');
+  const sync = () => seg.querySelectorAll('button').forEach((x) => x.setAttribute('aria-checked', String(x.dataset.d === diff.value)));
+  seg.replaceChildren(...s.difficulties.map((d) => {
+    const b = btn(LABEL[d] ?? d[0].toUpperCase() + d.slice(1), () => { diff.value = d; sync(); });
+    b.dataset.d = d; b.setAttribute('role', 'radio');
+    return b;
+  }));
+  sync();
   $<HTMLButtonElement>('btn-play').disabled = false;
 }
 
@@ -401,7 +475,6 @@ async function main() {
   bindSettings();
   updateKeysHint();
   $('search').addEventListener('input', renderCatalog);
-  $('filter-cat').addEventListener('change', renderCatalog);
   $('sort').addEventListener('change', renderCatalog);
   $('btn-settings').addEventListener('click', openSettings);
   $('btn-back').addEventListener('click', () => (location.hash = '#/'));
@@ -448,7 +521,7 @@ async function main() {
     settings,
     saveSettings: (p: Partial<Settings>) => { saveSettings(p); if ('quality' in p) engine?.applyQuality(); },
     startGame,
-    select: (song: string, diff?: string) => { selectSong(song); if (diff) $<HTMLSelectElement>('diff').value = diff; },
+    select: (song: string, diff?: string) => { selectSong(song); if (diff) { $<HTMLSelectElement>('diff').value = diff; $('diff-seg').querySelectorAll('button').forEach((x) => x.setAttribute('aria-checked', String((x as HTMLElement).dataset.d === diff))); } },
     stop: stopGame,
     resetFrames: () => Diag.resetFrames(),
   };

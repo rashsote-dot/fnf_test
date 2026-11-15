@@ -1,0 +1,127 @@
+{
+  "id": "vs-garcello",
+  "name": "VS Garcello",
+  "version": "1.0.0",
+  "format": "psych",
+  "author": "atsuover (arte y personaje) · Rageminer (música) · port web: Funkade",
+  "license": "Mod de fans no oficial. Recursos de sus autores originales y de The Funkin' Crew; sin licencia explícita de redistribución.",
+  "description": "Smoke 'Em Out Struggle: enfréntate a Garcello en un callejón lleno de humo. 4 canciones: Headache, Nerves, Release y Fading.",
+  "category": "Mods de la comunidad",
+  "cover": "cover.webp",
+  "popularity": 120,
+  "compatibility": "partial",
+  "compatNotes": [
+    "Diálogos, cinemáticas y efectos programados en el .exe original (tos de Garcello, desvanecimiento en Fading) no están incluidos.",
+    "Las texturas se reempaquetaron (hasta 8 veces menos memoria de GPU); GF y el humo usan algo menos de resolución.",
+    "Usa la skin de notas común de Funkade."
+  ],
+  "songs": [
+    {
+      "id": "headache",
+      "name": "Headache",
+      "difficulties": [
+        "easy",
+        "normal",
+        "hard"
+      ],
+      "bpm": 120
+    },
+    {
+      "id": "nerves",
+      "name": "Nerves",
+      "difficulties": [
+        "easy",
+        "normal",
+        "hard"
+      ],
+      "bpm": 100
+    },
+    {
+      "id": "release",
+      "name": "Release",
+      "difficulties": [
+        "easy",
+        "normal",
+        "hard"
+      ],
+      "bpm": 120
+    },
+    {
+      "id": "fading",
+      "name": "Fading",
+      "difficulties": [
+        "easy",
+        "normal",
+        "hard"
+      ],
+      "bpm": 100
+    }
+  ],
+  "files": [
+    "characters/bf.json",
+    "characters/garcello.json",
+    "characters/garcellodead.json",
+    "characters/garcelloghosty.json",
+    "characters/garcellotired.json",
+    "characters/gf.json",
+    "cover.webp",
+    "data/fading/fading-easy.json",
+    "data/fading/fading-hard.json",
+    "data/fading/fading.json",
+    "data/headache/headache-easy.json",
+    "data/headache/headache-hard.json",
+    "data/headache/headache.json",
+    "data/nerves/nerves-easy.json",
+    "data/nerves/nerves-hard.json",
+    "data/nerves/nerves.json",
+    "data/release/release-easy.json",
+    "data/release/release-hard.json",
+    "data/release/release.json",
+    "images/characters/BOYFRIEND.png",
+    "images/characters/BOYFRIEND.xml",
+    "images/characters/GF_assets.png",
+    "images/characters/GF_assets.xml",
+    "images/characters/garcello_assets.png",
+    "images/characters/garcello_assets.xml",
+    "images/characters/garcellodead_assets.png",
+    "images/characters/garcellodead_assets.xml",
+    "images/characters/garcelloghosty_assets.png",
+    "images/characters/garcelloghosty_assets.xml",
+    "images/characters/garcellotired_assets.png",
+    "images/characters/garcellotired_assets.xml",
+    "images/garcello/garSmoke.png",
+    "images/garcello/garSmoke.xml",
+    "images/garcello/garStage.png",
+    "images/garcello/garStageRise.png",
+    "images/garcello/garStagealt.png",
+    "images/garcello/garStagebg.png",
+    "images/garcello/garStagebgAlt.png",
+    "images/garcello/garStagebgRise.png",
+    "images/garcello/garStagesmoke.png",
+    "images/icons/icon-bf.png",
+    "images/icons/icon-garcello.png",
+    "images/icons/icon-garcelloghosty.png",
+    "images/icons/icon-garcellotired.png",
+    "images/icons/icon-gf.png",
+    "songs/fading/Inst.m4a",
+    "songs/fading/Inst.ogg",
+    "songs/fading/Voices.m4a",
+    "songs/fading/Voices.ogg",
+    "songs/headache/Inst.m4a",
+    "songs/headache/Inst.ogg",
+    "songs/headache/Voices.m4a",
+    "songs/headache/Voices.ogg",
+    "songs/nerves/Inst.m4a",
+    "songs/nerves/Inst.ogg",
+    "songs/nerves/Voices.m4a",
+    "songs/nerves/Voices.ogg",
+    "songs/release/Inst.m4a",
+    "songs/release/Inst.ogg",
+    "songs/release/Voices.m4a",
+    "songs/release/Voices.ogg",
+    "stages/alley-rise.json",
+    "stages/alley-smoke.json",
+    "stages/alley.json"
+  ],
+  "sizeBytes": 59193094
+}

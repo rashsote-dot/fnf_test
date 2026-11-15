@@ -38,7 +38,7 @@ export async function loadCatalog(): Promise<CatalogEntry[]> {
 
 export function manifestToEntry(m: ModManifest, path: string, local = false): CatalogEntry {
   return {
-    id: m.id, name: m.name, description: m.description ?? '', category: m.category ?? 'Mods', cover: m.cover ?? '',
+    id: m.id, name: m.name, author: m.author ?? '', description: m.description ?? '', category: m.category ?? 'Mods', cover: m.cover ?? '',
     popularity: m.popularity ?? 0, sizeBytes: m.sizeBytes ?? 0, songCount: m.songs.length, format: m.format,
     compatibility: m.compatibility ?? 'partial', path, local,
   };
