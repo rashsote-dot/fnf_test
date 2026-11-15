@@ -100,6 +100,8 @@ export interface InternalStage {
   hideGf?: boolean;
   /** Escala global de personajes para escenarios pixelados de Psych (daPixelZoom = 6). */
   pixelZoom?: number;
+  /** Velocidad de seguimiento de cámara definida por el escenario Psych. */
+  cameraSpeed?: number;
   bgColor: string;
 }
 
