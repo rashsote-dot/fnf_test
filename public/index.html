@@ -148,6 +148,11 @@
             </div>
           </div>
         </div>
+        <div id="song-timeline" class="song-timeline" hidden>
+          <span id="song-current" class="song-time">0:00</span>
+          <input id="song-seek" type="range" min="0" max="1" value="0" step="50" aria-label="Adelantar o retroceder la canción">
+          <span id="song-total" class="song-time">0:00</span>
+        </div>
         <div class="game-actions">
           <button type="button" class="ghost" id="btn-pause" disabled>⏸ Pausa</button>
           <button type="button" class="ghost" id="btn-restart" disabled>↻ Reiniciar</button>
