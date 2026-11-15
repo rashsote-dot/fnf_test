@@ -1174,7 +1174,8 @@ export class PlayState implements Scene, PsychHost {
 
   setCamera(tag: string, cam: string) {
     const c = cam.toLowerCase().replace(/^cam/, '');
-    const target: Sprite | undefined = this.luaSprites.get(tag) ?? this.luaTexts.get(tag)?.s ?? this.props.get(tag);
+    const groups: Record<string, CharSlot> = { dadGroup: 'dad', boyfriendGroup: 'bf', gfGroup: 'gf' };
+    const target: Sprite | undefined = this.luaSprites.get(tag) ?? this.luaTexts.get(tag)?.s ?? this.props.get(tag) ?? (groups[tag] ? this.chars[groups[tag]] ?? undefined : undefined);
     if (!target) return;
     target.cam = c === 'hud' ? 'hud' : c === 'other' ? 'other' : 'game';
     this.rebuildWorld();
@@ -1734,11 +1735,30 @@ function spriteProxy(sp: Sprite): any {
 }
 
 function groupProxy(ps: PlayState, slot: CharSlot): any {
+  const scaleProxy = {
+    psychGet(path: string) {
+      const c = ps.charOf(slot);
+      if (!c) return undefined;
+      const base = c.texMul * (c.def.scale || 1);
+      if (path === 'x') return base ? c.scaleX / base : 1;
+      if (path === 'y') return base ? c.scaleY / base : 1;
+      return undefined;
+    },
+    psychSet(path: string, v: unknown) {
+      const c = ps.charOf(slot);
+      if (!c) return;
+      const n = +(v as number);
+      const base = c.texMul * (c.def.scale || 1);
+      if (path === 'x') c.scaleX = n * base;
+      if (path === 'y') c.scaleY = n * base;
+    },
+  };
   return {
     psychGet(path: string) {
       const c = ps.charOf(slot);
       if (!c) return undefined;
       if (path === 'x') return c.groupX; if (path === 'y') return c.groupY;
+      if (path === 'scale') return scaleProxy;
       return spriteProxy(c).psychGet(path);
     },
     psychSet(path: string, v: unknown) {
@@ -1746,6 +1766,7 @@ function groupProxy(ps: PlayState, slot: CharSlot): any {
       if (!c) return;
       if (path === 'x') { c.x += +(v as number) - c.groupX; c.groupX = +(v as number); return; }
       if (path === 'y') { c.y += +(v as number) - c.groupY; c.groupY = +(v as number); return; }
+      if (path === 'scale.x' || path === 'scale.y') { scaleProxy.psychSet(path.slice(6), v); return; }
       spriteProxy(c).psychSet(path, v);
     },
   };
