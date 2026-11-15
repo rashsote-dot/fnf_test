@@ -1819,8 +1819,8 @@ function spriteProxy(sp: Sprite): any {
         case 'x': sp.x = num; return; case 'y': sp.y = num; return;
         case 'alpha': sp.alpha = num; return; case 'visible': sp.visible = !!v; return; case 'angle': sp.angle = num; return;
         case 'flipX': sp.flipX = !!v; return;
-        case 'scale.x': if (ls) { ls.lsx = num; ls.applyScale(); } else sp.scaleX = num * mul(); return;
-        case 'scale.y': if (ls) { ls.lsy = num; ls.applyScale(); } else sp.scaleY = num * mul(); return;
+        case 'scale.x': if (ls) { ls.lsx = num; ls.applyScale(); } else { sp.scaleX = num * mul(); if (sp instanceof Character) sp.refreshBaseSize(); } return;
+        case 'scale.y': if (ls) { ls.lsy = num; ls.applyScale(); } else { sp.scaleY = num * mul(); if (sp instanceof Character) sp.refreshBaseSize(); } return;
         case 'scrollFactor.x': sp.scrollX = num; return; case 'scrollFactor.y': sp.scrollY = num; return;
         case 'offset.x': sp.offsetX = num; return; case 'offset.y': sp.offsetY = num; return;
         case 'color': sp.setColor(hexColor(v as number)); return;
@@ -1853,8 +1853,8 @@ function groupProxy(ps: PlayState, slot: CharSlot): any {
       if (!c) return;
       const n = +(v as number);
       const base = c.texMul * (c.def.scale || 1);
-      if (path === 'x') c.scaleX = n * base;
-      if (path === 'y') c.scaleY = n * base;
+      if (path === 'x') { c.scaleX = n * base; c.refreshBaseSize(); }
+      if (path === 'y') { c.scaleY = n * base; c.refreshBaseSize(); }
     },
   };
   return {
