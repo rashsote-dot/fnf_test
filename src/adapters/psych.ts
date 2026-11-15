@@ -178,6 +178,7 @@ export function parsePsychStage(j: Json, id: string): InternalStage {
     hideGf: !!j.hide_girlfriend,
     // Psych aplica daPixelZoom (6x) a los personajes cuando isPixelStage=true.
     pixelZoom: j.isPixelStage ? 6 : 1,
+    cameraSpeed: num(j.camera_speed, 1),
     bgColor: '#000000',
   };
 }
