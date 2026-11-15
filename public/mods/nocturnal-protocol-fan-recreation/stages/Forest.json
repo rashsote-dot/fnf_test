@@ -2,31 +2,33 @@
  "directory": "slendy",
  "defaultZoom": 0.47,
  "stageUI": "",
- "boyfriend": [
-  1250,
-  1000
- ],
- "girlfriend": [
-  350,
-  1000
- ],
- "opponent": [
-  100,
-  1000
- ],
+ "boyfriend": [1250, 1000],
+ "girlfriend": [350, 1000],
+ "opponent": [100, 1000],
  "hide_girlfriend": true,
- "camera_boyfriend": [
-  -130,
-  -330
- ],
- "camera_opponent": [
-  270,
-  -330
- ],
- "camera_girlfriend": [
-  830,
-  330
- ],
+ "camera_boyfriend": [-130, -330],
+ "camera_opponent": [270, -330],
+ "camera_girlfriend": [830, 330],
  "camera_speed": 1.7,
- "objects": []
+ "objects": [
+  {"type":"sprite","name":"forest","image":"dayforest/forest","x":44,"y":280,"scale":[2,2],"scroll":[1,1],"alpha":1,"animations":[]},
+  {"type":"animatedSprite","name":"tinkychase","image":"characters/tinkyrun","x":800,"y":1100,"scale":[1.2,1.2],"scroll":[1,1],"alpha":0,"animations":[
+   {"anim":"idle","name":"idle","fps":24,"loop":false,"indices":[],"offsets":[0,0]},
+   {"anim":"left","name":"left","fps":24,"loop":false,"indices":[],"offsets":[0,0]},
+   {"anim":"down","name":"down","fps":24,"loop":false,"indices":[],"offsets":[0,0]},
+   {"anim":"up","name":"up","fps":24,"loop":false,"indices":[],"offsets":[0,0]},
+   {"anim":"right","name":"right","fps":24,"loop":false,"indices":[],"offsets":[0,0]}
+  ],"firstAnimation":"idle"},
+  {"type":"animatedSprite","name":"tinkychase2","image":"characters/tinkyrun","x":350,"y":800,"scale":[1.5,1.5],"scroll":[1,1],"alpha":0,"animations":[
+   {"anim":"idle","name":"idle","fps":24,"loop":false,"indices":[],"offsets":[0,0]},
+   {"anim":"left","name":"left","fps":24,"loop":false,"indices":[],"offsets":[0,0]},
+   {"anim":"down","name":"down","fps":24,"loop":false,"indices":[],"offsets":[0,0]},
+   {"anim":"up","name":"up","fps":24,"loop":false,"indices":[],"offsets":[0,0]},
+   {"anim":"right","name":"right","fps":24,"loop":false,"indices":[],"offsets":[0,0]}
+  ],"firstAnimation":"idle"},
+  {"type":"sprite","name":"custard","image":"dayforest/custard","x":990,"y":1200,"scale":[0.3,0.3],"scroll":[1,1],"alpha":0,"animations":[]},
+  {"type":"gf"},
+  {"type":"dad"},
+  {"type":"boyfriend"}
+ ]
 }
