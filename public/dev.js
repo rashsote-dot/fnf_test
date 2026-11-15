@@ -56,7 +56,7 @@ async function loadPatchHistory() {
       return;
     }
     host.innerHTML = commits.map((item) => {
-      const message = (item.commit?.message || 'Actualización de mod').split('\\n')[0];
+      const message = (item.commit?.message || 'Actualización de mod').split(/\r?\n/)[0];
       const author = item.commit?.author?.name || item.author?.login || 'Desconocido';
       const date = item.commit?.author?.date;
       const when = date
