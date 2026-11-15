@@ -9,7 +9,7 @@
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="css/app.css">
   <style>
-    .dev-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 18px 0 26px; }
+    .dev-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin: 18px 0 26px; }
     .dev-actions a { display: flex; flex-direction: column; gap: 6px; padding: 18px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line2); text-decoration: none; transition: border-color .15s, transform .15s; }
     .dev-actions a:hover { border-color: var(--pink); transform: translateY(-2px); }
     .dev-actions b { font-size: 17px; } .dev-actions span { color: var(--muted); font-size: 14px; }
@@ -21,6 +21,7 @@
     .devtable .acts { display: flex; gap: 6px; flex-wrap: wrap; }
     .devtable .acts a { font-size: 13px; padding: 6px 10px; }
     code { background: var(--bg2); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; font-size: 13px; }
+    @media (max-width: 1100px) { .dev-actions { grid-template-columns: repeat(2, 1fr); } }
     @media (max-width: 900px) { .dev-actions { grid-template-columns: 1fr; } .devtable td:nth-child(4), .devtable th:nth-child(4) { display: none; } }
   </style>
 </head>
@@ -38,6 +39,7 @@
       <a id="act-release" target="_blank" rel="noopener"><span class="tag">Recomendado · hasta 2 GB</span><b>⬆ Subir mod (Release)</b><span>Título = nombre del mod. Arrastra el .zip / .rar / .7z y pulsa «Publish release».</span></a>
       <a id="act-url" target="_blank" rel="noopener"><span class="tag">Desde un enlace</span><b>🔗 Agregar por enlace</b><span>«Run workflow» y pega un enlace de descarga directa (GameBanana, Dropbox…).</span></a>
       <a id="act-runs" target="_blank" rel="noopener"><span class="tag">Estado</span><b>📋 Ver conversiones</b><span>Progreso e informe de cada mod importado (avisos de compatibilidad).</span></a>
+      <a id="act-validate" target="_blank" rel="noopener"><span class="tag">Diagnóstico</span><b>🧪 Validar mods</b><span>Comprueba manifiestos, JSON y archivos antes de publicar. Genera un informe descargable.</span></a>
     </div>
 
     <section class="panel quota">
