@@ -574,7 +574,7 @@ export class PlayState implements Scene, PsychHost {
     const step = Math.floor(timeToBeat(target, this.chart.timeChanges) * 4);
     this.curStepI = step - 1;
     this.curBeatI = Math.floor((step - 1) / 4);
-    this.songStartedCalled = target >= 0;
+    this.songStartedCalled = target > 0;
     this.lastTick = -99;
     this.spawned.length = 0;
     this.popups.length = 0;
