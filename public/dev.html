@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'; base-uri 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://api.github.com; base-uri 'self'">
   <title>Funkade · Panel de desarrollador</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="css/app.css">
@@ -52,6 +52,12 @@
         <thead><tr><th></th><th>Mod</th><th>Canciones</th><th>Compatibilidad</th><th class="num">Tamaño</th><th>Acciones</th></tr></thead>
         <tbody id="rows"><tr><td colspan="6" class="muted">Cargando…</td></tr></tbody>
       </table>
+    </section>
+
+    <section class="panel" style="margin-top:22px">
+      <div class="panel-head"><h2>Historial de parches y cambios</h2><span class="muted" id="patch-count">Consultando…</span></div>
+      <p class="muted small" style="margin:0 0 14px">Cambios recientes publicados en <code>public/mods/</code>, incluidos parches de personajes, escenarios, scripts y archivos del mod.</p>
+      <div id="patch-history" class="muted">Cargando historial…</div>
     </section>
   </main>
   <script type="module" src="dev.js"></script>
