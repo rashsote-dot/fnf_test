@@ -1087,6 +1087,9 @@ export class PlayState implements Scene, PsychHost {
 
   makeLuaSprite(tag: string, image: string, x: number, y: number, animated: boolean) {
     const old = this.luaSprites.get(tag);
+    // Un sprite creado por el script reemplaza el objeto estático homónimo del JSON del escenario.
+    // Así se conservan posiciones/capas de respaldo sin dibujar dos copias cuando corre onCreate.
+    this.props.delete(tag);
     const s = new LSprite();
     s.tag = tag; s.name = tag; s.x = x; s.y = y;
     if (old) { s.added = old.added; s.z = old.z; s.cam = old.cam; }
