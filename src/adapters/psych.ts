@@ -176,6 +176,8 @@ export function parsePsychStage(j: Json, id: string): InternalStage {
       gf: { x: gf[0], y: gf[1], z: zGf, cam: [num(j.camera_girlfriend?.[0]), num(j.camera_girlfriend?.[1])] },
     },
     hideGf: !!j.hide_girlfriend,
+    // Psych aplica daPixelZoom (6x) a los personajes cuando isPixelStage=true.
+    pixelZoom: j.isPixelStage ? 6 : 1,
     bgColor: '#000000',
   };
 }
