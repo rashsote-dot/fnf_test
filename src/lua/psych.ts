@@ -37,6 +37,7 @@ export interface PsychHost {
   cameraFlash(cam: string, color: string, durSec: number): void;
   cameraShake(cam: string, intensity: number, durSec: number): void;
   playSound(name: string, volume: number): void;
+  startVideo(name: string): void;
   groupProp(group: string, index: number, prop: string, value?: unknown): unknown;
   groupLength(group: string): number;
   endSong(): void;
@@ -189,7 +190,7 @@ export class PsychScripts {
     def('addCharacterToList', () => undefined);
     def('setShaderFloat', () => undefined); def('setSpriteShader', () => undefined); def('initLuaShader', () => false);
     def('setBlendMode', (tag, mode) => { const o = h.luaSprite(s(tag)); if (o) o.blend = s(mode).toLowerCase(); });
-    def('makeVideoSprite', () => undefined); def('startVideo', () => { this.call('onVideoFinished', []); });
+    def('makeVideoSprite', () => undefined); def('startVideo', (name) => h.startVideo(s(name)));
     def('openCustomSubstate', () => undefined); def('closeCustomSubstate', () => undefined);
 
     // ---------------- sprites
