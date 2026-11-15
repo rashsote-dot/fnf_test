@@ -1,4 +1,4 @@
-# Compila y publica Funkade en GitHub Pages en cada push a main.
+# Compila, valida y publica Funkade en GitHub Pages.
 name: Publicar en GitHub Pages
 
 on:
@@ -26,6 +26,21 @@ jobs:
         with:
           ref: main
       - uses: oven-sh/setup-bun@v2
+      - name: Validar mods publicados
+        id: validate
+        run: |
+          python3 tools/mod-importer/validate_mods.py --markdown mod-validation.md --json mod-validation.json
+          cat mod-validation.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Guardar informe de validación
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: funkade-mod-validation
+          path: |
+            mod-validation.md
+            mod-validation.json
+          if-no-files-found: ignore
+          retention-days: 14
       - run: bun install
       - name: Comprobar tipos
         run: bunx tsc --noEmit
