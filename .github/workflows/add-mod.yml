@@ -115,6 +115,21 @@ jobs:
           fi
           cat /tmp/report.md >> "$GITHUB_STEP_SUMMARY"
 
+      - name: Validar los mods importados antes de guardarlos
+        run: |
+          python3 tools/mod-importer/validate_mods.py --markdown /tmp/mod-validation.md --json /tmp/mod-validation.json
+          cat /tmp/mod-validation.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Guardar informe de validación
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mod-import-validation
+          path: |
+            /tmp/mod-validation.md
+            /tmp/mod-validation.json
+          if-no-files-found: ignore
+          retention-days: 14
+
       - name: Actualizar catálogo y comprobar que compila
         run: |
           bun tools/build-catalog.ts
