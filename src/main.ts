@@ -44,6 +44,45 @@ let mod: ModRuntime | null = null;
 let selSong = '';
 let busy = false;
 let diagTimer = 0;
+let timelineTimer = 0;
+
+function formatSongTime(ms: number) {
+  const total = Math.max(0, Math.floor(ms / 1000));
+  return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`;
+}
+function stopTimeline() {
+  if (timelineTimer) window.clearInterval(timelineTimer);
+  timelineTimer = 0;
+  const wrap = $('song-timeline');
+  if (wrap) wrap.hidden = true;
+}
+function startTimeline() {
+  const wrap = $('song-timeline');
+  const seek = $<HTMLInputElement>('song-seek');
+  const current = $('song-current');
+  const total = $('song-total');
+  if (!play || !wrap || !seek) return;
+  seek.max = String(Math.max(1, Math.floor(play.songLength)));
+  seek.value = '0'; current.textContent = '0:00'; total.textContent = formatSongTime(play.songLength);
+  wrap.hidden = false;
+  seek.oninput = () => { current.textContent = formatSongTime(Number(seek.value)); };
+  seek.onchange = async () => {
+    if (!play || play.ended) return;
+    try {
+      await play.seekTo(Number(seek.value));
+      overlay(null);
+      engine?.start(play);
+      toast('Canción adelantada. Los logros y récords quedan desactivados en esta partida.', 6000);
+    } catch (e) { toast('No se pudo cambiar la posición: ' + (e as Error).message); }
+  };
+  if (timelineTimer) window.clearInterval(timelineTimer);
+  timelineTimer = window.setInterval(() => {
+    if (!play || play.ended) return;
+    const now = Math.max(0, Math.min(play.songLength, play.songT));
+    if (document.activeElement !== seek) seek.value = String(Math.floor(now));
+    current.textContent = formatSongTime(now);
+  }, 100);
+}
 
 // ------------------------------------------------------------------ utilidades
 function fmtSize(b: number) {
@@ -257,6 +296,7 @@ async function bestScore(song: string): Promise<number> {
 let playStarted = 0;
 async function savePlay(r: PlayResult | null, cleared: boolean) {
   if (!mod || !play) return { fresh: [], record: false };
+  if (!play.rankedEligible) return { fresh: [], record: false }; // buscar invalida logros, XP y récords
   const bot = r ? r.bot : settings.botplay;
   if (bot) return { fresh: [], record: false }; // las partidas con bot no cuentan
   const song = mod.manifest.songs.find((x) => x.id === selSong);
@@ -320,6 +360,7 @@ async function startGame() {
     p.start();
     playStarted = performance.now();
     engine!.start(p);
+    startTimeline();
     setControls(true);
     startDiag();
     ($('game-frame') as HTMLElement).focus?.();
@@ -334,6 +375,7 @@ async function startGame() {
 
 async function stopGame() {
   stopDiag();
+  stopTimeline();
   if (play) { play.dispose(); play = null; }
   engine?.stop();
   if (engine) { engine.scene = null; engine.renderer.begin('#000'); engine.renderer.end(); }
@@ -367,6 +409,7 @@ async function resultLike(): Promise<HTMLElement> {
 
 async function showResults(r: PlayResult) {
   engine?.stop();
+  stopTimeline();
   setControls(false);
   const { fresh, record } = await savePlay(r, true);
   if (mod) void renderSongs();
@@ -381,12 +424,14 @@ async function showResults(r: PlayResult) {
     await resultLike(),
     ...(fresh.length ? [h('p', { class: 'new-achs-title' }, `${fresh.length} logro${fresh.length > 1 ? 's' : ''} desbloqueado${fresh.length > 1 ? 's' : ''}`), h('div', { class: 'new-achs', tabindex: '0' }, ...fresh.map((a) => h('div', { class: 'new-ach ' + a.tier }, h('span', {}, a.icon), h('div', {}, h('small', {}, 'Logro desbloqueado'), h('b', {}, a.name)))))] : []),
     ...(r.bot ? [h('p', { class: 'muted small' }, 'Las partidas con bot no cuentan para el perfil.')] : []),
+    ...(play && !play.rankedEligible ? [h('p', { class: 'muted small' }, 'Esta partida no otorga logros, experiencia ni récords porque se modificó la posición de la canción.')] : []),
     h('div', { class: 'btns' }, btn('↻ Jugar otra vez', startGame, 'primary'), btn('Elegir otra canción', () => { void stopGame(); overlay(frag(h('h2', {}, 'Elige una canción'), btn('▶ Jugar', startGame, 'primary big'))); }))));
   (window as any).__funkadeLastPlayInfo = play?.debugInfo() ?? null;
   (window as any).__funkadeLastResult = r;
 }
 
 function showGameOver() {
+  stopTimeline();
   void savePlay(null, false);
   engine?.stop();
   setControls(false);
