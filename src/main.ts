@@ -512,7 +512,10 @@ function bindSettings() {
     if (k === 'quality') engine?.applyQuality();
     if (k === 'renderer') toast('El cambio de renderizador se aplica al recargar la página.');
     if (k.endsWith('Vol')) audio?.setVolumes(settings.masterVol, settings.musicVol, settings.sfxVol);
-    if (k === 'downscroll' && play) toast('Downscroll se aplicará en la próxima partida.');
+    if (k === 'downscroll' && play) {
+      $('hud-score').classList.toggle('down', settings.downscroll);
+      toast(settings.downscroll ? 'Downscroll activado.' : 'Downscroll desactivado.');
+    }
   });
   $('btn-reset-settings').addEventListener('click', () => { saveSettings(structuredClone(DEFAULT_SETTINGS)); openSettings(); audio?.setVolumes(settings.masterVol, settings.musicVol, settings.sfxVol); updateKeysHint(); });
   $('btn-clear-cache').addEventListener('click', async () => { await clearModCache(); $('storage-info').textContent = await storageInfo(); });
