@@ -751,6 +751,9 @@ def main():
             make_cover(out, name, f'{len(songs)} canción' + ('es' if len(songs) != 1 else ''))
         except Exception as e:
             log(f'No se pudo generar la portada: {e}')
+        # El validador exige que manifest.files enumere todos los recursos del mod.
+        manifest['files'] = sorted(p.relative_to(out).as_posix() for p in out.rglob('*') if p.is_file() and p.name != 'manifest.json')
+        (out / 'manifest.json').write_text(json.dumps(manifest, indent=2, ensure_ascii=False), encoding='utf-8')
         size = sum(f.stat().st_size for f in out.rglob('*') if f.is_file())
         md = [f'## Mod importado: {name}', '', f'- Carpeta: `public/mods/{mid}`', f'- Formato: **{fmt}** ({kind})', f'- Canciones: ' + ', '.join(f"{s['name']} ({'/'.join(s['difficulties'])})" for s in songs),
               f'- Tamaño: {size / 1048576:.1f} MB', f'- Compatibilidad: **{"Parcial" if partial else "Completa"}**', '', '### Avisos', *(f'- {r}' for r in report or ['Ninguno']), '', '### Registro', *(f'- {l}' for l in log_lines)]
