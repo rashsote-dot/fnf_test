@@ -1,7 +1,7 @@
 local camSwing = false
 local swingTime = 1
 local swingSpeed = 0.8
-local swingAmount = 1
+local swingAmount = 0.2
 
 function onEvent(name, value1, value2)
     if name == 'CamSwing' then
