@@ -14,8 +14,6 @@ export class Character extends Sprite {
   stunned = false;
   /** compensación de texturas reempaquetadas (1 = sin cambios) */
   texMul = 1;
-  /** multiplicador global del escenario (p. ej. daPixelZoom de Psych). */
-  stageMul = 1;
   /** posición del grupo (dadGroup/boyfriendGroup/gfGroup en Psych) */
   groupX = 0; groupY = 0;
   idleSuffix = '';
@@ -49,7 +47,6 @@ export class Character extends Sprite {
   /** Aplica el zoom global de escenarios pixelados de Psych sin alterar el zoom propio del personaje. */
   setStageScale(multiplier: number) {
     const m = Number.isFinite(multiplier) && multiplier > 0 ? multiplier : 1;
-    this.stageMul = m;
     this.scaleX = this.def.scale * this.texMul * m;
     this.scaleY = this.def.scale * this.texMul * m;
     this.refreshBaseSize();
