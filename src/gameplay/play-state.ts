@@ -439,17 +439,18 @@ export class PlayState implements Scene, PsychHost {
     this.cameraSpeed = st.cameraSpeed ?? 1;
     this.camGame.zoom = st.zoom;
     this.camGame.bgColor = st.bgColor;
+    const stageCharacterScale = (st.pixelZoom ?? 1) * (st.characterScale ?? 1);
     for (const slot of ['gf', 'dad', 'bf'] as CharSlot[]) {
       const c = this.chars[slot];
       if (!c) continue;
-      c.setStageScale(st.pixelZoom ?? 1);
+      c.setStageScale(stageCharacterScale);
       c.place(st.chars[slot].x, st.chars[slot].y);
       c.z = st.chars[slot].z;
       if (slot === 'gf' && st.hideGf) c.visible = false;
     }
     for (const [k, c] of this.altChars) {
       const slot = k.split(':')[0] as CharSlot;
-      c.setStageScale(st.pixelZoom ?? 1);
+      c.setStageScale(stageCharacterScale);
       c.place(st.chars[slot].x, st.chars[slot].y);
       c.z = st.chars[slot].z;
     }
