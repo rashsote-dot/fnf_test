@@ -204,6 +204,8 @@ function drawSongPreview() {
   songCtx.imageSmoothingEnabled=false;
   songCtx.drawImage(edSongImage,frame.x,frame.y,frame.w,frame.h,x,y,sw,sh);
 }
+function tickSongPreview() { drawSongPreview(); edSongRaf=requestAnimationFrame(tickSongPreview); }
+if(songCanvas && !edSongRaf) edSongRaf=requestAnimationFrame(tickSongPreview);
 function renderSongPosition() {
   if (!edSongChart) { drawSongPreview(); return; }
   const ms=(Number(ed('song-seek').value)/1000)*edSongDuration;
@@ -222,7 +224,7 @@ function renderSongPosition() {
   const isPlayer=String(song.player1||'').toLowerCase()===charId;
   const shouldMatch=section ? (!!section.mustHitSection===isPlayer) : false;
   for(const n of notes){
-    if(Number(n[0])<=ms && (Number(n[1])%4)>=0 && (Number(n[1])%4)<4) {
+    if(Number(n[0])<=ms && ms-Number(n[0])<650 && (Number(n[1])%4)>=0 && (Number(n[1])%4)<4) {
       if(shouldMatch) chosen=n;
     }
   }
