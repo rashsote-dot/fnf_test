@@ -1845,7 +1845,7 @@ function groupProxy(ps: PlayState, slot: CharSlot): any {
     psychGet(path: string) {
       const c = ps.charOf(slot);
       if (!c) return undefined;
-      const base = c.texMul * (c.def.scale || 1);
+      const base = c.texMul * (c.def.scale || 1) * c.stageMul;
       if (path === 'x') return base ? c.scaleX / base : 1;
       if (path === 'y') return base ? c.scaleY / base : 1;
       return undefined;
@@ -1854,7 +1854,7 @@ function groupProxy(ps: PlayState, slot: CharSlot): any {
       const c = ps.charOf(slot);
       if (!c) return;
       const n = +(v as number);
-      const base = c.texMul * (c.def.scale || 1);
+      const base = c.texMul * (c.def.scale || 1) * c.stageMul;
       if (path === 'x') { c.scaleX = n * base; c.refreshBaseSize(); }
       if (path === 'y') { c.scaleY = n * base; c.refreshBaseSize(); }
     },
