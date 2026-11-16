@@ -1,34 +1,20 @@
 {
   "version": 1,
-  "generated": "2026-11-15T17:54:05.464Z",
+  "generated": "2026-11-16T02:00:51.624Z",
   "mods": [
     {
-      "id": "vs-agoti",
-      "name": "VS AGOTI",
+      "id": "vs-fernan",
+      "name": "VS FERNAN",
       "author": "Autores originales del mod · importado con Funkade",
-      "description": "4 canción(es) importada(s) automáticamente.",
+      "description": "Esto es una version jugable hecha por mi (Josno) para Psych Engine v0.7.3. (Es compatible con la v0.7.1h+), Espero que te guste y No, NO es oficial. Gracias Camboi por el Chart! (Puedes Configurarlo a tu gusto)",
       "category": "Mods de la comunidad",
       "cover": "cover.webp",
       "popularity": 60,
-      "sizeBytes": 109561714,
-      "songCount": 4,
-      "format": "psych",
-      "compatibility": "partial",
-      "path": "mods/vs-agoti/"
-    },
-    {
-      "id": "nocturnal-protocol-fan-recreation",
-      "name": "Nocturnal Protocol (Fan Recreation)",
-      "author": "Autores originales del mod · importado con Funkade",
-      "description": "A mod based on the song “Nocturnal Protocol” made by Sanco The Fox",
-      "category": "Mods de la comunidad",
-      "cover": "cover.webp",
-      "popularity": 60,
-      "sizeBytes": 70081113,
+      "sizeBytes": 50828911,
       "songCount": 1,
       "format": "psych",
       "compatibility": "partial",
-      "path": "mods/nocturnal-protocol-fan-recreation/"
+      "path": "mods/vs-fernan/"
     },
     {
       "id": "vs-garcello",
@@ -45,20 +31,6 @@
       "path": "mods/vs-garcello/"
     },
     {
-      "id": "bite-fernan-mix",
-      "name": "Bite [Fernan Mix]",
-      "author": "Autores originales del mod · importado con Funkade",
-      "description": "Esto es una version jugable hecha por mi (Josno) para Psych Engine v0.7.3. (Es compatible con la v0.7.1h+), Espero que te guste y No, NO es oficial. Gracias Camboi por el Chart! (Puedes Configurarlo a tu gusto)",
-      "category": "Mods de la comunidad",
-      "cover": "cover.webp",
-      "popularity": 60,
-      "sizeBytes": 50830094,
-      "songCount": 1,
-      "format": "psych",
-      "compatibility": "partial",
-      "path": "mods/bite-fernan-mix/"
-    },
-    {
       "id": "fnf-rivals-demo",
       "name": "FNF Rivals (Demo)",
       "author": "Autores originales del mod · importado con Funkade",
@@ -73,6 +45,20 @@
       "path": "mods/fnf-rivals-demo/"
     },
     {
+      "id": "vs-agoti",
+      "name": "VS AGOTI",
+      "author": "Autores originales del mod · importado con Funkade",
+      "description": "4 canción(es) importada(s) automáticamente.",
+      "category": "Mods de la comunidad",
+      "cover": "cover.webp",
+      "popularity": 60,
+      "sizeBytes": 109564720,
+      "songCount": 4,
+      "format": "psych",
+      "compatibility": "partial",
+      "path": "mods/vs-agoti/"
+    },
+    {
       "id": "aura-funkin",
       "name": "Aura Funkin' at South America",
       "author": "Equipo de Aura Funkin' (scripts: Hot Mustafa, BCTIX, YB, kludge_) · port web: Funkade",
@@ -85,6 +71,20 @@
       "format": "psych",
       "compatibility": "partial",
       "path": "mods/aura-funkin/"
+    },
+    {
+      "id": "nocturnal-protocol-fan-recreation",
+      "name": "Nocturnal Protocol (Fan Recreation)",
+      "author": "Autores originales del mod · importado con Funkade",
+      "description": "A mod based on the song “Nocturnal Protocol” made by Sanco The Fox",
+      "category": "Mods de la comunidad",
+      "cover": "cover.webp",
+      "popularity": 60,
+      "sizeBytes": 70083235,
+      "songCount": 1,
+      "format": "psych",
+      "compatibility": "partial",
+      "path": "mods/nocturnal-protocol-fan-recreation/"
     }
   ]
 }
