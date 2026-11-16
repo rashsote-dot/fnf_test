@@ -80,3 +80,163 @@ async function loadPatchHistory() {
   }
 }
 loadPatchHistory();
+
+
+// ------------------------------------------------------------------ editor DEV aislado: overrides locales, nunca modifica el mod original.
+const ed = (id) => document.getElementById('ed-' + id);
+const patchKey = (id) => 'funkade-dev-patches:' + id;
+let edEntry = null;
+let edManifest = null;
+let edPath = '';
+let edOriginal = '';
+let edIsCharacter = false;
+let edOverrides = {};
+
+function readOverrides(id) {
+  try { return JSON.parse(localStorage.getItem(patchKey(id)) || '{}'); }
+  catch { return {}; }
+}
+function setEditorMessage(message) { ed('message').textContent = message; }
+function editorUrl(path) { return new URL(path, document.baseURI).href; }
+
+function renderEditorFiles() {
+  const host = ed('files');
+  host.replaceChildren();
+  if (!edManifest || !Array.isArray(edManifest.files)) {
+    host.textContent = 'Este mod no publica una lista de archivos.';
+    return;
+  }
+  const files = edManifest.files.filter(p => /\.(json|lua|js|xml|txt|hscript)$/i.test(p));
+  for (const path of files) {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'ghost';
+    b.textContent = path;
+    b.addEventListener('click', () => {
+      ed('file').value = path;
+      openEditorFile(path);
+    });
+    host.append(b);
+  }
+  if (!files.length) host.textContent = 'No hay archivos de texto editables en el manifiesto.';
+}
+async function openEditorFile(path) {
+  if (!edEntry || !path) return;
+  edPath = path;
+  edIsCharacter = /^characters\/.*\.json$/i.test(path);
+  try {
+    const response = await fetch(editorUrl(edEntry.path + path), { cache: 'no-store' });
+    if (!response.ok) throw new Error('HTTP ' + response.status);
+    edOriginal = await response.text();
+    edOverrides = readOverrides(edEntry.id);
+    const shown = Object.prototype.hasOwnProperty.call(edOverrides, path) ? edOverrides[path] : edOriginal;
+    ed('source').value = typeof shown === 'string' ? shown : JSON.stringify(shown, null, 2);
+    ed('status').textContent = edOverrides[path] !== undefined ? 'Tiene override local' : 'Original';
+    ed('preview-name').textContent = path;
+    if (edIsCharacter) {
+      let data;
+      try { data = JSON.parse(ed('source').value); } catch { data = null; }
+      updateCharacterPreview(data);
+    } else {
+      ed('atlas').hidden = true;
+      ed('preview-name').textContent = 'Archivo de texto · ' + path;
+    }
+    setEditorMessage('Archivo abierto: ' + path + '. El original no se ha modificado.');
+  } catch (error) {
+    setEditorMessage('No se pudo abrir el archivo: ' + error.message);
+  }
+}
+function updateCharacterPreview(data) {
+  const image = ed('atlas');
+  if (!data || typeof data !== 'object') {
+    image.hidden = true;
+    ed('preview-name').textContent = 'JSON no válido';
+    return;
+  }
+  const imageName = String(data.image || '').replace(/^\/+/, '');
+  image.hidden = !imageName;
+  if (imageName) image.src = editorUrl(edEntry.path + 'images/' + imageName + '.png');
+  const scale = Number(data.scale ?? 1);
+  image.style.transform = 'scale(' + Math.max(.05, Math.min(5, Number.isFinite(scale) ? scale : 1)) + ')';
+  ed('scale').value = String(scale);
+  ed('x').value = String(data.position?.[0] ?? 0);
+  ed('y').value = String(data.position?.[1] ?? 0);
+  ed('cx').value = String(data.camera_position?.[0] ?? 0);
+  ed('cy').value = String(data.camera_position?.[1] ?? 0);
+  ed('preview-name').textContent = imageName ? imageName + '.png · atlas completo' : 'Este personaje no declara una imagen.';
+}
+function selectedCharacterData() {
+  try { return JSON.parse(ed('source').value); }
+  catch { setEditorMessage('El JSON tiene un error. Corrígelo antes de aplicar ajustes.'); return null; }
+}
+
+ed('mod').replaceChildren(new Option('Selecciona un mod…', ''));
+for (const entry of mods) ed('mod').add(new Option(entry.name, entry.id));
+ed('mod').addEventListener('change', async () => {
+  edEntry = mods.find(x => x.id === ed('mod').value) || null;
+  edManifest = null; edPath = ''; ed('source').value = '';
+  ed('file').replaceChildren(new Option('Selecciona un archivo…', ''));
+  ed('files').textContent = 'Cargando manifiesto…';
+  if (!edEntry) return;
+  try {
+    const response = await fetch(editorUrl(edEntry.path + 'manifest.json'), { cache: 'no-store' });
+    if (!response.ok) throw new Error('No se pudo leer manifest.json');
+    edManifest = await response.json();
+    edOverrides = readOverrides(edEntry.id);
+    renderEditorFiles();
+    const character = (edManifest.files || []).find(p => /^characters\/.*\.json$/i.test(p));
+    const allText = (edManifest.files || []).filter(p => /\.(json|lua|js|xml|txt|hscript)$/i.test(p));
+    ed('file').replaceChildren(new Option('Selecciona un archivo…', ''), ...allText.map(p => new Option(p, p)));
+    if (character) { ed('file').value = character; await openEditorFile(character); }
+    setEditorMessage('Workspace listo para ' + edEntry.name + '. Los cambios se guardan solo en este navegador.');
+  } catch (error) { setEditorMessage(error.message); }
+});
+ed('load').addEventListener('click', () => openEditorFile(ed('file').value));
+ed('source').addEventListener('input', () => {
+  ed('status').textContent = 'Sin guardar';
+  if (edIsCharacter) updateCharacterPreview(selectedCharacterData());
+});
+ed('apply').addEventListener('click', () => {
+  if (!edIsCharacter) { setEditorMessage('Selecciona un JSON de personaje para usar estos controles.'); return; }
+  const data = selectedCharacterData();
+  if (!data) return;
+  data.scale = Number(ed('scale').value);
+  data.position = [Number(ed('x').value), Number(ed('y').value)];
+  data.camera_position = [Number(ed('cx').value), Number(ed('cy').value)];
+  ed('source').value = JSON.stringify(data, null, 2);
+  updateCharacterPreview(data);
+  ed('status').textContent = 'Ajustes aplicados · pendiente de guardar';
+  setEditorMessage('Ajustes aplicados al JSON. Pulsa «Guardar cambio local» para conservarlos.');
+});
+ed('save').addEventListener('click', () => {
+  if (!edEntry || !edPath) { setEditorMessage('Primero abre un archivo.'); return; }
+  const value = ed('source').value;
+  if (/\.json$/i.test(edPath)) {
+    try { JSON.parse(value); } catch (error) { setEditorMessage('JSON inválido: ' + error.message); return; }
+  }
+  edOverrides = readOverrides(edEntry.id);
+  edOverrides[edPath] = value;
+  localStorage.setItem(patchKey(edEntry.id), JSON.stringify(edOverrides));
+  ed('status').textContent = 'Guardado localmente';
+  setEditorMessage('Guardado en este navegador: ' + edPath + '. El ZIP original sigue intacto.');
+});
+ed('reset').addEventListener('click', async () => {
+  if (!edEntry || !edPath) return;
+  if (!confirm('¿Eliminar el override local de ' + edPath + ' y volver al original?')) return;
+  edOverrides = readOverrides(edEntry.id);
+  delete edOverrides[edPath];
+  localStorage.setItem(patchKey(edEntry.id), JSON.stringify(edOverrides));
+  await openEditorFile(edPath);
+  setEditorMessage('Override eliminado. Se está mostrando el archivo original.');
+});
+ed('export').addEventListener('click', () => {
+  if (!edEntry) { setEditorMessage('Selecciona un mod primero.'); return; }
+  const patches = readOverrides(edEntry.id);
+  const paths = Object.keys(patches);
+  if (!paths.length) { setEditorMessage('Todavía no hay cambios guardados para exportar.'); return; }
+  const blob = new Blob([JSON.stringify({ format: 'funkade-mod-patch', version: 1, modId: edEntry.id, files: patches }, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = edEntry.id + '-patch.json'; a.click();
+  URL.revokeObjectURL(url);
+  setEditorMessage('Parche exportado con ' + paths.length + ' archivo(s).');
+});
