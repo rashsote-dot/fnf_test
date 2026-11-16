@@ -1,69 +1,69 @@
 {
- "animations": [
-  {
-   "offsets": [
+  "animations": [
+    {
+      "offsets": [
+        0,
+        0
+      ],
+      "loop": false,
+      "fps": 24,
+      "anim": "idle",
+      "name": "Fernan Idle0",
+      "indices": []
+    },
+    {
+      "offsets": [
+        0,
+        0
+      ],
+      "indices": [],
+      "fps": 24,
+      "anim": "huh",
+      "loop": true,
+      "name": "Fernan Huh"
+    },
+    {
+      "offsets": [
+        0,
+        0
+      ],
+      "indices": [],
+      "fps": 24,
+      "anim": "nono",
+      "loop": true,
+      "name": "Fernan Nono"
+    },
+    {
+      "offsets": [
+        0,
+        0
+      ],
+      "indices": [],
+      "fps": 24,
+      "anim": "jejnosab",
+      "loop": true,
+      "name": "Fernan Jejnosab"
+    }
+  ],
+  "vocals_file": "",
+  "no_antialiasing": false,
+  "image": "characters/shobon no action/FernanRene",
+  "position": [
     0,
     0
-   ],
-   "loop": false,
-   "fps": 24,
-   "anim": "idle",
-   "name": "Fernan Idle0",
-   "indices": []
-  },
-  {
-   "offsets": [
+  ],
+  "healthicon": "fernan",
+  "flip_x": false,
+  "healthbar_colors": [
+    20,
+    200,
+    120
+  ],
+  "camera_position": [
     0,
-    0
-   ],
-   "indices": [],
-   "fps": 24,
-   "anim": "huh",
-   "loop": true,
-   "name": "Fernan Huh"
-  },
-  {
-   "offsets": [
-    0,
-    0
-   ],
-   "indices": [],
-   "fps": 24,
-   "anim": "nono",
-   "loop": true,
-   "name": "Fernan Nono"
-  },
-  {
-   "offsets": [
-    0,
-    0
-   ],
-   "indices": [],
-   "fps": 24,
-   "anim": "jejnosab",
-   "loop": true,
-   "name": "Fernan Jejnosab"
-  }
- ],
- "vocals_file": "",
- "no_antialiasing": false,
- "image": "characters/shobon no action/FernanRene",
- "position": [
-  0,
-  0
- ],
- "healthicon": "fernan",
- "flip_x": false,
- "healthbar_colors": [
-  20,
-  200,
-  120
- ],
- "camera_position": [
-  0,
-  70
- ],
- "sing_duration": 5.99999999999999,
- "scale": 1,
- "_editor_isPlayer": false
+    70
+  ],
+  "sing_duration": 5.99999999999999,
+  "scale": 0.2,
+  "_editor_isPlayer": false
 }
