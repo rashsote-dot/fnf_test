@@ -136,6 +136,7 @@ async function openEditorFile(path) {
       let data;
       try { data = JSON.parse(ed('source').value); } catch { data = null; }
       updateCharacterPreview(data);
+      loadSongAtlas(data);
     } else {
       ed('atlas').hidden = true;
       ed('preview-name').textContent = 'Archivo de texto · ' + path;
@@ -164,6 +165,147 @@ function updateCharacterPreview(data) {
   ed('cy').value = String(data.camera_position?.[1] ?? 0);
   ed('preview-name').textContent = imageName ? imageName + '.png · atlas completo' : 'Este personaje no declara una imagen.';
 }
+
+let edSongChart = null;
+let edSongDuration = 0;
+let edSongFrames = [];
+let edSongImage = null;
+let edSongAnim = null;
+let edSongAnimStarted = 0;
+let edSongLastPose = 'idle';
+let edSongRaf = 0;
+const songCanvas = $('ed-song-canvas');
+const songCtx = songCanvas?.getContext('2d');
+const fmtSongTime = (ms) => {
+  const sec = Math.max(0, Math.floor(ms / 1000));
+  return String(Math.floor(sec / 60)).padStart(2,'0') + ':' + String(sec % 60).padStart(2,'0');
+};
+function drawSongPreview() {
+  if (!songCtx || !songCanvas) return;
+  const w = songCanvas.width, h = songCanvas.height;
+  songCtx.clearRect(0,0,w,h);
+  const grad = songCtx.createLinearGradient(0,0,0,h);
+  grad.addColorStop(0,'#29213d'); grad.addColorStop(.72,'#171329'); grad.addColorStop(1,'#100d1c');
+  songCtx.fillStyle=grad; songCtx.fillRect(0,0,w,h);
+  songCtx.fillStyle='rgba(255,255,255,.08)'; songCtx.fillRect(0,h-34,w,34);
+  songCtx.fillStyle='rgba(255,255,255,.22)'; songCtx.fillRect(0,h-36,w,2);
+  if (!edSongImage || !edSongImage.complete || !edSongFrames.length) {
+    songCtx.fillStyle='#c8bfdc'; songCtx.font='16px sans-serif'; songCtx.textAlign='center';
+    songCtx.fillText('Carga un JSON de personaje con atlas XML para ver la animación',w/2,h/2);
+    return;
+  }
+  const frame=edSongFrames[Math.floor((performance.now()-edSongAnimStarted)/1000*24)%edSongFrames.length];
+  if (!frame) return;
+  const data=selectedCharacterData();
+  const scale=Math.max(.05,Math.min(5,Number(data?.scale??1)));
+  const sw=frame.w*scale, sh=frame.h*scale;
+  const posX=Number(data?.position?.[0]??0), posY=Number(data?.position?.[1]??0);
+  const x=w/2-sw/2+posX*scale, y=h-36-sh+posY*scale;
+  songCtx.imageSmoothingEnabled=false;
+  songCtx.drawImage(edSongImage,frame.x,frame.y,frame.w,frame.h,x,y,sw,sh);
+}
+function renderSongPosition() {
+  if (!edSongChart) { drawSongPreview(); return; }
+  const ms=(Number(ed('song-seek').value)/1000)*edSongDuration;
+  const sections=edSongChart.song?.notes || edSongChart.notes || [];
+  let elapsed=0, sectionIndex=0, section=null;
+  const bpm=Number(edSongChart.song?.bpm || edManifest?.songs?.find(s=>s.id===ed('song').value)?.bpm || 100);
+  for(let i=0;i<sections.length;i++){
+    const s=sections[i], length=Math.max(1,Number(s.lengthInSteps||16))*60000/(Math.max(1,bpm)*4);
+    if(ms>=elapsed && ms<elapsed+length){sectionIndex=i;section=s;break;}
+    elapsed+=length;
+  }
+  let chosen=null;
+  const notes=(section?.sectionNotes||[]);
+  const charId=edPath.split('/').pop().replace(/\.json$/i,'').toLowerCase();
+  const song=edSongChart.song||edSongChart;
+  const isPlayer=String(song.player1||'').toLowerCase()===charId;
+  const shouldMatch=section ? (!!section.mustHitSection===isPlayer) : false;
+  for(const n of notes){
+    if(Number(n[0])<=ms && (Number(n[1])%4)>=0 && (Number(n[1])%4)<4) {
+      if(shouldMatch) chosen=n;
+    }
+  }
+  let pose='idle';
+  if(chosen) pose=['singLEFT','singDOWN','singUP','singRIGHT'][Number(chosen[1])%4]||'idle';
+  const anims=selectedCharacterData()?.animations||selectedCharacterData()?.anims||[];
+  const anim=anims.find(a=>(a.anim||a.name||'').toLowerCase()===pose.toLowerCase())
+    || anims.find(a=>(a.anim||a.name||'').toLowerCase()==='idle');
+  const prefix=anim?.name||anim?.prefix||'';
+  if(pose!==edSongLastPose || !edSongFrames.length) {
+    edSongLastPose=pose; edSongAnim=anim;
+    const matching=edSongAllFrames.filter(f=>f.name.toLowerCase().startsWith(String(prefix).toLowerCase()));
+    edSongFrames=matching.length?matching:[];
+    edSongAnimStarted=performance.now();
+  }
+  $('ed-song-time').textContent=fmtSongTime(ms)+' / '+fmtSongTime(edSongDuration);
+  $('ed-song-pose').textContent='Animación: '+(anim?.anim||pose)+(chosen?' · nota':' · reposo');
+  $('ed-song-section').textContent='Sección '+(sectionIndex+1)+' · '+(section?.mustHitSection?'Turno jugador':'Turno oponente');
+  drawSongPreview();
+}
+let edSongAllFrames=[];
+async function loadSongAtlas(data) {
+  edSongAllFrames=[]; edSongFrames=[]; edSongImage=null;
+  if(!edEntry || !data?.image) { drawSongPreview(); return; }
+  const base=String(data.image).replace(/^\/+/, '');
+  const imageUrl=editorUrl(edEntry.path+'images/'+base+'.png');
+  const xmlUrl=editorUrl(edEntry.path+'images/'+base+'.xml');
+  try {
+    const [imgRes,xmlRes]=await Promise.all([fetch(imageUrl),fetch(xmlUrl)]);
+    if(!imgRes.ok||!xmlRes.ok) throw new Error('No se encontró PNG/XML del atlas');
+    const xmlText=await xmlRes.text();
+    const doc=new DOMParser().parseFromString(xmlText,'application/xml');
+    edSongAllFrames=[...doc.querySelectorAll('SubTexture')].map(node=>({
+      name:node.getAttribute('name')||'',x:Number(node.getAttribute('x')),y:Number(node.getAttribute('y')),
+      w:Number(node.getAttribute('width')),h:Number(node.getAttribute('height'))
+    })).filter(f=>f.name&&f.w>0&&f.h>0);
+    edSongImage=new Image();
+    edSongImage.src=imageUrl;
+    await new Promise((resolve,reject)=>{edSongImage.onload=resolve;edSongImage.onerror=reject;});
+    renderSongPosition();
+  } catch(error) {
+    $('ed-song-status').textContent='Atlas no disponible: '+error.message;
+    drawSongPreview();
+  }
+}
+async function loadSongChart() {
+  if(!edEntry || !edManifest) return;
+  const id=ed('song').value;
+  if(!id) return;
+  const difficulty=ed('difficulty').value;
+  const candidates=[`data/${id}/${id}-${difficulty}.json`,`data/${id}/${id}.json`];
+  edSongChart=null;
+  $('ed-song-status').textContent='Cargando chart…';
+  for(const path of candidates) {
+    try {
+      const res=await fetch(editorUrl(edEntry.path+path),{cache:'no-store'});
+      if(res.ok){edSongChart=await res.json();break;}
+    } catch {}
+  }
+  if(!edSongChart){$('ed-song-status').textContent='No se encontró chart para esta canción';return;}
+  const sections=edSongChart.song?.notes||edSongChart.notes||[];
+  const bpm=Number(edSongChart.song?.bpm||edManifest.songs?.find(s=>s.id===id)?.bpm||100);
+  let total=0;
+  for(const s of sections) total+=Math.max(1,Number(s.lengthInSteps||16))*60000/(Math.max(1,bpm)*4);
+  const last=sections.flatMap(s=>s.sectionNotes||[]).reduce((v,n)=>Math.max(v,Number(n[0])||0),0);
+  edSongDuration=Math.max(total,last+5000,1000);
+  $('ed-song-seek').value='0';
+  $('ed-song-status').textContent='Chart cargado · '+sections.length+' secciones';
+  renderSongPosition();
+}
+function setupSongPreview(data) {
+  const select=ed('song');
+  if(!select || !edManifest) return;
+  select.replaceChildren(new Option('Selecciona una canción…',''));
+  for(const song of (edManifest.songs||[])) select.add(new Option(song.name,song.id));
+  if(edManifest.songs?.length) select.value=edManifest.songs[0].id;
+  ed('song').onchange=loadSongChart;
+  ed('difficulty').onchange=loadSongChart;
+  ed('song-seek').oninput=renderSongPosition;
+  if(data) loadSongAtlas(data);
+  if(select.value) loadSongChart();
+}
+
 function selectedCharacterData() {
   try { return JSON.parse(ed('source').value); }
   catch { setEditorMessage('El JSON tiene un error. Corrígelo antes de aplicar ajustes.'); return null; }
@@ -181,6 +323,7 @@ ed('mod').addEventListener('change', async () => {
     const response = await fetch(editorUrl(edEntry.path + 'manifest.json'), { cache: 'no-store' });
     if (!response.ok) throw new Error('No se pudo leer manifest.json');
     edManifest = await response.json();
+    setupSongPreview(null);
     edOverrides = readOverrides(edEntry.id);
     renderEditorFiles();
     const character = (edManifest.files || []).find(p => /^characters\/.*\.json$/i.test(p));
@@ -193,7 +336,7 @@ ed('mod').addEventListener('change', async () => {
 ed('load').addEventListener('click', () => openEditorFile(ed('file').value));
 ed('source').addEventListener('input', () => {
   ed('status').textContent = 'Sin guardar';
-  if (edIsCharacter) updateCharacterPreview(selectedCharacterData());
+  if (edIsCharacter) { const data=selectedCharacterData(); updateCharacterPreview(data); loadSongAtlas(data); }
 });
 ed('apply').addEventListener('click', () => {
   if (!edIsCharacter) { setEditorMessage('Selecciona un JSON de personaje para usar estos controles.'); return; }
