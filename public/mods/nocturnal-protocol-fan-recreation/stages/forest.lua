@@ -23,6 +23,19 @@ local custardScale = 0.3
 local custardX = 990
 local custardY = 1200
 
+-- Mantiene fijo el centro visual del personaje al cambiar su escala.
+-- Evita que la cámara arrastre todo el escenario durante el crecimiento.
+local function setBoyfriendScaleKeepingCenter(scale)
+    local centerX = getProperty('boyfriend.x') + getProperty('boyfriend.width') / 2
+    local centerY = getProperty('boyfriend.y') + getProperty('boyfriend.height') / 2
+
+    setProperty('boyfriend.scale.x', scale)
+    setProperty('boyfriend.scale.y', scale)
+
+    setProperty('boyfriend.x', centerX - getProperty('boyfriend.width') / 2)
+    setProperty('boyfriend.y', centerY - getProperty('boyfriend.height') / 2)
+end
+
 function onCreate()
 
     makeLuaSprite('forest', 'dayforest/forest', 44, 280)
