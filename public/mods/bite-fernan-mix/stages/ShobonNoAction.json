@@ -2,6 +2,7 @@
  "directory": "",
  "defaultZoom": 1.88,
  "isPixelStage": true,
+ "characterScale": 0.6,
  "boyfriend": [257, 150],
  "girlfriend": [205, 116],
  "opponent": [15, 15],
