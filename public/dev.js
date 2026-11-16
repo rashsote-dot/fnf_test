@@ -274,19 +274,32 @@ async function loadSongChart() {
   if(!edEntry || !edManifest) return;
   const id=ed('song').value;
   if(!id) return;
+  const songMeta=edManifest.songs?.find(s=>s.id===id);
   const difficulty=ed('difficulty').value;
-  const candidates=[`data/${id}/${id}-${difficulty}.json`,`data/${id}/${id}.json`];
-  edSongChart=null;
+  const files=Array.isArray(edManifest.files)?edManifest.files:[];
+  const candidates=[
+    `data/${id}/${id}-${difficulty}.json`,
+    `data/${id}/${id}.json`,
+    ...files.filter(p=>p.startsWith(`data/${id}/`) && p.endsWith('.json') && /\.json$/i.test(p))
+  ].filter((p,i,a)=>a.indexOf(p)===i);
+  edSongChart=null; edSongDuration=0; edSongFrames=[];
   $('ed-song-status').textContent='Cargando chart…';
   for(const path of candidates) {
+    if(files.length && !files.includes(path)) continue;
     try {
       const res=await fetch(editorUrl(edEntry.path+path),{cache:'no-store'});
-      if(res.ok){edSongChart=await res.json();break;}
+      if(res.ok) {
+        const parsed=await res.json();
+        if(parsed.song?.notes || parsed.notes) { edSongChart=parsed; break; }
+      }
     } catch {}
   }
-  if(!edSongChart){$('ed-song-status').textContent='No se encontró chart para esta canción';return;}
+  if(!edSongChart){
+    $('ed-song-status').textContent='No se encontró un chart compatible para esta canción/dificultad';
+    drawSongPreview(); return;
+  }
   const sections=edSongChart.song?.notes||edSongChart.notes||[];
-  const bpm=Number(edSongChart.song?.bpm||edManifest.songs?.find(s=>s.id===id)?.bpm||100);
+  const bpm=Number(edSongChart.song?.bpm||songMeta?.bpm||100);
   let total=0;
   for(const s of sections) total+=Math.max(1,Number(s.lengthInSteps||16))*60000/(Math.max(1,bpm)*4);
   const last=sections.flatMap(s=>s.sectionNotes||[]).reduce((v,n)=>Math.max(v,Number(n[0])||0),0);
@@ -301,20 +314,28 @@ function setupSongPreview(data) {
   const songs=Array.isArray(edManifest.songs)?edManifest.songs:[];
   select.replaceChildren(new Option(songs.length ? 'Selecciona una canción…' : 'Este mod no tiene canciones', ''));
   for(const song of songs) select.add(new Option(song.name || song.id,song.id));
-  // Al cambiar de mod, seleccionar siempre la primera canción automáticamente.
   select.value=songs[0]?.id || '';
-  edSongChart=null; edSongDuration=0; edSongLastPose='idle';
+  const updateDifficulties=()=>{
+    const song=songs.find(item=>item.id===select.value);
+    const difficulties=Array.isArray(song?.difficulties)&&song.difficulties.length?song.difficulties:['hard','normal','easy'];
+    const difficulty=ed('difficulty');
+    difficulty.replaceChildren(...difficulties.map((name)=>new Option(
+      String(name).charAt(0).toUpperCase()+String(name).slice(1),String(name)
+    )));
+    difficulty.value=difficulties[0]||'hard';
+  };
+  updateDifficulties();
+  edSongChart=null; edSongDuration=0; edSongLastPose='idle'; edSongFrames=[];
   ed('song-seek').value='0';
   ed('song-time').textContent='00:00 / 00:00';
   ed('song-pose').textContent='En espera';
   ed('song-section').textContent='Sección —';
   $('ed-song-status').textContent=songs.length ? 'Primera canción seleccionada' : 'Este mod no declara canciones';
-  ed('song').onchange=loadSongChart;
+  select.onchange=()=>{updateDifficulties();loadSongChart();};
   ed('difficulty').onchange=loadSongChart;
   ed('song-seek').oninput=renderSongPosition;
   if(data) loadSongAtlas(data);
 }
-
 function selectedCharacterData() {
   try { return JSON.parse(ed('source').value); }
   catch { setEditorMessage('El JSON tiene un error. Corrígelo antes de aplicar ajustes.'); return null; }
