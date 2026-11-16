@@ -62,6 +62,57 @@
       <div id="patch-history" class="muted">Cargando historial…</div>
     </section>
   </main>
+
+    <section class="panel" id="mod-editor" style="margin-top:22px">
+      <div class="panel-head"><h2>🛠 Editor DEV de mods</h2><span class="badge partial">Beta · cambios locales</span></div>
+      <p class="muted small">Edita archivos JSON/Lua y ajusta personajes sin modificar los archivos originales publicados. Los cambios se guardan en este navegador y puedes exportarlos como parche.</p>
+      <div class="editor-toolbar">
+        <label>Mod <select id="ed-mod"><option value="">Cargando mods…</option></select></label>
+        <label>Archivo <select id="ed-file"><option value="">Selecciona un mod</option></select></label>
+        <button id="ed-load" class="ghost" type="button">Abrir archivo</button>
+        <button id="ed-export" class="primary" type="button">Exportar parche</button>
+        <button id="ed-reset" class="ghost danger" type="button">Restaurar original</button>
+      </div>
+      <div class="editor-layout">
+        <aside class="editor-files"><b>Archivos del mod</b><div id="ed-files" class="muted small">Selecciona un mod para explorar sus archivos.</div></aside>
+        <div class="editor-main">
+          <div class="editor-preview">
+            <div class="panel-head"><b>Vista previa del atlas</b><span class="muted small" id="ed-preview-name">Selecciona un personaje JSON</span></div>
+            <div class="atlas-stage" id="ed-stage"><span class="muted">La imagen del personaje aparecerá aquí.</span><img id="ed-atlas" alt="Atlas del personaje" hidden></div>
+            <div class="editor-controls">
+              <label>Escala <input id="ed-scale" type="number" min="0.05" max="5" step="0.05" value="1"></label>
+              <label>Posición X <input id="ed-x" type="number" step="1" value="0"></label>
+              <label>Posición Y <input id="ed-y" type="number" step="1" value="0"></label>
+              <label>Cámara X <input id="ed-cx" type="number" step="1" value="0"></label>
+              <label>Cámara Y <input id="ed-cy" type="number" step="1" value="0"></label>
+              <button id="ed-apply" type="button">Aplicar ajustes al JSON</button>
+            </div>
+          </div>
+          <div class="editor-code">
+            <div class="panel-head"><b>Editor de archivo</b><span class="muted small" id="ed-status">Sin cambios</span></div>
+            <textarea id="ed-source" spellcheck="false" placeholder="El contenido del archivo aparecerá aquí…" aria-label="Contenido del archivo"></textarea>
+            <div class="muted small">Los JSON se validan antes de guardar. Lua y otros archivos de texto se pueden editar y exportar, pero no se ejecutan desde este panel.</div>
+            <button id="ed-save" class="primary" type="button">Guardar cambio local</button>
+          </div>
+        </div>
+      </div>
+      <p class="muted small" id="ed-message" role="status">Los cambios locales no afectan a otros jugadores ni se publican automáticamente.</p>
+    </section>
+    <style>
+      .editor-toolbar,.editor-controls{display:flex;gap:10px;align-items:end;flex-wrap:wrap;margin:14px 0}
+      .editor-toolbar label,.editor-controls label{display:flex;flex-direction:column;gap:5px;color:var(--muted);font-size:12px}
+      .editor-toolbar select,.editor-controls input{max-width:210px;width:100%}
+      .editor-layout{display:grid;grid-template-columns:minmax(180px,230px) 1fr;gap:16px}
+      .editor-files,.editor-preview,.editor-code{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:12px;min-width:0}
+      .editor-files button{display:block;width:100%;text-align:left;white-space:normal;margin-top:6px;font-size:12px}
+      .editor-main{display:grid;grid-template-columns:minmax(220px,.8fr) minmax(300px,1.2fr);gap:12px;min-width:0}
+      .atlas-stage{height:260px;background:repeating-conic-gradient(#211c36 0% 25%,#171329 0% 50%) 50%/24px 24px;border:1px solid var(--line2);border-radius:10px;display:grid;place-items:center;overflow:hidden}
+      .atlas-stage img{max-width:100%;max-height:100%;object-fit:contain;image-rendering:pixelated;transform-origin:center}
+      .editor-controls input{width:100px}
+      #ed-source{width:100%;height:330px;resize:vertical;background:#090713;color:#e8e1ff;border:1px solid var(--line2);border-radius:8px;padding:12px;font:12px/1.5 ui-monospace,Consolas,monospace;tab-size:2}
+      @media(max-width:900px){.editor-layout,.editor-main{grid-template-columns:1fr}}
+    </style>
+
   <script type="module" src="dev.js"></script>
 </body>
 </html>
