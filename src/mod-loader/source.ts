@@ -78,3 +78,32 @@ export class ListedSource implements ModSource {
     return this.inner.blob(real);
   }
 }
+
+/**
+ * Aplica los overrides creados desde el panel DEV sin alterar los archivos base.
+ * Se limita al navegador actual y al ID exacto del mod.
+ */
+export class PatchedSource implements ModSource {
+  constructor(private inner: ModSource) {}
+  get id() { return this.inner.id; }
+  private readPatch(path: string): string | null {
+    try {
+      const raw = localStorage.getItem('funkade-dev-patches:' + this.id);
+      if (!raw) return null;
+      const patches = JSON.parse(raw) as Record<string, unknown>;
+      const value = patches[path] ?? patches[path.replace(/\\/g, '/')];
+      return typeof value === 'string' ? value : null;
+    } catch { return null; }
+  }
+  async blob(path: string): Promise<Blob> {
+    if (path !== 'manifest.json') {
+      const patched = this.readPatch(path);
+      if (patched !== null) return new Blob([patched], { type: /\\.json$/i.test(path) ? 'application/json' : 'text/plain' });
+    }
+    return this.inner.blob(path);
+  }
+  async exists(path: string) {
+    if (path !== 'manifest.json' && this.readPatch(path) !== null) return true;
+    return this.inner.exists(path);
+  }
+}
