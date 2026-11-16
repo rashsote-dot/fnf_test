@@ -298,14 +298,21 @@ async function loadSongChart() {
 function setupSongPreview(data) {
   const select=ed('song');
   if(!select || !edManifest) return;
-  select.replaceChildren(new Option('Selecciona una canción…',''));
-  for(const song of (edManifest.songs||[])) select.add(new Option(song.name,song.id));
-  if(edManifest.songs?.length) select.value=edManifest.songs[0].id;
+  const songs=Array.isArray(edManifest.songs)?edManifest.songs:[];
+  select.replaceChildren(new Option(songs.length ? 'Selecciona una canción…' : 'Este mod no tiene canciones', ''));
+  for(const song of songs) select.add(new Option(song.name || song.id,song.id));
+  // Al cambiar de mod, seleccionar siempre la primera canción automáticamente.
+  select.value=songs[0]?.id || '';
+  edSongChart=null; edSongDuration=0; edSongLastPose='idle';
+  ed('song-seek').value='0';
+  ed('song-time').textContent='00:00 / 00:00';
+  ed('song-pose').textContent='En espera';
+  ed('song-section').textContent='Sección —';
+  $('ed-song-status').textContent=songs.length ? 'Primera canción seleccionada' : 'Este mod no declara canciones';
   ed('song').onchange=loadSongChart;
   ed('difficulty').onchange=loadSongChart;
   ed('song-seek').oninput=renderSongPosition;
   if(data) loadSongAtlas(data);
-  if(select.value) loadSongChart();
 }
 
 function selectedCharacterData() {
@@ -332,6 +339,7 @@ ed('mod').addEventListener('change', async () => {
     const allText = (edManifest.files || []).filter(p => /\.(json|lua|js|xml|txt|hscript)$/i.test(p));
     ed('file').replaceChildren(new Option('Selecciona un archivo…', ''), ...allText.map(p => new Option(p, p)));
     if (character) { ed('file').value = character; await openEditorFile(character); }
+    if (ed('song').value) await loadSongChart();
     setEditorMessage('Workspace listo para ' + edEntry.name + '. Los cambios se guardan solo en este navegador.');
   } catch (error) { setEditorMessage(error.message); }
 });
