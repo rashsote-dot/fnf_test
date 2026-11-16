@@ -5,7 +5,7 @@ import { detectMod } from './mod-manager-detect';
 export { detectMod };
 import { idbDelete, idbDeletePrefix, idbGet, idbKeys, idbSet, idbSetMany } from '../storage/idb';
 import { readZip } from '../storage/zip';
-import { getJson, ListedSource, LocalSource, RemoteSource, type ModSource } from './source';
+import { getJson, ListedSource, LocalSource, PatchedSource, RemoteSource, type ModSource } from './source';
 
 export const BASE_URL = new URL('./', document.baseURI).href;
 
@@ -49,7 +49,9 @@ export async function openMod(entry: CatalogEntry): Promise<ModRuntime> {
   const manifest: ModManifest = entry.local ? (await idbGet<ModManifest>('mods', entry.id))! : await getJson(source, 'manifest.json');
   if (!manifest) throw new Error('Manifiesto del mod no encontrado');
   const listed = manifest.files?.length ? new ListedSource(source, manifest.files) : source;
-  return { entry, manifest, source: listed, adapter: getAdapter(manifest.format) };
+  // Los parches del panel DEV se superponen en memoria; el contenido original permanece intacto.
+  const patched = new PatchedSource(listed);
+  return { entry, manifest, source: patched, adapter: getAdapter(manifest.format) };
 }
 
 export function coverUrl(e: CatalogEntry): string {
