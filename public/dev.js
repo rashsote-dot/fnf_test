@@ -648,6 +648,92 @@ ed('reset').addEventListener('click', async () => {
   await openEditorFile(edPath);
   setEditorMessage('Override eliminado. Se está mostrando el archivo original.');
 });
+
+const publisherTokenKey = 'funkade-dev-github-token';
+const publisherStatus = $('ed-github-status');
+function publisherToken() { try { return sessionStorage.getItem(publisherTokenKey) || ''; } catch { return ''; } }
+function publisherMessage(message) { if (publisherStatus) publisherStatus.textContent = message; }
+function updatePublisherUI() {
+  const connected = !!publisherToken();
+  if ($('ed-github-connect')) $('ed-github-connect').textContent = connected ? 'Conectado' : 'Conectar';
+  if ($('ed-publish')) $('ed-publish').disabled = !connected;
+  if (connected) publisherMessage('GitHub conectado en esta pestaña. Selecciona un mod y pulsa PUBLICAR CAMBIOS DEL MOD.');
+}
+async function githubApi(path, options = {}) {
+  const token = publisherToken();
+  if (!token) throw new Error('Primero conecta tu token de GitHub.');
+  const response = await fetch('https://api.github.com' + path, {
+    ...options,
+    headers: { Accept: 'application/vnd.github+json', Authorization: 'Bearer ' + token,
+      'X-GitHub-Api-Version': '2022-11-28',
+      ...(options.body ? { 'Content-Type': 'application/json' } : {}), ...(options.headers || {}) }
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.message || ('GitHub respondió ' + response.status));
+  return data;
+}
+$('ed-github-connect')?.addEventListener('click', async () => {
+  const token = $('ed-github-token').value.trim();
+  if (!token) { publisherMessage('Pega el token en el campo para conectar.'); return; }
+  try {
+    sessionStorage.setItem(publisherTokenKey, token);
+    const user = await githubApi('/user');
+    const repoInfo = await githubApi('/repos/' + owner + '/' + repo);
+    if (!repoInfo.permissions?.push) throw new Error('La cuenta no tiene permiso de escritura en este repositorio.');
+    $('ed-github-token').value = '';
+    updatePublisherUI();
+    publisherMessage('Conectado como ' + (user.login || 'usuario') + '. Listo para publicar en ' + owner + '/' + repo + '.');
+  } catch (error) {
+    sessionStorage.removeItem(publisherTokenKey);
+    publisherMessage('No se pudo conectar: ' + error.message + '. Revisa el token y sus permisos.');
+  }
+});
+$('ed-github-disconnect')?.addEventListener('click', () => {
+  sessionStorage.removeItem(publisherTokenKey); $('ed-github-token').value = '';
+  updatePublisherUI(); publisherMessage('Sesión desconectada. Tus modificaciones locales siguen guardadas.');
+});
+$('ed-publish')?.addEventListener('click', async () => {
+  if (!edEntry || !edManifest) { setEditorMessage('Selecciona un mod antes de publicar.'); return; }
+  const patches = readOverrides(edEntry.id), paths = Object.keys(patches);
+  if (!paths.length) { setEditorMessage('No hay archivos modificados guardados. Pulsa primero «Guardar cambio local».'); return; }
+  if (!publisherToken()) { publisherMessage('Conecta tu token antes de publicar.'); return; }
+  const allowed = new Set(Array.isArray(edManifest.files) ? edManifest.files : []);
+  const files = [];
+  try {
+    for (const path of paths) {
+      if (!allowed.has(path) || path.startsWith('/') || path.split('/').includes('..') || typeof patches[path] !== 'string')
+        throw new Error('Ruta no permitida o contenido inválido: ' + path);
+      if (/\.json$/i.test(path)) JSON.parse(patches[path]);
+      files.push({ path: 'public/' + edEntry.path + path, content: patches[path] });
+    }
+  } catch(error) { publisherMessage('No se puede publicar: ' + error.message); return; }
+  const button=$('ed-publish'); button.disabled=true;
+  publisherMessage('Publicando ' + files.length + ' archivo(s) de ' + edEntry.name + '… No cierres esta pestaña.');
+  try {
+    const base='/repos/'+owner+'/'+repo;
+    const ref=await githubApi(base+'/git/ref/heads/main');
+    const parentSha=ref.object.sha;
+    const parent=await githubApi(base+'/git/commits/'+parentSha);
+    const treeItems=[];
+    for(const file of files){
+      const blob=await githubApi(base+'/git/blobs',{method:'POST',body:JSON.stringify({content:file.content,encoding:'utf-8'})});
+      treeItems.push({path:file.path,mode:'100644',type:'blob',sha:blob.sha});
+    }
+    const tree=await githubApi(base+'/git/trees',{method:'POST',body:JSON.stringify({base_tree:parent.tree.sha,tree:treeItems})});
+    const commit=await githubApi(base+'/git/commits',{method:'POST',body:JSON.stringify({
+      message:'Publish DEV changes for '+edEntry.id,tree:tree.sha,parents:[parentSha]})});
+    await githubApi(base+'/git/refs/heads/main',{method:'PATCH',body:JSON.stringify({sha:commit.sha,force:false})});
+    localStorage.removeItem(patchKey(edEntry.id)); edOverrides={};
+    if(edPath) await openEditorFile(edPath);
+    setEditorMessage('Publicado correctamente: '+files.length+' archivo(s) de '+edEntry.name+'.');
+    publisherMessage('Commit '+commit.sha.slice(0,7)+' creado. GitHub Actions iniciará la validación y el despliegue automáticamente.');
+    $('ed-status').textContent='Publicado en GitHub'; loadPatchHistory();
+  } catch(error) {
+    publisherMessage('No se pudo publicar: '+error.message+'. Tus cambios locales siguen guardados.');
+  } finally { button.disabled=!publisherToken(); }
+});
+updatePublisherUI();
+
 ed('export').addEventListener('click', () => {
   if (!edEntry) { setEditorMessage('Selecciona un mod primero.'); return; }
   const patches = readOverrides(edEntry.id);
