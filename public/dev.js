@@ -345,6 +345,8 @@ let edStageOrder = [];
 let edStageImages = new Map();
 let edStageBounds = [];
 let edStageSelected = -1;
+let edStageAssetSelected = '';
+let edStageAssetImage = null;
 const stageCanvas = $('ed-stage-canvas');
 const stageCtx = stageCanvas?.getContext('2d');
 const stageLayerKey = (id) => 'funkade-dev-stage-layers:' + id;
@@ -353,11 +355,20 @@ function readStageLayers(id) {
   catch { return {}; }
 }
 function stageDrawableIndices() {
-  // También incluir gf/dad/boyfriend: son marcadores de personajes del escenario
-  // y deben poder seleccionarse/reordenarse aunque no sean sprites normales.
+  // Cualquier objeto visual del stage es seleccionable, aunque use otro type.
   return (edStageData?.objects || []).map((o,i)=>({o,i}))
-    .filter(x=>['sprite','animatedsprite','animated','gf','dad','boyfriend'].includes(String(x.o?.type||'').toLowerCase()))
+    .filter(x=>!!x.o && (x.o.image || ['gf','dad','boyfriend'].includes(String(x.o.type||'').toLowerCase())))
     .map(x=>x.i);
+}
+function stageAssetPaths() {
+  return (edManifest?.files || []).filter(p => /^images\\/.+\\.png$/i.test(p));
+}
+function stageAssetOptions() {
+  return stageAssetPaths().map(path => new Option('Sprite · ' + path.replace(/^images\\//i,''), 'asset:' + path));
+}
+function showStageAsset(path) {
+  edStageAssetSelected=path||'';edStageSelected=-1;edStageAssetImage=null;
+  updateStageLayerButtons();drawStagePreview();
 }
 function stageObjectLabel(obj,index) {
   return String(obj?.name || obj?.image || obj?.type || 'Objeto') + ' · #' + (index+1);
@@ -367,15 +378,18 @@ function setupStageEditor() {
   if(!select || !edManifest) return;
   const paths=(edManifest.files||[]).filter(p=>/^stages\/.*\.json$/i.test(p));
   select.replaceChildren(new Option(paths.length?'Selecciona un escenario…':'Este mod no declara escenarios',''),...paths.map(p=>new Option(p,p)));
-  ed('stage-object').replaceChildren(new Option('Selecciona un objeto…',''));
-  edStageData=null; edStagePath=''; edStageOrder=[]; edStageSelected=-1; edStageImages=new Map();
-  ed('stage-status').textContent=paths.length?'Escenario disponible':'Este mod no declara archivos stages/*.json';
-  ed('layer-back').disabled=true; ed('layer-front').disabled=true;
+  ed('stage-object').replaceChildren(new Option('Selecciona un objeto o sprite…',''),...stageAssetOptions());
+  edStageData=null;edStagePath='';edStageOrder=[];edStageSelected=-1;edStageAssetSelected='';edStageAssetImage=null;edStageImages=new Map();
+  ed('stage-status').textContent=paths.length?'Escenario disponible':'No hay escenarios · puedes explorar los sprites del mod';
+  ed('layer-back').disabled=true;ed('layer-front').disabled=true;
   drawStagePreview();
   if(paths.length){select.value=paths[0];loadStageFile(paths[0]);}
   select.onchange=()=>loadStageFile(select.value);
   ed('stage-object').onchange=()=>{
-    edStageSelected=ed('stage-object').value===''?-1:Number(ed('stage-object').value);
+    const value=ed('stage-object').value;
+    if(value.startsWith('asset:')){showStageAsset(value.slice(6));return;}
+    edStageAssetSelected='';
+    edStageSelected=value===''?-1:Number(value);
     updateStageLayerButtons();drawStagePreview();
   };
 }
@@ -401,9 +415,12 @@ async function loadStageFile(path) {
     const saved=readStageLayers(edEntry.id)[path];
     edStageOrder=Array.isArray(saved)?saved.filter(i=>drawable.includes(i)):[];
     for(const i of drawable)if(!edStageOrder.includes(i))edStageOrder.push(i);
-    ed('stage-object').replaceChildren(new Option('Selecciona un objeto o personaje…',''),
-      ...edStageOrder.map(i=>new Option(stageObjectLabel(parsed.objects[i],i),String(i))));
-    ed('stage-status').textContent=drawable.length+' objetos editables · orden local';
+    ed('stage-object').replaceChildren(
+      new Option('Selecciona un objeto o sprite…',''),
+      ...edStageOrder.map(i=>new Option(stageObjectLabel(parsed.objects[i],i),String(i))),
+      ...stageAssetOptions()
+    );
+    ed('stage-status').textContent=drawable.length+' objetos del escenario · '+stageAssetPaths().length+' sprites del mod';
     updateStageLayerButtons();
     drawStagePreview();
   }catch(error){
@@ -413,8 +430,9 @@ async function loadStageFile(path) {
 }
 function updateStageLayerButtons(){
   const at=edStageOrder.indexOf(edStageSelected);
-  ed('layer-back').disabled=at<=0;
-  ed('layer-front').disabled=at<0||at>=edStageOrder.length-1;
+  const isStageObject=!edStageAssetSelected&&at>=0;
+  ed('layer-back').disabled=!isStageObject||at<=0;
+  ed('layer-front').disabled=!isStageObject||at>=edStageOrder.length-1;
 }
 function moveStageLayer(direction){
   const at=edStageOrder.indexOf(edStageSelected),to=at+direction;
@@ -469,9 +487,30 @@ function drawStagePreview(){
   for(let x=0;x<w;x+=80){stageCtx.beginPath();stageCtx.moveTo(x,0);stageCtx.lineTo(x,h);stageCtx.stroke();}
   for(let y=0;y<h;y+=60){stageCtx.beginPath();stageCtx.moveTo(0,y);stageCtx.lineTo(w,y);stageCtx.stroke();}
   edStageBounds=[];
+  if(edStageAssetSelected){
+    if(!edStageAssetImage){
+      const img=new Image();edStageAssetImage=img;
+      img.onload=drawStagePreview;
+      img.onerror=()=>{stageCtx.fillStyle='#ff9aaa';stageCtx.font='14px sans-serif';stageCtx.textAlign='center';stageCtx.fillText('No se pudo cargar este sprite',w/2,h/2);};
+      img.src=editorUrl(edEntry.path+edStageAssetSelected);
+    }
+    if(edStageAssetImage.complete&&edStageAssetImage.naturalWidth){
+      const fit=Math.min((w-40)/edStageAssetImage.naturalWidth,(h-40)/edStageAssetImage.naturalHeight,1);
+      const dw=edStageAssetImage.naturalWidth*fit,dh=edStageAssetImage.naturalHeight*fit;
+      stageCtx.imageSmoothingEnabled=false;
+      stageCtx.drawImage(edStageAssetImage,(w-dw)/2,(h-dh)/2,dw,dh);
+      stageCtx.strokeStyle='#ff3fa4';stageCtx.lineWidth=2;stageCtx.strokeRect((w-dw)/2,(h-dh)/2,dw,dh);
+      stageCtx.fillStyle='#fff';stageCtx.font='11px sans-serif';stageCtx.textAlign='left';
+      stageCtx.fillText(edStageAssetSelected.replace(/^images\\//i,''),12,h-12);
+    }else{
+      stageCtx.fillStyle='#c8bfdc';stageCtx.font='15px sans-serif';stageCtx.textAlign='center';
+      stageCtx.fillText('Cargando sprite…',w/2,h/2);
+    }
+    return;
+  }
   if(!edStageData){
     stageCtx.fillStyle='#c8bfdc';stageCtx.font='15px sans-serif';stageCtx.textAlign='center';
-    stageCtx.fillText('Selecciona un escenario con objetos para previsualizarlo',w/2,h/2);return;
+    stageCtx.fillText('Selecciona un sprite del mod o un escenario',w/2,h/2);return;
   }
   if(!edStageOrder.length){
     stageCtx.fillStyle='#c8bfdc';stageCtx.font='15px sans-serif';stageCtx.textAlign='center';
