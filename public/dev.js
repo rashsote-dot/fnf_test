@@ -577,13 +577,13 @@ ed('export').addEventListener('click', () => {
   if (!edEntry) { setEditorMessage('Selecciona un mod primero.'); return; }
   const patches = readOverrides(edEntry.id);
   const paths = Object.keys(patches);
-  if (!paths.length) { setEditorMessage('Todavía no hay cambios guardados para exportar.'); return; }
   const stageLayers = readStageLayers(edEntry.id);
-  const hasStageLayers = Object.keys(stageLayers).some(path => Array.isArray(stageLayers[path]) && stageLayers[path].length);
-  const blob = new Blob([JSON.stringify({ format: 'funkade-mod-patch', version: 1, modId: edEntry.id, files: patches, ...(hasStageLayers ? { stageLayers } : {}) }, null, 2)], { type: 'application/json' });
+  const stagePaths = Object.keys(stageLayers).filter(path => Array.isArray(stageLayers[path]) && stageLayers[path].length);
+  if (!paths.length && !stagePaths.length) { setEditorMessage('Todavía no hay cambios guardados para exportar.'); return; }
+  const blob = new Blob([JSON.stringify({ format: 'funkade-mod-patch', version: 1, modId: edEntry.id, files: patches, ...(stagePaths.length ? { stageLayers } : {}) }, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url; a.download = edEntry.id + '-patch.json'; a.click();
   URL.revokeObjectURL(url);
-  setEditorMessage('Parche exportado con ' + paths.length + ' archivo(s).');
+  setEditorMessage('Parche exportado: ' + paths.length + ' archivo(s) y ' + stagePaths.length + ' escenario(s) con orden de capas.');
 });
