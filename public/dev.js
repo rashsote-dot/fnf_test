@@ -395,7 +395,7 @@ function setupStageEditor() {
 }
 async function loadStageFile(path) {
   if(!edEntry||!path)return;
-  edStagePath=path;edStageData=null;edStageImages=new Map();edStageSelected=-1;
+  edStagePath=path;edStageData=null;edStageImages=new Map();edStageSelected=-1;edStageAssetSelected='';edStageAssetImage=null;
   ed('stage-status').textContent='Cargando escenario…';
   try{
     const response=await fetch(editorUrl(edEntry.path+path),{cache:'no-store'});
