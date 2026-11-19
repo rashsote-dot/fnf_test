@@ -1,223 +1,223 @@
 {
- "animations": [
-  {
-   "offsets": [
+  "animations": [
+    {
+      "offsets": [
+        0,
+        0
+      ],
+      "loop": false,
+      "fps": 24,
+      "anim": "idle",
+      "name": "Fernan Idle0",
+      "indices": []
+    },
+    {
+      "offsets": [
+        0,
+        0
+      ],
+      "loop": false,
+      "fps": 24,
+      "anim": "singLEFT",
+      "indices": [],
+      "name": "Fernan Left0"
+    },
+    {
+      "offsets": [
+        0,
+        0
+      ],
+      "loop": false,
+      "fps": 24,
+      "anim": "singDOWN",
+      "indices": [],
+      "name": "Fernan Down0"
+    },
+    {
+      "offsets": [
+        0,
+        0
+      ],
+      "loop": false,
+      "fps": 24,
+      "anim": "singUP",
+      "indices": [],
+      "name": "Fernan Up0"
+    },
+    {
+      "offsets": [
+        0,
+        0
+      ],
+      "loop": false,
+      "fps": 24,
+      "anim": "singRIGHT",
+      "indices": [],
+      "name": "Fernan Right0"
+    },
+    {
+      "loop": true,
+      "offsets": [
+        0,
+        0
+      ],
+      "anim": "idle-alt",
+      "fps": 5,
+      "name": "Fernan Idle Alt0",
+      "indices": []
+    },
+    {
+      "loop": false,
+      "offsets": [
+        0,
+        0
+      ],
+      "anim": "singLEFT-alt",
+      "fps": 24,
+      "name": "Fernan Left Alt0",
+      "indices": []
+    },
+    {
+      "loop": false,
+      "offsets": [
+        0,
+        0
+      ],
+      "anim": "singDOWN-alt",
+      "fps": 24,
+      "name": "Fernan Down Alt0",
+      "indices": []
+    },
+    {
+      "loop": false,
+      "offsets": [
+        0,
+        0
+      ],
+      "anim": "singUP-alt",
+      "fps": 24,
+      "name": "Fernan Up Alt0",
+      "indices": []
+    },
+    {
+      "loop": false,
+      "offsets": [
+        0,
+        0
+      ],
+      "anim": "singRIGHT-alt",
+      "fps": 24,
+      "name": "Fernan Right Alt0",
+      "indices": []
+    },
+    {
+      "offsets": [
+        0,
+        0
+      ],
+      "indices": [],
+      "fps": 24,
+      "anim": "QUE",
+      "loop": true,
+      "name": "Fernan QUE"
+    },
+    {
+      "offsets": [
+        0,
+        0
+      ],
+      "indices": [],
+      "fps": 24,
+      "anim": "AAHH",
+      "loop": true,
+      "name": "Fernan AAHH"
+    },
+    {
+      "offsets": [
+        0,
+        0
+      ],
+      "indices": [],
+      "fps": 24,
+      "anim": "vamos",
+      "loop": true,
+      "name": "Fernan Vamos0"
+    },
+    {
+      "offsets": [
+        0,
+        0
+      ],
+      "indices": [],
+      "fps": 24,
+      "anim": "goku1",
+      "loop": true,
+      "name": "Fernan Goku1"
+    },
+    {
+      "offsets": [
+        0,
+        0
+      ],
+      "indices": [],
+      "fps": 24,
+      "anim": "goku2",
+      "loop": true,
+      "name": "Fernan Goku2"
+    },
+    {
+      "offsets": [
+        0,
+        0
+      ],
+      "indices": [],
+      "fps": 24,
+      "anim": "cry1",
+      "loop": true,
+      "name": "Fernan Cry1"
+    },
+    {
+      "offsets": [
+        0,
+        0
+      ],
+      "indices": [],
+      "fps": 24,
+      "anim": "cry2",
+      "loop": true,
+      "name": "Fernan Cry2"
+    },
+    {
+      "offsets": [
+        0,
+        0
+      ],
+      "indices": [],
+      "fps": 24,
+      "anim": "cry3",
+      "loop": true,
+      "name": "Fernan Cry3"
+    }
+  ],
+  "vocals_file": "",
+  "no_antialiasing": false,
+  "image": "characters/shobon no action/Fernan",
+  "position": [
     0,
-    0
-   ],
-   "loop": false,
-   "fps": 24,
-   "anim": "idle",
-   "name": "Fernan Idle0",
-   "indices": []
-  },
-  {
-   "offsets": [
+    -10
+  ],
+  "healthicon": "fernan",
+  "flip_x": false,
+  "healthbar_colors": [
+    20,
+    200,
+    120
+  ],
+  "camera_position": [
     0,
-    0
-   ],
-   "loop": false,
-   "fps": 24,
-   "anim": "singLEFT",
-   "indices": [],
-   "name": "Fernan Left0"
-  },
-  {
-   "offsets": [
-    0,
-    0
-   ],
-   "loop": false,
-   "fps": 24,
-   "anim": "singDOWN",
-   "indices": [],
-   "name": "Fernan Down0"
-  },
-  {
-   "offsets": [
-    0,
-    0
-   ],
-   "loop": false,
-   "fps": 24,
-   "anim": "singUP",
-   "indices": [],
-   "name": "Fernan Up0"
-  },
-  {
-   "offsets": [
-    0,
-    0
-   ],
-   "loop": false,
-   "fps": 24,
-   "anim": "singRIGHT",
-   "indices": [],
-   "name": "Fernan Right0"
-  },
-  {
-   "loop": true,
-   "offsets": [
-    0,
-    0
-   ],
-   "anim": "idle-alt",
-   "fps": 5,
-   "name": "Fernan Idle Alt0",
-   "indices": []
-  },
-  {
-   "loop": false,
-   "offsets": [
-    0,
-    0
-   ],
-   "anim": "singLEFT-alt",
-   "fps": 24,
-   "name": "Fernan Left Alt0",
-   "indices": []
-  },
-  {
-   "loop": false,
-   "offsets": [
-    0,
-    0
-   ],
-   "anim": "singDOWN-alt",
-   "fps": 24,
-   "name": "Fernan Down Alt0",
-   "indices": []
-  },
-  {
-   "loop": false,
-   "offsets": [
-    0,
-    0
-   ],
-   "anim": "singUP-alt",
-   "fps": 24,
-   "name": "Fernan Up Alt0",
-   "indices": []
-  },
-  {
-   "loop": false,
-   "offsets": [
-    0,
-    0
-   ],
-   "anim": "singRIGHT-alt",
-   "fps": 24,
-   "name": "Fernan Right Alt0",
-   "indices": []
-  },
-  {
-   "offsets": [
-    0,
-    0
-   ],
-   "indices": [],
-   "fps": 24,
-   "anim": "QUE",
-   "loop": true,
-   "name": "Fernan QUE"
-  },
-  {
-   "offsets": [
-    0,
-    0
-   ],
-   "indices": [],
-   "fps": 24,
-   "anim": "AAHH",
-   "loop": true,
-   "name": "Fernan AAHH"
-  },
-  {
-   "offsets": [
-    0,
-    0
-   ],
-   "indices": [],
-   "fps": 24,
-   "anim": "vamos",
-   "loop": true,
-   "name": "Fernan Vamos0"
-  },
-  {
-   "offsets": [
-    0,
-    0
-   ],
-   "indices": [],
-   "fps": 24,
-   "anim": "goku1",
-   "loop": true,
-   "name": "Fernan Goku1"
-  },
-  {
-   "offsets": [
-    0,
-    0
-   ],
-   "indices": [],
-   "fps": 24,
-   "anim": "goku2",
-   "loop": true,
-   "name": "Fernan Goku2"
-  },
-  {
-   "offsets": [
-    0,
-    0
-   ],
-   "indices": [],
-   "fps": 24,
-   "anim": "cry1",
-   "loop": true,
-   "name": "Fernan Cry1"
-  },
-  {
-   "offsets": [
-    0,
-    0
-   ],
-   "indices": [],
-   "fps": 24,
-   "anim": "cry2",
-   "loop": true,
-   "name": "Fernan Cry2"
-  },
-  {
-   "offsets": [
-    0,
-    0
-   ],
-   "indices": [],
-   "fps": 24,
-   "anim": "cry3",
-   "loop": true,
-   "name": "Fernan Cry3"
-  }
- ],
- "vocals_file": "",
- "no_antialiasing": false,
- "image": "characters/shobon no action/Fernan",
- "position": [
-  0,
-  0
- ],
- "healthicon": "fernan",
- "flip_x": false,
- "healthbar_colors": [
-  20,
-  200,
-  120
- ],
- "camera_position": [
-  0,
-  70
- ],
- "sing_duration": 5.99999999999999,
- "scale": 1,
- "_editor_isPlayer": false
+    70
+  ],
+  "sing_duration": 5.99999999999999,
+  "scale": 0.2,
+  "_editor_isPlayer": false
 }

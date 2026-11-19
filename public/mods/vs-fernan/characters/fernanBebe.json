@@ -1,158 +1,158 @@
 {
- "animations": [
-  {
-   "loop": false,
-   "offsets": [
+  "animations": [
+    {
+      "loop": false,
+      "offsets": [
+        0,
+        0
+      ],
+      "indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "anim": "idle",
+      "fps": 24,
+      "name": "Fernan Idle0"
+    },
+    {
+      "loop": false,
+      "offsets": [
+        0,
+        0
+      ],
+      "anim": "singLEFT",
+      "fps": 24,
+      "name": "Fernan Left0",
+      "indices": []
+    },
+    {
+      "loop": false,
+      "offsets": [
+        0,
+        0
+      ],
+      "anim": "singDOWN",
+      "fps": 24,
+      "name": "Fernan Down0",
+      "indices": []
+    },
+    {
+      "loop": false,
+      "offsets": [
+        0,
+        0
+      ],
+      "anim": "singUP",
+      "fps": 24,
+      "name": "Fernan Up0",
+      "indices": []
+    },
+    {
+      "loop": false,
+      "offsets": [
+        0,
+        0
+      ],
+      "anim": "singRIGHT",
+      "fps": 24,
+      "name": "Fernan Right0",
+      "indices": []
+    },
+    {
+      "loop": true,
+      "offsets": [
+        0,
+        0
+      ],
+      "anim": "UAHH",
+      "fps": 24,
+      "name": "Fernan UAHH0",
+      "indices": []
+    },
+    {
+      "loop": true,
+      "offsets": [
+        0,
+        0
+      ],
+      "anim": "beberepeat",
+      "fps": 24,
+      "name": "Fernan Beberepeat0",
+      "indices": []
+    },
+    {
+      "loop": true,
+      "offsets": [
+        0,
+        0
+      ],
+      "anim": "nopodemos",
+      "fps": 24,
+      "name": "Fernan Nopodemos0",
+      "indices": []
+    },
+    {
+      "loop": true,
+      "offsets": [
+        0,
+        0
+      ],
+      "anim": "sipodemos",
+      "fps": 24,
+      "name": "Fernan Sipodemos0",
+      "indices": []
+    },
+    {
+      "loop": true,
+      "offsets": [
+        0,
+        0
+      ],
+      "anim": "queno",
+      "fps": 24,
+      "name": "Fernan Queno0",
+      "indices": []
+    },
+    {
+      "offsets": [
+        0,
+        0
+      ],
+      "indices": [],
+      "fps": 60,
+      "anim": "waaa",
+      "loop": false,
+      "name": "Fernan Waaa0"
+    }
+  ],
+  "vocals_file": "",
+  "no_antialiasing": false,
+  "image": "characters/shobon no action/FernanBebe",
+  "position": [
+    300,
+    -33
+  ],
+  "healthicon": "fernan",
+  "flip_x": false,
+  "healthbar_colors": [
+    20,
+    200,
+    120
+  ],
+  "camera_position": [
     0,
-    0
-   ],
-   "indices": [
-    0,
-    1,
-    2,
-    3,
-    4,
-    5,
-    6,
-    7,
-    8,
-    9,
-    10
-   ],
-   "anim": "idle",
-   "fps": 24,
-   "name": "Fernan Idle0"
-  },
-  {
-   "loop": false,
-   "offsets": [
-    0,
-    0
-   ],
-   "anim": "singLEFT",
-   "fps": 24,
-   "name": "Fernan Left0",
-   "indices": []
-  },
-  {
-   "loop": false,
-   "offsets": [
-    0,
-    0
-   ],
-   "anim": "singDOWN",
-   "fps": 24,
-   "name": "Fernan Down0",
-   "indices": []
-  },
-  {
-   "loop": false,
-   "offsets": [
-    0,
-    0
-   ],
-   "anim": "singUP",
-   "fps": 24,
-   "name": "Fernan Up0",
-   "indices": []
-  },
-  {
-   "loop": false,
-   "offsets": [
-    0,
-    0
-   ],
-   "anim": "singRIGHT",
-   "fps": 24,
-   "name": "Fernan Right0",
-   "indices": []
-  },
-  {
-   "loop": true,
-   "offsets": [
-    0,
-    0
-   ],
-   "anim": "UAHH",
-   "fps": 24,
-   "name": "Fernan UAHH0",
-   "indices": []
-  },
-  {
-   "loop": true,
-   "offsets": [
-    0,
-    0
-   ],
-   "anim": "beberepeat",
-   "fps": 24,
-   "name": "Fernan Beberepeat0",
-   "indices": []
-  },
-  {
-   "loop": true,
-   "offsets": [
-    0,
-    0
-   ],
-   "anim": "nopodemos",
-   "fps": 24,
-   "name": "Fernan Nopodemos0",
-   "indices": []
-  },
-  {
-   "loop": true,
-   "offsets": [
-    0,
-    0
-   ],
-   "anim": "sipodemos",
-   "fps": 24,
-   "name": "Fernan Sipodemos0",
-   "indices": []
-  },
-  {
-   "loop": true,
-   "offsets": [
-    0,
-    0
-   ],
-   "anim": "queno",
-   "fps": 24,
-   "name": "Fernan Queno0",
-   "indices": []
-  },
-  {
-   "offsets": [
-    0,
-    0
-   ],
-   "indices": [],
-   "fps": 60,
-   "anim": "waaa",
-   "loop": false,
-   "name": "Fernan Waaa0"
-  }
- ],
- "vocals_file": "",
- "no_antialiasing": false,
- "image": "characters/shobon no action/FernanBebe",
- "position": [
-  0,
-  0
- ],
- "healthicon": "fernan",
- "flip_x": false,
- "healthbar_colors": [
-  20,
-  200,
-  120
- ],
- "camera_position": [
-  0,
-  70
- ],
- "sing_duration": 5.99999999999999,
- "scale": 1,
- "_editor_isPlayer": false
+    70
+  ],
+  "sing_duration": 5.99999999999999,
+  "scale": 0.08,
+  "_editor_isPlayer": false
 }
