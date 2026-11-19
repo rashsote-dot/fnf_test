@@ -361,10 +361,10 @@ function stageDrawableIndices() {
     .map(x=>x.i);
 }
 function stageAssetPaths() {
-  return (edManifest?.files || []).filter(p => /^images\\/.+\\.png$/i.test(p));
+  return (edManifest?.files || []).filter(p => /^images\/.+\.png$/i.test(p));
 }
 function stageAssetOptions() {
-  return stageAssetPaths().map(path => new Option('Sprite · ' + path.replace(/^images\\//i,''), 'asset:' + path));
+  return stageAssetPaths().map(path => new Option('Sprite · ' + path.replace(/^images\//i,''), 'asset:' + path));
 }
 function showStageAsset(path) {
   edStageAssetSelected=path||'';edStageSelected=-1;edStageAssetImage=null;
