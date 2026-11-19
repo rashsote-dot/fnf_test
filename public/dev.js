@@ -388,6 +388,14 @@ async function loadStageFile(path) {
     if(!response.ok)throw new Error('HTTP '+response.status);
     const parsed=await response.json();
     if(!Array.isArray(parsed.objects))throw new Error('El JSON no contiene una lista objects.');
+    // Algunos stages no incluyen gf/dad/boyfriend en objects: el motor los crea
+    // automáticamente usando sus coordenadas. Añadimos marcadores solo en memoria
+    // para que también puedan seleccionarse sin tocar el JSON publicado.
+    const presentTypes=new Set(parsed.objects.map(o=>String(o?.type||'').toLowerCase()));
+    for(const type of ['gf','dad','boyfriend']){
+      if(type==='gf'&&parsed.hide_girlfriend)continue;
+      if(!presentTypes.has(type))parsed.objects.push({type,name:type+' (personaje del escenario)',_editorVirtual:true});
+    }
     edStageData=parsed;
     const drawable=stageDrawableIndices();
     const saved=readStageLayers(edEntry.id)[path];
