@@ -353,8 +353,10 @@ function readStageLayers(id) {
   catch { return {}; }
 }
 function stageDrawableIndices() {
+  // También incluir gf/dad/boyfriend: son marcadores de personajes del escenario
+  // y deben poder seleccionarse/reordenarse aunque no sean sprites normales.
   return (edStageData?.objects || []).map((o,i)=>({o,i}))
-    .filter(x=>['sprite','animatedSprite','animated'].includes(String(x.o?.type||'').toLowerCase()))
+    .filter(x=>['sprite','animatedsprite','animated','gf','dad','boyfriend'].includes(String(x.o?.type||'').toLowerCase()))
     .map(x=>x.i);
 }
 function stageObjectLabel(obj,index) {
@@ -391,7 +393,7 @@ async function loadStageFile(path) {
     const saved=readStageLayers(edEntry.id)[path];
     edStageOrder=Array.isArray(saved)?saved.filter(i=>drawable.includes(i)):[];
     for(const i of drawable)if(!edStageOrder.includes(i))edStageOrder.push(i);
-    ed('stage-object').replaceChildren(new Option('Selecciona un objeto…',''),
+    ed('stage-object').replaceChildren(new Option('Selecciona un objeto o personaje…',''),
       ...edStageOrder.map(i=>new Option(stageObjectLabel(parsed.objects[i],i),String(i))));
     ed('stage-status').textContent=drawable.length+' objetos editables · orden local';
     updateStageLayerButtons();
@@ -463,10 +465,31 @@ function drawStagePreview(){
     stageCtx.fillStyle='#c8bfdc';stageCtx.font='15px sans-serif';stageCtx.textAlign='center';
     stageCtx.fillText('Selecciona un escenario con objetos para previsualizarlo',w/2,h/2);return;
   }
+  if(!edStageOrder.length){
+    stageCtx.fillStyle='#c8bfdc';stageCtx.font='15px sans-serif';stageCtx.textAlign='center';
+    stageCtx.fillText('Este escenario no contiene objetos ni marcadores de personajes',w/2,h/2);
+  }
   const zoom=Math.max(.1,Math.min(3,Number(edStageData.defaultZoom||1)));
   const scaleX=(w/1280)*zoom,scaleY=(h/720)*zoom;
   for(const index of edStageOrder){
     const obj=edStageData.objects[index];if(!obj)continue;
+    const objectType=String(obj.type||'').toLowerCase();
+    if(['gf','dad','boyfriend'].includes(objectType)){
+      const position=objectType==='boyfriend'?(edStageData.boyfriend||[770,100]):objectType==='gf'?(edStageData.girlfriend||[400,130]):(edStageData.opponent||[100,100]);
+      const px=(Number(position[0]||0)-640)*scaleX+w/2;
+      const py=(Number(position[1]||0)-360)*scaleY+h/2;
+      const pw=76*scaleX,ph=118*scaleY;
+      edStageBounds.push({index,x:px,y:py,w:pw,h:ph});
+      stageCtx.save();
+      stageCtx.fillStyle=index===edStageSelected?'rgba(255,63,164,.35)':'rgba(125,180,255,.18)';
+      stageCtx.strokeStyle=index===edStageSelected?'#ff3fa4':'#9dc8ff';
+      stageCtx.lineWidth=2;stageCtx.setLineDash([5,3]);
+      stageCtx.fillRect(px,py,pw,ph);stageCtx.strokeRect(px,py,pw,ph);
+      stageCtx.setLineDash([]);stageCtx.fillStyle='#fff';stageCtx.font='bold 11px sans-serif';stageCtx.textAlign='center';
+      stageCtx.fillText(objectType==='boyfriend'?'BOYFRIEND':objectType.toUpperCase(),px+pw/2,py+ph/2);
+      stageCtx.restore();
+      continue;
+    }
     const asset=loadStageImage(obj,index);
     const sx=Number(Array.isArray(obj.scale)?obj.scale[0]:obj.scale??1)||1;
     const sy=Number(Array.isArray(obj.scale)?obj.scale[1]:obj.scale??1)||1;
