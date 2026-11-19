@@ -336,6 +336,176 @@ function setupSongPreview(data) {
   ed('song-seek').oninput=renderSongPosition;
   if(data) loadSongAtlas(data);
 }
+
+ 
+// Previsualizador de escenarios: el orden de capas se guarda aparte del JSON.
+let edStageData = null;
+let edStagePath = '';
+let edStageOrder = [];
+let edStageImages = new Map();
+let edStageBounds = [];
+let edStageSelected = -1;
+const stageCanvas = $('ed-stage-canvas');
+const stageCtx = stageCanvas?.getContext('2d');
+const stageLayerKey = (id) => 'funkade-dev-stage-layers:' + id;
+function readStageLayers(id) {
+  try { return JSON.parse(localStorage.getItem(stageLayerKey(id)) || '{}'); }
+  catch { return {}; }
+}
+function stageDrawableIndices() {
+  return (edStageData?.objects || []).map((o,i)=>({o,i}))
+    .filter(x=>['sprite','animatedSprite','animated'].includes(String(x.o?.type||'').toLowerCase()))
+    .map(x=>x.i);
+}
+function stageObjectLabel(obj,index) {
+  return String(obj?.name || obj?.image || obj?.type || 'Objeto') + ' · #' + (index+1);
+}
+function setupStageEditor() {
+  const select=ed('stage-file');
+  if(!select || !edManifest) return;
+  const paths=(edManifest.files||[]).filter(p=>/^stages\/.*\.json$/i.test(p));
+  select.replaceChildren(new Option(paths.length?'Selecciona un escenario…':'Este mod no declara escenarios',''),...paths.map(p=>new Option(p,p)));
+  ed('stage-object').replaceChildren(new Option('Selecciona un objeto…',''));
+  edStageData=null; edStagePath=''; edStageOrder=[]; edStageSelected=-1; edStageImages=new Map();
+  ed('stage-status').textContent=paths.length?'Escenario disponible':'Este mod no declara archivos stages/*.json';
+  ed('layer-back').disabled=true; ed('layer-front').disabled=true;
+  drawStagePreview();
+  if(paths.length){select.value=paths[0];loadStageFile(paths[0]);}
+  select.onchange=()=>loadStageFile(select.value);
+  ed('stage-object').onchange=()=>{
+    edStageSelected=ed('stage-object').value===''?-1:Number(ed('stage-object').value);
+    updateStageLayerButtons();drawStagePreview();
+  };
+}
+async function loadStageFile(path) {
+  if(!edEntry||!path)return;
+  edStagePath=path;edStageData=null;edStageImages=new Map();edStageSelected=-1;
+  ed('stage-status').textContent='Cargando escenario…';
+  try{
+    const response=await fetch(editorUrl(edEntry.path+path),{cache:'no-store'});
+    if(!response.ok)throw new Error('HTTP '+response.status);
+    const parsed=await response.json();
+    if(!Array.isArray(parsed.objects))throw new Error('El JSON no contiene una lista objects.');
+    edStageData=parsed;
+    const drawable=stageDrawableIndices();
+    const saved=readStageLayers(edEntry.id)[path];
+    edStageOrder=Array.isArray(saved)?saved.filter(i=>drawable.includes(i)):[];
+    for(const i of drawable)if(!edStageOrder.includes(i))edStageOrder.push(i);
+    ed('stage-object').replaceChildren(new Option('Selecciona un objeto…',''),
+      ...edStageOrder.map(i=>new Option(stageObjectLabel(parsed.objects[i],i),String(i))));
+    ed('stage-status').textContent=drawable.length+' objetos editables · orden local';
+    updateStageLayerButtons();
+    drawStagePreview();
+  }catch(error){
+    ed('stage-status').textContent='No se pudo cargar: '+error.message;
+    drawStagePreview();
+  }
+}
+function updateStageLayerButtons(){
+  const at=edStageOrder.indexOf(edStageSelected);
+  ed('layer-back').disabled=at<=0;
+  ed('layer-front').disabled=at<0||at>=edStageOrder.length-1;
+}
+function moveStageLayer(direction){
+  const at=edStageOrder.indexOf(edStageSelected),to=at+direction;
+  if(at<0||to<0||to>=edStageOrder.length)return;
+  [edStageOrder[at],edStageOrder[to]]=[edStageOrder[to],edStageOrder[at]];
+  const all=readStageLayers(edEntry.id);all[edStagePath]=edStageOrder.slice();
+  localStorage.setItem(stageLayerKey(edEntry.id),JSON.stringify(all));
+  updateStageLayerButtons();drawStagePreview();
+  ed('stage-status').textContent='Orden guardado localmente · '+edStageOrder.length+' objetos';
+}
+ed('layer-back').addEventListener('click',()=>moveStageLayer(-1));
+ed('layer-front').addEventListener('click',()=>moveStageLayer(1));
+function stageImageUrl(obj){
+  let image=String(obj?.image||'').replace(/^\/+|\.png$/gi,'');
+  if(!image)return '';
+  return editorUrl(edEntry.path+'images/'+image+'.png');
+}
+function loadStageImage(obj,index){
+  if(edStageImages.has(index))return edStageImages.get(index);
+  const record={image:null,ready:false,failed:false,frame:null};
+  edStageImages.set(index,record);
+  const url=stageImageUrl(obj);
+  if(!url){record.failed=true;return record;}
+  const img=new Image();
+  img.onload=async()=>{
+    record.image=img;record.ready=true;
+    try{
+      const xmlUrl=url.replace(/\.png(?:\?.*)?$/i,'.xml');
+      const res=await fetch(xmlUrl);
+      if(res.ok){
+        const doc=new DOMParser().parseFromString(await res.text(),'application/xml');
+        const nodes=[...doc.querySelectorAll('SubTexture')];
+        const animation=(obj.animations||[]).find(a=>a.name===obj.firstAnimation||a.anim===obj.firstAnimation)||obj.animations?.[0];
+        const prefix=String(animation?.prefix||animation?.name||'');
+        const node=nodes.find(n=>(n.getAttribute('name')||'').startsWith(prefix))||nodes[0];
+        if(node)record.frame={x:Number(node.getAttribute('x')),y:Number(node.getAttribute('y')),w:Number(node.getAttribute('width')),h:Number(node.getAttribute('height'))};
+      }
+    }catch{}
+    drawStagePreview();
+  };
+  img.onerror=()=>{record.failed=true;drawStagePreview();};
+  img.src=url;
+  return record;
+}
+function drawStagePreview(){
+  if(!stageCtx||!stageCanvas)return;
+  const w=stageCanvas.width,h=stageCanvas.height;
+  stageCtx.clearRect(0,0,w,h);
+  const bg=stageCtx.createLinearGradient(0,0,0,h);bg.addColorStop(0,'#29213d');bg.addColorStop(1,'#100d1c');
+  stageCtx.fillStyle=bg;stageCtx.fillRect(0,0,w,h);
+  stageCtx.strokeStyle='rgba(255,255,255,.09)';stageCtx.lineWidth=1;
+  for(let x=0;x<w;x+=80){stageCtx.beginPath();stageCtx.moveTo(x,0);stageCtx.lineTo(x,h);stageCtx.stroke();}
+  for(let y=0;y<h;y+=60){stageCtx.beginPath();stageCtx.moveTo(0,y);stageCtx.lineTo(w,y);stageCtx.stroke();}
+  edStageBounds=[];
+  if(!edStageData){
+    stageCtx.fillStyle='#c8bfdc';stageCtx.font='15px sans-serif';stageCtx.textAlign='center';
+    stageCtx.fillText('Selecciona un escenario con objetos para previsualizarlo',w/2,h/2);return;
+  }
+  const scaleX=w/1280,scaleY=h/720;
+  for(const index of edStageOrder){
+    const obj=edStageData.objects[index];if(!obj)continue;
+    const asset=loadStageImage(obj,index);
+    const sx=Number(Array.isArray(obj.scale)?obj.scale[0]:obj.scale??1)||1;
+    const sy=Number(Array.isArray(obj.scale)?obj.scale[1]:obj.scale??1)||1;
+    const frame=asset.frame;
+    const naturalW=frame?.w||asset.image?.naturalWidth||160;
+    const naturalH=frame?.h||asset.image?.naturalHeight||90;
+    const dw=naturalW*sx*scaleX,dh=naturalH*sy*scaleY;
+    const dx=Number(obj.x||0)*scaleX,dy=Number(obj.y||0)*scaleY;
+    const bounds={index,x:dx,y:dy,w:dw,h:dh};edStageBounds.push(bounds);
+    stageCtx.save();stageCtx.globalAlpha=Math.max(0,Math.min(1,Number(obj.alpha??1)));
+    if(obj.flipX){stageCtx.translate(dx+dw,dy);stageCtx.scale(-1,1);}
+    if(asset.ready&&asset.image){
+      if(frame)stageCtx.drawImage(asset.image,frame.x,frame.y,frame.w,frame.h,obj.flipX?0:dx,obj.flipX?0:dy,dw,dh);
+      else stageCtx.drawImage(asset.image,obj.flipX?0:dx,obj.flipX?0:dy,dw,dh);
+    }else{
+      stageCtx.fillStyle=asset.failed?'rgba(255,90,120,.22)':'rgba(180,160,220,.18)';
+      stageCtx.fillRect(obj.flipX?0:dx,obj.flipX?0:dy,dw,dh);
+      stageCtx.strokeStyle='rgba(255,255,255,.35)';stageCtx.strokeRect(obj.flipX?0:dx,obj.flipX?0:dy,dw,dh);
+      stageCtx.fillStyle='#fff';stageCtx.font='11px sans-serif';stageCtx.textAlign='left';
+      stageCtx.fillText(String(obj.name||obj.image||'Objeto'),(obj.flipX?0:dx)+4,(obj.flipX?0:dy)+14);
+    }
+    stageCtx.restore();
+    if(index===edStageSelected){
+      stageCtx.save();stageCtx.strokeStyle='#ff3fa4';stageCtx.lineWidth=3;stageCtx.setLineDash([7,4]);
+      stageCtx.strokeRect(dx,dy,dw,dh);stageCtx.restore();
+    }
+  }
+  stageCtx.fillStyle='rgba(0,0,0,.55)';stageCtx.fillRect(8,h-25,230,18);
+  stageCtx.fillStyle='#fff';stageCtx.font='11px sans-serif';stageCtx.textAlign='left';
+  stageCtx.fillText('Vista aproximada · coordenadas 1280 × 720',14,h-12);
+}
+stageCanvas?.addEventListener('click',(event)=>{
+  if(!edStageData||!edStageBounds.length)return;
+  const rect=stageCanvas.getBoundingClientRect();
+  const x=(event.clientX-rect.left)*stageCanvas.width/rect.width;
+  const y=(event.clientY-rect.top)*stageCanvas.height/rect.height;
+  const hit=[...edStageBounds].reverse().find(b=>x>=b.x&&x<=b.x+b.w&&y>=b.y&&y<=b.y+b.h);
+  if(hit){edStageSelected=hit.index;ed('stage-object').value=String(hit.index);updateStageLayerButtons();drawStagePreview();}
+});
+
 function selectedCharacterData() {
   try { return JSON.parse(ed('source').value); }
   catch { setEditorMessage('El JSON tiene un error. Corrígelo antes de aplicar ajustes.'); return null; }
@@ -354,6 +524,7 @@ ed('mod').addEventListener('change', async () => {
     if (!response.ok) throw new Error('No se pudo leer manifest.json');
     edManifest = await response.json();
     setupSongPreview(null);
+    setupStageEditor();
     edOverrides = readOverrides(edEntry.id);
     renderEditorFiles();
     const character = (edManifest.files || []).find(p => /^characters\/.*\.json$/i.test(p));
@@ -407,7 +578,9 @@ ed('export').addEventListener('click', () => {
   const patches = readOverrides(edEntry.id);
   const paths = Object.keys(patches);
   if (!paths.length) { setEditorMessage('Todavía no hay cambios guardados para exportar.'); return; }
-  const blob = new Blob([JSON.stringify({ format: 'funkade-mod-patch', version: 1, modId: edEntry.id, files: patches }, null, 2)], { type: 'application/json' });
+  const stageLayers = readStageLayers(edEntry.id);
+  const hasStageLayers = Object.keys(stageLayers).some(path => Array.isArray(stageLayers[path]) && stageLayers[path].length);
+  const blob = new Blob([JSON.stringify({ format: 'funkade-mod-patch', version: 1, modId: edEntry.id, files: patches, ...(hasStageLayers ? { stageLayers } : {}) }, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url; a.download = edEntry.id + '-patch.json'; a.click();
