@@ -66,7 +66,18 @@
     <section class="panel" id="mod-editor" style="margin-top:22px">
       <div class="panel-head"><h2>🛠 Editor DEV de mods</h2><span class="badge partial">Beta · cambios locales</span></div>
       <p class="muted small">Edita archivos JSON/Lua y ajusta personajes sin modificar los archivos originales publicados. Los cambios se guardan en este navegador y puedes exportarlos como parche.</p>
-      <div class="editor-toolbar">
+            <div class="editor-publish" style="margin:12px 0;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--bg2)">
+        <b>Publicar cambios en GitHub</b>
+        <p class="muted small" style="margin:6px 0">Conecta tu token de acceso. Se conserva solo durante esta sesión del navegador y no se añade al repositorio.</p>
+        <div class="editor-toolbar" style="margin:8px 0">
+          <label>Token de GitHub <input id="ed-github-token" type="password" autocomplete="off" placeholder="Pega aquí tu token" style="min-width:260px"></label>
+          <button id="ed-github-connect" class="ghost" type="button">Conectar</button>
+          <button id="ed-github-disconnect" class="ghost" type="button">Desconectar</button>
+          <button id="ed-publish" class="primary" type="button" disabled>PUBLICAR CAMBIOS DEL MOD</button>
+        </div>
+        <p id="ed-github-status" class="muted small" role="status">No conectado. Tus cambios locales se mantienen guardados.</p>
+      </div>
+<div class="editor-toolbar">
         <label>Mod <select id="ed-mod"><option value="">Cargando mods…</option></select></label>
         <label>Archivo <select id="ed-file"><option value="">Selecciona un mod</option></select></label>
         <button id="ed-load" class="ghost" type="button">Abrir archivo</button>
