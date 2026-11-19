@@ -463,7 +463,8 @@ function drawStagePreview(){
     stageCtx.fillStyle='#c8bfdc';stageCtx.font='15px sans-serif';stageCtx.textAlign='center';
     stageCtx.fillText('Selecciona un escenario con objetos para previsualizarlo',w/2,h/2);return;
   }
-  const scaleX=w/1280,scaleY=h/720;
+  const zoom=Math.max(.1,Math.min(3,Number(edStageData.defaultZoom||1)));
+  const scaleX=(w/1280)*zoom,scaleY=(h/720)*zoom;
   for(const index of edStageOrder){
     const obj=edStageData.objects[index];if(!obj)continue;
     const asset=loadStageImage(obj,index);
@@ -472,8 +473,12 @@ function drawStagePreview(){
     const frame=asset.frame;
     const naturalW=frame?.w||asset.image?.naturalWidth||160;
     const naturalH=frame?.h||asset.image?.naturalHeight||90;
-    const dw=naturalW*sx*scaleX,dh=naturalH*sy*scaleY;
-    const dx=Number(obj.x||0)*scaleX,dy=Number(obj.y||0)*scaleY;
+    let imageName=String(obj.image||'');
+    if(imageName.startsWith('/'))imageName=imageName.slice(1);
+    if(imageName.toLowerCase().endsWith('.png'))imageName=imageName.slice(0,-4);
+    const textureScale=Number(edManifest?.textureScale?.['images/'+imageName]??1)||1;
+    const dw=naturalW*sx*textureScale*scaleX,dh=naturalH*sy*textureScale*scaleY;
+    const dx=(Number(obj.x||0)-640)*scaleX+w/2,dy=(Number(obj.y||0)-360)*scaleY+h/2;
     const bounds={index,x:dx,y:dy,w:dw,h:dh};edStageBounds.push(bounds);
     stageCtx.save();stageCtx.globalAlpha=Math.max(0,Math.min(1,Number(obj.alpha??1)));
     if(obj.flipX){stageCtx.translate(dx+dw,dy);stageCtx.scale(-1,1);}
